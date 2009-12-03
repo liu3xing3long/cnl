@@ -1,0 +1,30 @@
+﻿Katalogi:
+CUDAFiles: Znajduja się tu wszystkie pliki mające bezpośredni związek z CUDA (pliki CU, pliki alokujące, kopiujące, usuwające pamięć GPU).
+Global: Pliki potrzebne do ogólnego działania projektu.
+InputTests: Katalog zawierający klasy InputTest i InputTestSet. Te klasy służą do zarządzania testami, w założeniu mogą być używane też w innych rodzajach sieci niż MLP.
+MLP: Pliki związane bezpośrednio z implementacją sieci neuronowej MLP.
+NeuralNetwork: Pliki związane z ogólnym działaniem sieci neuronowych. W założeniu mają z nich korzystać wszystkie rodzaje sieci neuronowych.
+TinyXML: Wszystkie pliki związane z biblioteką TinyXML (W niewielkim stopniu zmodyfikowałem pliki tinystr.xpp i tinystr.h).
+Resources: pliki nie używane przy kompilacji
+
+Pliki:
+CUDAFiles\CUDATools.* - klasa służąca do alokowania, kopiowania, usuwania pamięci GPU, wywoływania plików '.cu'
+CUDAFiles\ExecuteNetwork.cu - metoda wywołująca kernel oraz kernel obliczający wyjście warstwy sieci
+CUDAFiles\TrainNetwork.cu - metoda wywołująca kernel oraz kernel uczący sieć
+
+Global\CUDA.cpp - zawiera funkcję main(), wywołuje podstawowe operacje na sieci i testach, żeby sprawdzić poprawność działania programu
+Global\Global.* - globalne funkcje, nie pasujące nigdzie indziej
+Global\Logging.* - klasa logująca. Zapisuje logi do pliku i/lub na ekran
+Global\MersenneTwister.h - Klasa generująca liczby pseudolosowe
+Global\stdafx.* - prekompilowany nagłówek - dla szybszej kompilacji
+
+InputTests\InputTest.* - zawiera informacje o jednym teście - wejścia, oczekiwane wyjścia, oraz ostatnie wyjścia sieci wygenerowane na CPU i GPU
+InputTests\InputTestSet.* - Zawiera informacje o zestawie testów. Zestawy testów można wczytywać/zapisywać do pliku
+
+MLP\MLP.* - zawiera informacje o sieci MLP. Klasa dziedziczy z klasy NeuralNetwork. Implementuje wiele metod abstrakcyjnych z klasy bazowej.
+
+NeuralNetwork\Neuron.* - klasa zawiera informacje o generycznym neuronie.
+NeuralNetwork\Layer.* - klasa zawiera informacje o wartstwie sieci.
+NeuralNetwork\NeuralNetwork.* - klasa bazowa sieci neuronowej. Zawiera wiele metod abstrakcyjnych do zaimplementowania w klasach pochodnych.
+
+TinyXML\tinystr.* - zmodyfikowałem tę klasę, żeby zawierała przydatne dodatki - metodę format (podobna do sprintf) oraz konstruktor akceptujący podobne parametry jak metoda format.

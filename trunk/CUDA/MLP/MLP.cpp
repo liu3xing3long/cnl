@@ -1,0 +1,300 @@
+#include "stdafx.h"
+
+const Str m_XMLLayer("Layer");
+
+void MLP::executeNetwork(InputTestSet &p_TestSet)
+{
+	// execute network on all tests
+	for(unsigned iTestIndex = 0;iTestIndex < p_TestSet.getTestCount();++iTestIndex)
+	{
+		executeNetwork(p_TestSet.getTest(iTestIndex));
+	}
+}
+
+void MLP::executeNetwork(InputTest &p_Test)
+{
+	// execute network on all layers for this test
+	vector<double> vecLayerInput(p_Test.m_vecInputs);
+	vector<double> vecLayerOutput;
+	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+	{
+		m_vecLayers[iLayerIndex].executeLayer(vecLayerInput,vecLayerOutput);
+
+		// Now output layer becomes input layer (except when in the last layer)
+		if(iLayerIndex != m_vecLayers.size() - 1)
+			vecLayerInput.swap(vecLayerOutput);
+	}
+
+	// We put the result into the test
+	p_Test.setOutputs(vecLayerOutput);
+}
+
+void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator)
+{
+	for(int iTrainedElement=0;iTrainedElement<p_iTrainedElements;++iTrainedElement)
+	{
+		// We get test index to be used in training
+
+		vector<InputTest *> vecTests;
+
+		// Clean everything
+		for(unsigned uLayerIndex=0;uLayerIndex<m_vecLayers.size();++uLayerIndex) 
+		{
+			for(unsigned uNeuronIndex=0;uNeuronIndex<m_vecLayers[uLayerIndex].m_vecNeurons.size();++uNeuronIndex) 
+			{
+				m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.clear();
+				m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.clear();
+				m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.clear();
+			}
+		}
+
+		for(int a=0;a<p_iNumTestsInBatch;++a)
+		{
+			int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount()); // iTrainedElement % p_TestSet.getTestCount()
+			InputTest &test = p_TestSet.getTest(iTestIndex);
+			vecTests.push_back(&test);
+
+			// we Execute network and get differences between required results and network output
+			executeNetwork(test);
+
+			// We assign error values in the last layer
+			for(unsigned uOutputElement=0;uOutputElement<p_TestSet.getOutputCount();++uOutputElement)
+			{
+				double dError = test.m_vecNetworkOutputs[uOutputElement] - test.m_vecCorrectOutputs[uOutputElement];
+				//vecDifferences.push_back(dError);
+				m_vecLayers[m_vecLayers.size()-1].m_vecNeurons[uOutputElement].m_vecLastError.push_back(dError);
+			}
+		}
+
+		// We move backwards through layers - we set neuron errors
+		//vector<double> vecDifferencesBeforeLayer;
+		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
+		{
+			m_vecLayers[iLayerIndex].updateErrorValues();
+		}
+
+		// We can finally update weights in all neurons
+		for(unsigned uLayerIndex=0;uLayerIndex<m_vecLayers.size();++uLayerIndex) 
+		{
+			vector< vector<double> > vecOutputsLayerBefore; // outputs from a layer before the current layer
+			if(uLayerIndex == 0)
+			{
+				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
+					vecOutputsLayerBefore.push_back(vecTests[uTestIndex]->m_vecInputs);
+			}
+			else
+			{
+				Layer &layerBefore = m_vecLayers[uLayerIndex-1];
+
+				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
+				{
+					vecOutputsLayerBefore.push_back( vector<double> () );
+					for(int iNeuronIndex=0;iNeuronIndex<layerBefore.getNeuronCount();++iNeuronIndex) 
+					{
+						vecOutputsLayerBefore[uTestIndex].push_back(layerBefore.m_vecNeurons[iNeuronIndex].m_vecLastOutputWithOutputFunction[uTestIndex]);
+					}
+				}
+			}
+
+			m_vecLayers[uLayerIndex].updateWeights(vecOutputsLayerBefore,p_dEta);
+		}
+	}
+}
+/*
+void MLP::executeNetworkGPU(InputTestSet &p_TestSet)
+{
+	executeNetworkGPU(p_TestSet,false);
+}.*/
+
+void MLP::executeNetworkGPU(InputTestSet &p_TestSet/*,bool p_bInTraining*/)
+{
+	// execute network on all layers for this test
+	real_gpu *d_pLayerInput = NULL;
+	real_gpu *d_pWeights = NULL;
+	real_gpu *d_pLayerOutput = NULL;
+	
+	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+	{
+		const Layer &thisLayer = m_vecLayers[iLayerIndex];
+		// unallocate and allocate memory
+		//int iMemorySizeForOutput = getMemorySizeForOutput();
+		//int iMemorySizeForWeights = getMemorySizeForWeights();
+		if(iLayerIndex == 0)
+		{
+			int iDummy;
+			d_pLayerInput = CUDATools::setGPUMemoryForInputLayer(p_TestSet,iDummy);
+			d_pWeights =  CUDATools::setGPUMemoryForWeights(thisLayer);
+			d_pLayerOutput = CUDATools::allocateGPUMemoryForHiddenOrOutputLayer(p_TestSet,thisLayer);
+		}
+		else
+		{
+			CUDATools::freeGPUMemory(d_pLayerInput);
+			d_pLayerInput = d_pLayerOutput;
+			CUDATools::freeGPUMemory(d_pWeights);
+			d_pWeights =  CUDATools::setGPUMemoryForWeights(thisLayer);
+			d_pLayerOutput = CUDATools::allocateGPUMemoryForHiddenOrOutputLayer(p_TestSet,thisLayer);
+		}
+
+		CUDATools::executeLayerGPU(d_pLayerInput,d_pWeights,d_pLayerOutput,p_TestSet,thisLayer);
+	}
+
+	CUDATools::retrieveOutputsGPU(d_pLayerOutput,p_TestSet);
+	CUDATools::freeGPUMemory(d_pLayerInput);
+	CUDATools::freeGPUMemory(d_pWeights);
+	CUDATools::freeGPUMemory(d_pLayerOutput);
+}
+
+void MLP::executeNetworkGPU(InputTest &p_Test)
+{
+	// JRTODO - added to remove a warning
+	p_Test;
+}
+
+void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double p_dEta,int /*p_iNumTestsInBatch*/,MTRand *p_pRandomGenerator)
+{
+	// pomysl - indeksy uczonych elementow moga byc w read-only memory
+	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+	{
+		CUDATools::allocateAndSetGPUMemoryForLayerTraining(m_vecLayers[iLayerIndex]);
+	}
+
+	real_gpu *d_pTestsInput = NULL; // tests input
+	real_gpu *d_pTestsOutput = NULL; // correct outputs
+	//real_gpu *d_pTestNumbers = NULL; // JRTODO - unused
+	int iSpaceBetweenTestsInInput; // index difference between each test in d_pTestInput
+	int iSpaceBetweenTestsInOutput; // index difference between each test in d_pTestInput
+	CUDATools::allocateAndSetGPUMemoryForTestTraining(d_pTestsInput,d_pTestsOutput,p_TestSet,iSpaceBetweenTestsInInput,iSpaceBetweenTestsInOutput);
+
+	for(int iTrainedElement=0;iTrainedElement<p_iTrainedElements;++iTrainedElement)
+	{
+		// We get test index to be used in training
+		int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount());
+		//InputTest &test = p_TestSet.getTest(iTestIndex);
+
+		// 1. We execute the test on the network
+		for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+		{
+			const Layer &thisLayer = m_vecLayers[iLayerIndex];
+			
+			real_gpu *d_pLayerInput = NULL;
+		
+			if(iLayerIndex == 0)
+			{
+				d_pLayerInput = d_pTestsInput + iTestIndex*iSpaceBetweenTestsInInput;
+			}
+			else
+			{
+				d_pLayerInput = m_vecLayers[iLayerIndex].md_pLastOutputWithOutputFunction;
+			}
+
+			CUDATools::executeLayerGPUForTraining(d_pLayerInput,p_TestSet,thisLayer);
+		}
+
+		// calculate error in the last layer
+		CUDATools::calculateErrorInLastLayer(m_vecLayers[m_vecLayers.size()-1],d_pTestsOutput+iTestIndex*iSpaceBetweenTestsInOutput);
+
+		// calculate error in other layers
+		for(unsigned uLayerIndex = m_vecLayers.size()-2;uLayerIndex >= 0;--uLayerIndex)
+		{
+			CUDATools::calculateErrorInNotLastLayer(m_vecLayers[uLayerIndex]);
+		}
+
+		// We can finally update weights in all neurons
+		for(unsigned uLayerIndex=0;uLayerIndex<m_vecLayers.size();++uLayerIndex) 
+		{
+			const real_gpu *d_pOutputsLayerBefore;
+			int p_iNumOutputsLayerBefore = 0;
+			if(uLayerIndex == 0)
+			{
+				d_pOutputsLayerBefore = d_pTestsInput;
+				p_iNumOutputsLayerBefore = p_TestSet.getInputCount();
+			}
+			else
+			{
+				Layer &layerBefore = m_vecLayers[uLayerIndex-1];
+				d_pOutputsLayerBefore = layerBefore.md_pLastOutputWithOutputFunction;
+				p_iNumOutputsLayerBefore = layerBefore.getNeuronCount();
+			}
+			
+			CUDATools::updateWeightsInTraining( m_vecLayers[uLayerIndex],d_pOutputsLayerBefore,p_iNumOutputsLayerBefore,p_dEta);
+		}
+	}
+
+	//We copy updated weights back to the Layer structures
+	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+	{
+		CUDATools::retrieveGPUWeightsForLayerTraining(m_vecLayers[iLayerIndex]);
+	}
+
+	// JRTODO - check if all memory was freed
+	// We free all memory needed for training
+	CUDATools::freeGPUMemoryForTestTraining(d_pTestsInput,d_pTestsOutput);
+	
+	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+	{
+		CUDATools::freeGPUMemoryForLayerTraining(m_vecLayers[iLayerIndex]);
+	}
+}
+
+void MLP::randomizeWeights(double p_dAbsMax,MTRand *p_pRandomGenerator)
+{
+	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+	{
+		m_vecLayers[iLayerIndex].randomizeWeights(p_dAbsMax,p_pRandomGenerator);
+	}
+}
+
+void MLP::clearNetwork()
+{
+	m_vecLayers.clear();
+}
+
+Layer *MLP::getLayerBefore(Layer *p_pLayer)
+{
+	if(p_pLayer->m_iLayerIndex == 0)
+		return NULL;
+	return &m_vecLayers[p_pLayer->m_iLayerIndex-1];
+}
+
+Layer *MLP::getLayerAfter(Layer *p_pLayer)
+{
+	if(p_pLayer->m_iLayerIndex == (int)(m_vecLayers.size()-1))
+		return NULL;
+	return &m_vecLayers[p_pLayer->m_iLayerIndex+1];
+}
+
+void MLP::saveToXML(TiXmlElement &p_XML) const
+{
+	// we save all layers
+	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
+	{
+		TiXmlElement newLayerElement(m_XMLLayer.c_str());
+		m_vecLayers[iLayerIndex].saveToXML(newLayerElement);
+		p_XML.InsertEndChild(newLayerElement);
+	}
+}
+
+void MLP::loadFromXML(const TiXmlElement &p_XML)
+{
+	const TiXmlElement *pXMLLayer = p_XML.FirstChildElement();
+	while(pXMLLayer)
+	{
+		Layer newLayer;
+		newLayer.loadFromXML(*pXMLLayer);
+		m_vecLayers.push_back(newLayer);
+		pXMLLayer = pXMLLayer->NextSiblingElement();
+	}
+}
+
+MLP::MLP()
+: NeuralNetwork(NNT_MLP)
+{
+	
+}
+
+void MLP::addNewLayer(Layer p_LayerToAdd)
+{
+	p_LayerToAdd.m_pNetwork = this;
+	p_LayerToAdd.m_iLayerIndex = m_vecLayers.size();
+	m_vecLayers.push_back(p_LayerToAdd);
+}

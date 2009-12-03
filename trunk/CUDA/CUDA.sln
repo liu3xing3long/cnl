@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDA", "CUDA.vcproj", "{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		EmuDebug|Win32 = EmuDebug|Win32
+		EmuRelease|Win32 = EmuRelease|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.Debug|Win32.Build.0 = Debug|Win32
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.EmuDebug|Win32.ActiveCfg = EmuDebug|Win32
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.EmuDebug|Win32.Build.0 = EmuDebug|Win32
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.EmuRelease|Win32.ActiveCfg = EmuRelease|Win32
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.EmuRelease|Win32.Build.0 = EmuRelease|Win32
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.Release|Win32.ActiveCfg = Release|Win32
+		{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
