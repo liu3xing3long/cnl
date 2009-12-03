@@ -207,7 +207,7 @@ void CUDATools::calculateErrorInNotLastLayer(Layer &p_Layer)
 
 void CUDATools::updateWeightsInTraining(Layer &p_Layer,const real_gpu *d_pOutputsLayerBefore,int p_iNumOutputsLayerBefore, double p_dEta)
 {
-	updateWeightsInTrainingCUDA(p_Layer.md_pLastError,p_Layer.md_pDerivativeOfLastOutput,d_pOutputsLayerBefore,p_dEta,p_iNumOutputsLayerBefore,p_Layer.md_pLayerWeights);
+	//updateWeightsInTrainingCUDA(p_Layer.md_pLastError,p_Layer.md_pDerivativeOfLastOutput,d_pOutputsLayerBefore,p_dEta,p_iNumOutputsLayerBefore,p_Layer.md_pLayerWeights);
 		/*
 		,p_Layer.getLayerAfter()->md_pLastError,p_Layer.md_pLastError
 		,p_Layer.getNeuronCount(),p_Layer.getLayerAfter()->getNeuronCount());
