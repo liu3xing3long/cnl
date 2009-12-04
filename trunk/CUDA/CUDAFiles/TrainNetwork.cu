@@ -27,3 +27,22 @@ extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWe
 {
 	calculateErrorInNotLastLayerKernel <<<1,p_iThisLayerNeuronCount>>> (dp_pNextLayerWeights,dp_pNextLayerError,dp_pThisLayerError,p_iNextLayerNeuronCount);
 }
+
+__global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta,int p_iNumOutputsLayerBefore,real_gpu *dp_pThisLayerWeights)
+{
+	real_gpu *d_pThisNeuronWeights = dp_pThisLayerWeights + blockDim.x * (p_iNumOutputsLayerBefore+1);
+	real_gpu dErrorMultDerivativeMultEta = dp_pThisLayerError[threadIdx.x] * dp_pDerivativeOfLastOutput[threadIdx.x] * p_dEta;
+	
+	for(unsigned uWeightIndex = 0;uWeightIndex < p_iNumOutputsLayerBefore;++uWeightIndex)
+	{
+		real_gpu dChange = dErrorMultDerivativeMultEta * dp_pLayerBeforeOutputs[threadIdx.x];
+		d_pThisNeuronWeights[uWeightIndex] -= dChange;
+	}
+	
+	d_pThisNeuronWeights[p_iNumOutputsLayerBefore] -= dErrorMultDerivativeMultEta;
+}
+
+extern "C" void updateWeightsInTrainingCUDA(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta,int p_iThisLayerNeuronCount,int p_iNumOutputsLayerBefore,real_gpu *dp_pThisLayerWeights)
+{
+	updateWeightsInTrainingKernel <<<1,p_iThisLayerNeuronCount>>> (dp_pThisLayerError,dp_pDerivativeOfLastOutput,dp_pLayerBeforeOutputs,p_dEta,p_iNumOutputsLayerBefore,dp_pThisLayerWeights);
+}
