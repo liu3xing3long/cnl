@@ -21,6 +21,11 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 {
 	makeSureLoggingFileExists();
 
+#ifdef NO_PRINT_DEBUG
+	if(p_eLoggingType == LT_DEBUG)
+		return;
+#endif
+
 	static Str sLogging;
 	Str sLoggingType;
 	switch(p_eLoggingType)
@@ -28,6 +33,7 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 		case LT_INFORMATION: sLoggingType = "INFORMATION"; break;
 		case LT_WARNING: sLoggingType = "WARNING    "; break;
 		case LT_ERROR: sLoggingType = "ERROR      "; break;
+		case LT_DEBUG: sLoggingType = "DEBUG      "; break;
 	}
 
 	Str sFileName(p_sFileName);

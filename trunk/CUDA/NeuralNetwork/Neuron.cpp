@@ -89,6 +89,7 @@ void Neuron::updateWeights(const vector< vector<double> > &p_vecOutputsLayerBefo
 		for(unsigned uWeightIndex = 0;uWeightIndex < p_vecOutputsLayerBefore[uTestIndex].size();++uWeightIndex)
 		{
 			double dChange = dErrorMultDerivativeMultEta * p_vecOutputsLayerBefore[uTestIndex][uWeightIndex];
+			logTextParams(Logging::LT_DEBUG,"Test index %d , Weight index %d : Current %f , Change %f , Changed value %f",uTestIndex,uWeightIndex,m_vecWeights[uWeightIndex],dChange,m_vecWeights[uWeightIndex]-dChange);
 			m_vecWeights[uWeightIndex] -= dChange;
 			if(abs(m_vecWeights[uWeightIndex]) > 1000)
 			{
@@ -96,6 +97,7 @@ void Neuron::updateWeights(const vector< vector<double> > &p_vecOutputsLayerBefo
 				r++;
 			}
 		}
+		logTextParams(Logging::LT_DEBUG,"Test index %d , Bias : Change %f",uTestIndex,dErrorMultDerivativeMultEta);
 		m_vecWeights[p_vecOutputsLayerBefore[uTestIndex].size()] -= dErrorMultDerivativeMultEta; // bias weight
 	}
 }

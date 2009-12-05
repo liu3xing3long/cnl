@@ -190,7 +190,7 @@ void CUDATools::allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer)
 	p_Layer.md_pLastError = createZeroGPUMemory(iBytesAllocated);
 }
 
-void CUDATools::allocateAndSetGPUMemoryForTestTraining(real_gpu *dp_pTestsInput,real_gpu *dp_pTestsOutput,const InputTestSet &p_TestSet,int &p_iSpaceBetweenTestsInInput,int &p_iSpaceBetweenTestsInOutput)
+void CUDATools::allocateAndSetGPUMemoryForTestTraining(real_gpu *&dp_pTestsInput,real_gpu *&dp_pTestsOutput,const InputTestSet &p_TestSet,int &p_iSpaceBetweenTestsInInput,int &p_iSpaceBetweenTestsInOutput)
 {
 	dp_pTestsInput = CUDATools::setGPUMemoryForInputLayer(p_TestSet,p_iSpaceBetweenTestsInInput);
 	dp_pTestsOutput = CUDATools::setGPUMemoryForOutputLayer(p_TestSet,p_iSpaceBetweenTestsInOutput);

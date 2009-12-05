@@ -24,6 +24,7 @@ public:
 	virtual void loadFromXML(const TiXmlElement &p_XML);
 
 	MLP();
+	MLP(const MLP &p_Other);
 
 	void addNewLayer(Layer p_LayerToAdd);
 

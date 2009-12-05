@@ -13,7 +13,8 @@ public:
 	{
 		LT_INFORMATION,
 		LT_WARNING,
-		LT_ERROR
+		LT_ERROR,
+		LT_DEBUG,
 	};
 
 	static void makeSureLoggingFileExists();

@@ -111,6 +111,7 @@ void Layer::updateErrorValues()
 				dError += vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecWeights[iNeuronIndex] * vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecLastError[a];
 			}
 
+			logTextParams(Logging::LT_DEBUG,"Test index %d , Neuron index %d : Error %f",a,iNeuronIndex,dError);
 			m_vecNeurons[iNeuronIndex].m_vecLastError.push_back(dError);
 		}
 	}
@@ -120,6 +121,7 @@ void Layer::updateWeights(const vector< vector<double> > &p_vecOutputsLayerBefor
 {
 	for(int iNeuronIndex=0;iNeuronIndex<getNeuronCount();++iNeuronIndex)
 	{
+		logTextParams(Logging::LT_DEBUG,"updateWeights for neuron %d",iNeuronIndex);
 		m_vecNeurons[iNeuronIndex].updateWeights(p_vecOutputsLayerBefore, p_dEta);
 	}
 }

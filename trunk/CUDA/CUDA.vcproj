@@ -139,6 +139,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="2"
 				AdditionalIncludeDirectories="Global;NeuralNetwork;MLP;TinyXML;InputTests;CUDAFiles;&quot;$(CUDA_INC_PATH)&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
