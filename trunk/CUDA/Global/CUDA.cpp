@@ -60,7 +60,7 @@ void printVectorDifferenceInfo(const InputTestSet &p_testSet,InputTestSet::Diffe
 }
 
 const int iInputs = 2;
-const int iHiddenNeurons = 48;
+const int iHiddenNeurons = 45;
 const int iOutputs = 1;
 const int iNumTests = 1000;
 
@@ -74,8 +74,8 @@ void checkIfGPUTrainingIsOK()
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.3;
 	const int iTestsInTraining = 1000;
-	const int iHiddenNeuronsInTesting = 250;
-	const int iNumTrainedElements = 10000;
+	const int iHiddenNeuronsInTesting = 100;
+	const int iNumTrainedElements = 100;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
@@ -118,7 +118,7 @@ void makeTraining()
 	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 160000 };
+	const int iTrainedElementsArray[numElementsInArrays1] = { 1600 };
 	const double dEtaArray[numElementsInArrays2] = { 0.02 };
 	const int iTestsInTrainingArray[numElementsInArrays3] = { 10 };
 

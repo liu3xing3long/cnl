@@ -8,7 +8,6 @@ __global__ void calculateErrorInLastLayerKernel(const real_gpu *dp_pCorrectOutpu
 
 extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iOutputNeuronCount)
 {
-	//int iSharedMem = 
 	calculateErrorInLastLayerKernel <<<1,p_iOutputNeuronCount>>> (dp_pCorrectOutput,dp_pNetworkOutput,dp_pErrors);
 }
 

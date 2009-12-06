@@ -37,8 +37,7 @@ real_gpu* CUDATools::setGPUMemoryForInputLayer(const InputTestSet &p_TestSet, in
 {
 	// allocate memory
 	int iNumNeurons = p_TestSet.getInputCount(); // and bias
-	int iNumNeuronsAligned = iNumNeurons + 1;
-	ALIGN_UP(iNumNeuronsAligned,HALF_WARP); // Padding neurons to 16 elements
+	int iNumNeuronsAligned = ALIGN_UP(iNumNeurons + 1,HALF_WARP); // Padding neurons to 16 elements
 	p_iSpaceBetweenTestsInInput = iNumNeuronsAligned;
 	int iTestCount = p_TestSet.getTestCount();
 	int iNumberCount = iNumNeuronsAligned * iTestCount;
@@ -68,8 +67,7 @@ real_gpu* CUDATools::setGPUMemoryForOutputLayer(const InputTestSet &p_TestSet, i
 {
 	// allocate memory
 	int iNumNeurons = p_TestSet.getOutputCount();
-	int iNumNeuronsAligned = iNumNeurons + 1;
-	ALIGN_UP(iNumNeuronsAligned,HALF_WARP); // Padding neurons to 16 elements
+	int iNumNeuronsAligned = ALIGN_UP(iNumNeurons + 1,HALF_WARP); // Padding neurons to 16 elements
 	p_iSpaceBetweenTestsInOutput = iNumNeuronsAligned;
 	int iTestCount = p_TestSet.getTestCount();
 	int iNumberCount = iNumNeuronsAligned * iTestCount;
@@ -128,8 +126,7 @@ real_gpu* CUDATools::allocateGPUMemoryForHiddenOrOutputLayer(const InputTestSet 
 {
 	// allocate memory
 	int iNumNeurons = p_Layer.getNeuronCount()+1; // and bias
-	int iNumNeuronsAligned = iNumNeurons;
-	ALIGN_UP(iNumNeuronsAligned,HALF_WARP); // Padding neurons to 16 elements
+	int iNumNeuronsAligned = ALIGN_UP(iNumNeurons,HALF_WARP); // Padding neurons to 16 elements
 	int iTestCount = p_TestSet.getTestCount();
 	int iNumberCount = iNumNeuronsAligned * iTestCount;
 	int iBytesAllocated = iNumberCount * sizeof(real_gpu);
@@ -142,8 +139,7 @@ void CUDATools::retrieveOutputsGPU(const real_gpu *dp_pMemoryToAssign, InputTest
 {
 	// allocate host memory
 	int iNumNeurons = p_TestSet.getOutputCount()+1; // and bias
-	int iNumNeuronsAligned = iNumNeurons;
-	ALIGN_UP(iNumNeuronsAligned,HALF_WARP); // Padding neurons to 16 elements
+	int iNumNeuronsAligned = ALIGN_UP(iNumNeurons,HALF_WARP); // Padding neurons to 16 elements
 	int iTestCount = p_TestSet.getTestCount();
 	int iNumberCount = iNumNeuronsAligned * iTestCount;
 	int iBytesAllocated = iNumberCount * sizeof(real_gpu);

@@ -2,10 +2,8 @@
 
 __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput,int p_iNumInputNeurons, Neuron::NeuronType p_eNeuronType)
 {
-	int iNumInputNeuronsAligned = p_iNumInputNeurons;
-	ALIGN_UP(iNumInputNeuronsAligned, HALF_WARP);
-	int iNumOutputNeuronsAligned = blockDim.x;
-	ALIGN_UP(iNumOutputNeuronsAligned, HALF_WARP);
+	int iNumInputNeuronsAligned = ALIGN_UP(p_iNumInputNeurons, HALF_WARP);
+	int iNumOutputNeuronsAligned = ALIGN_UP(blockDim.x, HALF_WARP);
 	
 	const real_gpu *d_LayerInputThisTest = dp_pLayerInput + blockIdx.x*iNumInputNeuronsAligned;
 	const real_gpu *d_WeightsThisTest = dp_pWeights + threadIdx.x*p_iNumInputNeurons;
@@ -59,5 +57,6 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 	//for(int iElementIndex = 0;iElementIndex < p_iTestCount;iElementIndex += iMaxBlockDimSize)
 	//{
 	//	int iElementsToExecute = min(iMaxBlockDimSize,p_iTestCount - iElementIndex);
+
 	executeLayerKernel <<<p_iTestCount,p_iOutputNeuronCount+1>>> (dp_pLayerInput,dp_pWeights,dp_pLayerOutput,dp_pDerivativeOfLastOutput,p_iNumInputNeurons,p_eNeuronType);
 }

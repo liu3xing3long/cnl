@@ -40,6 +40,9 @@ const int iMaxBlockDimSize = 65535;
 using namespace std;
 
 #define ALIGN_UP(offset, alignment)												\
+	(((offset) + (alignment) - 1) / (alignment)) * (alignment)
+
+#define ALIGN_UP_ASSIGN(offset, alignment)										\
 	(offset) = (((offset) + (alignment) - 1) / (alignment)) * (alignment)
 	
 #define HALF_WARP 16
