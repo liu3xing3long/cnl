@@ -60,9 +60,9 @@ void printVectorDifferenceInfo(const InputTestSet &p_testSet,InputTestSet::Diffe
 }
 
 const int iInputs = 2;
-const int iHiddenNeurons = 45;
+const int iHiddenNeurons = 5;
 const int iOutputs = 1;
-const int iNumTests = 50000;
+const int iNumTests = 1;
 
 vector< pair<double,double> > vecMinMax;
 
@@ -260,11 +260,11 @@ int main()
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // First input variable
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // Second input variable
 
-	//doExecuteNetworksAndSaveLoad();
+	doExecuteNetworksAndSaveLoad();
 
 	//makeTraining();
 
-	checkIfGPUTrainingIsOK();
+	//checkIfGPUTrainingIsOK();
 
 	return 0;
 }

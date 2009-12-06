@@ -21,11 +21,11 @@
 
 const int iMaxBlockDimSize = 65535;
 
-#define NO_PRINT_DEBUG 1
+//#define NO_PRINT_DEBUG 1
 
 #ifndef NO_PRINT_DEBUG
 	#define PRINT_DEBUG_INFO(a,...) printf(a,__VA_ARGS__)
-	#define logTextParamsDebug(a,...) logTextParams(Logging::LT_DEBUG,__VA_ARGS__)
+	#define logTextParamsDebug(a,...) logTextParams(Logging::LT_DEBUG,a,__VA_ARGS__)
 #else
 	#define PRINT_DEBUG_INFO(a,...)
 	#define logTextParamsDebug(a,...)
