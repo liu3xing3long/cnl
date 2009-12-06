@@ -55,6 +55,9 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput,int p_iTestCount,int p_iOutputNeuronCount,int p_iNumInputNeurons,Neuron::NeuronType p_eNeuronType)
 {
-	//int iSharedMem = 
+	// x dimension of blockIdx <= 65535
+	//for(int iElementIndex = 0;iElementIndex < p_iTestCount;iElementIndex += iMaxBlockDimSize)
+	//{
+	//	int iElementsToExecute = min(iMaxBlockDimSize,p_iTestCount - iElementIndex);
 	executeLayerKernel <<<p_iTestCount,p_iOutputNeuronCount+1>>> (dp_pLayerInput,dp_pWeights,dp_pLayerOutput,dp_pDerivativeOfLastOutput,p_iNumInputNeurons,p_eNeuronType);
 }

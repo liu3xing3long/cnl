@@ -10,7 +10,8 @@
 // JRTODO - Na CPU uzywam double do liczb zmiennoprzecinkowych, a na GPU - real_gpu (w zaleznosci od rodzaju GPU).
 // JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
 // JRTODO - skalowanie danych wejsciowych
-//JRTODO - maybe a possibility to change eta during training?
+// JRTODO - maybe a possibility to change eta during training?
+// JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
@@ -69,13 +70,12 @@ void checkIfGPUTrainingIsOK()
 {
 	// New MLP network
 	MLP dummyNet;
-	//for(int f=0;f<2000000000;++f)for(int a=0;a<2000000000;++a) int r=4;
 
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.3;
 	const int iTestsInTraining = 1000;
-	const int iHiddenNeuronsInTesting = 17;
-	const int iNumTrainedElements = 10;
+	const int iHiddenNeuronsInTesting = 250;
+	const int iNumTrainedElements = 10000;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
@@ -96,8 +96,11 @@ void checkIfGPUTrainingIsOK()
 
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
 	MTRand rand1(7),rand2(7);
+	logText(Logging::LT_INFORMATION,"Started training CPU");
 	dummyNet.trainNetwork(dummyTestSet,iNumTrainedElements,dEta,1,&rand1);
+	logText(Logging::LT_INFORMATION,"Started training GPU");
 	dummyNetGPU.trainNetworkGPU(dummyTestSet,iNumTrainedElements,dEta,1,&rand2);
+	logText(Logging::LT_INFORMATION,"Finished training GPU");
 
 	dummyNet.executeNetwork(dummyTestSet);
 	dummyNetGPU.executeNetworkGPU(dummyTestSet);
@@ -106,18 +109,26 @@ void checkIfGPUTrainingIsOK()
 
 void makeTraining()
 {
-	const int numElementsInArrays1 = 3;
+	/*const int numElementsInArrays1 = 3;
 	const int numElementsInArrays2 = 4;
 	const int numElementsInArrays3 = 3;
 	const int iTrainedElementsArray[numElementsInArrays1] = { 4000,8000,16000 };
 	const double dEtaArray[numElementsInArrays2] = { 0.01, 0.02, 0.04, 0.08 };
-	const int iTestsInTrainingArray[numElementsInArrays3] = { 1, 2, 4 };
+	const int iTestsInTrainingArray[numElementsInArrays3] = { 1, 2, 4 };*/
+	const int numElementsInArrays1 = 1;
+	const int numElementsInArrays2 = 1;
+	const int numElementsInArrays3 = 1;
+	const int iTrainedElementsArray[numElementsInArrays1] = { 160000 };
+	const double dEtaArray[numElementsInArrays2] = { 0.02 };
+	const int iTestsInTrainingArray[numElementsInArrays3] = { 10 };
 
 	const int numTriedTrainings = 3;
 
 	InputTestSet::DifferenceStatisticsType eDifferenceType = InputTestSet::DST_CORRECT_AND_CPU;
 
 	InputTestSet **testSetsInTraining = new InputTestSet*[numTriedTrainings];
+
+	logText(Logging::LT_INFORMATION,"Started training");
 
 	/*testSetsInTraining[0] = new InputTestSet(iNumTests,iInputs,iOutputs);
 	testSetsInTraining[0]->setOutputFunction(vecMinMax,testingFunction,NULL);
@@ -209,8 +220,22 @@ void doExecuteNetworksAndSaveLoad()
 	dummyTestSet.setOutputFunction(vecMinMax,testingFunction,NULL);
 
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
-	dummyNet.executeNetwork(dummyTestSet);
-	dummyNet.executeNetworkGPU(dummyTestSet);
+	const int iTimesTried = 1;
+
+	logText(Logging::LT_INFORMATION,"Started execution CPU");
+	for(int a=0;a<iTimesTried;++a)
+	{
+		dummyNet.executeNetwork(dummyTestSet);
+	}
+
+	logText(Logging::LT_INFORMATION,"Started execution GPU");
+
+	for(int a=0;a<iTimesTried;++a)
+	{
+		dummyNet.executeNetworkGPU(dummyTestSet);
+	}
+
+	logText(Logging::LT_INFORMATION,"Finished execution GPU");
 
 	// We retrieve and print differences between CPU and GPU results for each output (these should be small).
 	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_GPU_AND_CPU);
@@ -218,7 +243,7 @@ void doExecuteNetworksAndSaveLoad()
 	// check differences before training network
 	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_CORRECT_AND_CPU);
 
-	dummyNet.saveToFile("NetworkStruct.xml");
+	/*dummyNet.saveToFile("NetworkStruct.xml");
 	dummyTestSet.saveToFile("TestSet.xml");
 
 	NeuralNetwork *pToLoad = NULL;
@@ -227,7 +252,7 @@ void doExecuteNetworksAndSaveLoad()
 	testSetToLoad.loadFromFile("TestSet.xml");
 
 	pToLoad->saveToFile("NetworkStruct2.xml");
-	testSetToLoad.saveToFile("TestSet2.xml");
+	testSetToLoad.saveToFile("TestSet2.xml");*/
 }
  
 int main()

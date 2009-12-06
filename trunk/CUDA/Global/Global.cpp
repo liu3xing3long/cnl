@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 const char cDivider = ';';
-const int randomSeed = 463;
+const int randomSeed = 45632;
 
 double getRandom01(MTRand *p_pRandomGenerator)
 {

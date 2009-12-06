@@ -19,13 +19,16 @@
 // If true, floating point numbers on a GPU is float. If false, it is double (possible only on 1.3 CUDA devices)
 #define REAL_GPU_IS_FLOAT 1
 
+const int iMaxBlockDimSize = 65535;
 
 #define NO_PRINT_DEBUG 1
 
 #ifndef NO_PRINT_DEBUG
 	#define PRINT_DEBUG_INFO(a,...) printf(a,__VA_ARGS__)
+	#define logTextParamsDebug(a,...) logTextParams(Logging::LT_DEBUG,__VA_ARGS__)
 #else
 	#define PRINT_DEBUG_INFO(a,...)
+	#define logTextParamsDebug(a,...)
 #endif
 
 //#ifdef REAL_GPU_IS_FLOAT

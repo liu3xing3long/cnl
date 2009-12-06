@@ -48,13 +48,13 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			}
 		}
 
-		logTextParams(Logging::LT_DEBUG,"iTrainedElement = %d",iTrainedElement);
+		logTextParamsDebug("iTrainedElement = %d",iTrainedElement);
 
 		for(int a=0;a<p_iNumTestsInBatch;++a)
 		{
 			int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount()); // iTrainedElement % p_TestSet.getTestCount()
 
-			logTextParams(Logging::LT_DEBUG,"Test in batch nr %d = %d",a,iTestIndex);
+			logTextParamsDebug("Test in batch nr %d = %d",a,iTestIndex);
 
 			InputTest &test = p_TestSet.getTest(iTestIndex);
 			vecTests.push_back(&test);
@@ -66,17 +66,52 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			for(unsigned uOutputElement=0;uOutputElement<p_TestSet.getOutputCount();++uOutputElement)
 			{
 				double dError = test.m_vecNetworkOutputs[uOutputElement] - test.m_vecCorrectOutputs[uOutputElement];
-				logTextParams(Logging::LT_DEBUG,"Test in batch nr %d , Output %d : Network = %f , Correct  = %f , Error = %f",a,uOutputElement,test.m_vecNetworkOutputs[uOutputElement],test.m_vecCorrectOutputs[uOutputElement],dError);
+				logTextParamsDebug("Test in batch nr %d , Output %d : Network = %f , Correct  = %f , Error = %f",a,uOutputElement,test.m_vecNetworkOutputs[uOutputElement],test.m_vecCorrectOutputs[uOutputElement],dError);
 				//vecDifferences.push_back(dError);
 				m_vecLayers[m_vecLayers.size()-1].m_vecNeurons[uOutputElement].m_vecLastError.push_back(dError);
 			}
 		}
 
+		/* JRTODO - this code was used when I tested mean value of all outputs
+		for(unsigned uLayerIndex=0;uLayerIndex<m_vecLayers.size();++uLayerIndex)
+		{
+			for(unsigned uNeuronIndex=0;uNeuronIndex<m_vecLayers[uLayerIndex].m_vecNeurons.size();++uNeuronIndex)
+			{
+				double dSumError = 0.0,dSumDerivativeOfLastOutput=0.0,dSumLastOutputWithOutputFunction = 0.0;
+				if(m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.size())
+				{
+					int dSize = m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.size();
+					for(unsigned a=0;a<dSize;++a)
+						dSumError += m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError[a];
+					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.clear();
+					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.push_back(dSumError/dSize);
+				}
+
+				if(m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.size())
+				{
+					int dSize = m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.size();
+					for(unsigned a=0;a<dSize;++a)
+						dSumDerivativeOfLastOutput += m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput[a];
+					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.clear();
+					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.push_back(dSumDerivativeOfLastOutput/dSize);
+				}
+
+				if(m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.size())
+				{
+					int dSize = m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.size();
+					for(unsigned a=0;a<dSize;++a)
+						dSumLastOutputWithOutputFunction += m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction[a];
+					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.clear();
+					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.push_back(dSumLastOutputWithOutputFunction/dSize);
+				}
+			}
+		} */
+
 		// We move backwards through layers - we set neuron errors
 		//vector<double> vecDifferencesBeforeLayer;
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
 		{
-			logTextParams(Logging::LT_DEBUG,"Errors in layer %d",iLayerIndex);
+			logTextParamsDebug("Errors in layer %d",iLayerIndex);
 			m_vecLayers[iLayerIndex].updateErrorValues();
 		}
 
@@ -86,11 +121,31 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			vector< vector<double> > vecOutputsLayerBefore; // outputs from a layer before the current layer
 			if(uLayerIndex == 0)
 			{
+				/* JRTODO - this code was used when I tested mean value of all outputs
+				vecOutputsLayerBefore.push_back(vector<double> () );
+				vecOutputsLayerBefore[0].assign(vecTests[0]->m_vecInputs.size(),0);
+
+				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
+				{
+					for(unsigned uInputIndex=0;uInputIndex<vecTests[0]->m_vecInputs.size();++uInputIndex) 
+						vecOutputsLayerBefore[0][uInputIndex] += vecTests[uTestIndex]->m_vecInputs[uInputIndex]/vecTests.size();
+				}*/
+
 				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
 					vecOutputsLayerBefore.push_back(vecTests[uTestIndex]->m_vecInputs);
 			}
 			else
 			{
+				/* JRTODO - this code was used when I tested mean value of all outputs
+				Layer &layerBefore = m_vecLayers[uLayerIndex-1];
+				vecOutputsLayerBefore.push_back(vector<double> () );
+				vecOutputsLayerBefore[0].assign(layerBefore.getNeuronCount(),0);
+
+				for(unsigned iNeuronIndex=0;iNeuronIndex<layerBefore.getNeuronCount();++iNeuronIndex) 
+					vecOutputsLayerBefore[0][iNeuronIndex] += layerBefore.m_vecNeurons[iNeuronIndex].m_vecLastOutputWithOutputFunction[0];
+					*/
+
+				
 				Layer &layerBefore = m_vecLayers[uLayerIndex-1];
 
 				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
@@ -103,13 +158,13 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 				}
 			}
 
-			logTextParams(Logging::LT_DEBUG,"Errors in layer %d , elements in vecOutputsLayerBefore: %d",uLayerIndex,vecOutputsLayerBefore.size());
+			logTextParamsDebug("Errors in layer %d , elements in vecOutputsLayerBefore: %d",uLayerIndex,vecOutputsLayerBefore.size());
 			for(int a=0;a<vecOutputsLayerBefore.size();++a)
 			{
-				logTextParams(Logging::LT_DEBUG,"vecOutputsLayerBefore [%d], size %d",a,vecOutputsLayerBefore[a].size());
+				logTextParamsDebug("vecOutputsLayerBefore [%d], size %d",a,vecOutputsLayerBefore[a].size());
 				for(int b=0;b<vecOutputsLayerBefore[a].size();++b)
 				{
-					logTextParams(Logging::LT_DEBUG,"vecOutputsLayerBefore [%d] [%d] = %f",a,b,vecOutputsLayerBefore[a][b]);
+					logTextParamsDebug("vecOutputsLayerBefore [%d] [%d] = %f",a,b,vecOutputsLayerBefore[a][b]);
 				}
 			}
 
@@ -188,8 +243,8 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount());
 		//InputTest &test = p_TestSet.getTest(iTestIndex);
 
-		logTextParams(Logging::LT_DEBUG,"GPU: iTrainedElement = %d",iTrainedElement);
-		logTextParams(Logging::LT_DEBUG,"GPU: Test in batch nr 0 = %d",iTestIndex);
+		logTextParamsDebug("GPU: iTrainedElement = %d",iTrainedElement);
+		logTextParamsDebug("GPU: Test in batch nr 0 = %d",iTestIndex);
 
 		// 1. We execute the test on the network
 		for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
@@ -216,7 +271,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		// calculate error in other layers
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
 		{
-			logTextParams(Logging::LT_DEBUG,"GPU: Errors in layer %d",iLayerIndex);
+			logTextParamsDebug("GPU: Errors in layer %d",iLayerIndex);
 			CUDATools::calculateErrorInNotLastLayer(m_vecLayers[iLayerIndex]);
 		}
 
@@ -237,7 +292,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 				p_iNumOutputsLayerBefore = layerBefore.getNeuronCount();
 			}
 
-			logTextParams(Logging::LT_DEBUG,"GPU: Updating weights in layer %d",uLayerIndex);
+			logTextParamsDebug("GPU: Updating weights in layer %d",uLayerIndex);
 			
 			CUDATools::updateWeightsInTraining( m_vecLayers[uLayerIndex],d_pOutputsLayerBefore,p_iNumOutputsLayerBefore,p_dEta);
 		}
