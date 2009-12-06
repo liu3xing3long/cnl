@@ -62,7 +62,7 @@ void printVectorDifferenceInfo(const InputTestSet &p_testSet,InputTestSet::Diffe
 const int iInputs = 2;
 const int iHiddenNeurons = 45;
 const int iOutputs = 1;
-const int iNumTests = 1000;
+const int iNumTests = 50000;
 
 vector< pair<double,double> > vecMinMax;
 
