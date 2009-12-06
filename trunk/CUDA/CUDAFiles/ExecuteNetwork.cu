@@ -13,10 +13,10 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + blockIdx.x*iNumOutputNeuronsAligned + threadIdx.x;
 
 	// first, we copy d_LayerInputThisTest to sharedInputNeurons
-	/*for(int iInputIndex = threadIdx.x;iInputIndex < p_iNumInputNeurons; iInputIndex+=blockDim.x)
+	for(int iInputIndex = threadIdx.x;iInputIndex < p_iNumInputNeurons; iInputIndex+=blockDim.x)
 	{
 		sharedInputNeurons[iInputIndex] = d_LayerInputThisTest[iInputIndex];
-	}*/
+	}
 
 	// we have to make sure that all data was written to shared memory
 	__syncthreads();
@@ -34,7 +34,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 		for(int iWeightIndex = 0;iWeightIndex < p_iNumInputNeurons; ++iWeightIndex)
 		{
 			PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , iWeightIndex %d : d_LayerInputThisTest %f , d_WeightsThisTest %f , MULT %f\n",blockIdx.x,threadIdx.x,iWeightIndex,d_LayerInputThisTest[iWeightIndex],d_WeightsThisTest[iWeightIndex],d_LayerInputThisTest[iWeightIndex] * d_WeightsThisTest[iWeightIndex]);
-			dResult += d_LayerInputThisTest[iWeightIndex] * d_WeightsThisTest[iWeightIndex];
+			dResult += sharedInputNeurons[iWeightIndex] * d_WeightsThisTest[iWeightIndex];
 		}
 		
 		double dDerivativeOfLastOutput = 0.0f;
