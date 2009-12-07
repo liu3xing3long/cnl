@@ -71,18 +71,20 @@ void checkIfGPUTrainingIsOK()
 
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.3;
-	const int iTestsInTraining = 1000;
+	const int iTestsInTraining = 5;
 	const int iHiddenNeuronsInTesting = 100;
-	const int iNumTrainedElements = 100;
+	const int iNumTrainedElements = 9;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
+
+	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_SIGMOID));
 
 	// Output layer - 5 neurons, linear neurons
 	dummyNet.addNewLayer(Layer(iOutputs,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
 
 	// we randomize weights in a all layers
-	dummyNet.randomizeWeights(0.01,NULL);
+	dummyNet.randomizeWeights(0.1,NULL);
 
 	MLP dummyNetGPU (dummyNet);
 
@@ -91,6 +93,9 @@ void checkIfGPUTrainingIsOK()
 	dummyTestSet.randomizeTests(NULL);
 
 	dummyTestSet.setOutputFunction(vecMinMax,testingFunction,NULL);
+
+	dummyNet.executeNetwork(dummyTestSet);
+	dummyNetGPU.executeNetworkGPU(dummyTestSet);
 
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
 	MTRand rand1(7),rand2(7);
@@ -259,11 +264,11 @@ int main()
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // First input variable
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // Second input variable
 
-	doExecuteNetworksAndSaveLoad();
+	//doExecuteNetworksAndSaveLoad();
 
 	//makeTraining();
 
-	//checkIfGPUTrainingIsOK();
+	checkIfGPUTrainingIsOK();
 
 	return 0;
 }
