@@ -21,7 +21,7 @@
 
 const int iMaxBlockDimSize = 65535;
 
-//#define NO_PRINT_DEBUG 1
+#define NO_PRINT_DEBUG 1
 
 #ifndef NO_PRINT_DEBUG
 	#define PRINT_DEBUG_INFO(a,...) printf(a,__VA_ARGS__)

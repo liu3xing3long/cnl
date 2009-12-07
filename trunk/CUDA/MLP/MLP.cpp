@@ -9,6 +9,8 @@ void MLP::executeNetwork(InputTestSet &p_TestSet)
 	{
 		executeNetwork(p_TestSet.getTest(iTestIndex));
 	}
+
+	cleanTemporaryData();
 }
 
 void MLP::executeNetwork(InputTest &p_Test)
@@ -38,15 +40,7 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 		vector<InputTest *> vecTests;
 
 		// Clean everything
-		for(unsigned uLayerIndex=0;uLayerIndex<m_vecLayers.size();++uLayerIndex)
-		{
-			for(unsigned uNeuronIndex=0;uNeuronIndex<m_vecLayers[uLayerIndex].m_vecNeurons.size();++uNeuronIndex)
-			{
-				m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.clear();
-				m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.clear();
-				m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.clear();
-			}
-		}
+		cleanTemporaryData();
 
 		logTextParamsDebug("iTrainedElement = %d",iTrainedElement);
 
@@ -325,6 +319,19 @@ void MLP::randomizeWeights(double p_dAbsMax,MTRand *p_pRandomGenerator)
 void MLP::clearNetwork()
 {
 	m_vecLayers.clear();
+}
+
+void MLP::cleanTemporaryData()
+{
+	for(unsigned uLayerIndex=0;uLayerIndex<m_vecLayers.size();++uLayerIndex)
+	{
+		for(unsigned uNeuronIndex=0;uNeuronIndex<m_vecLayers[uLayerIndex].m_vecNeurons.size();++uNeuronIndex)
+		{
+			m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.clear();
+			m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.clear();
+			m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.clear();
+		}
+	}
 }
 
 Layer *MLP::getLayerBefore(Layer *p_pLayer)

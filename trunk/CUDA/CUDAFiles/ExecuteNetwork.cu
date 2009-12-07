@@ -1,7 +1,7 @@
 #include "..\Global\stdafx.h"
 
 __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput,int p_iNumInputNeurons, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount)
-{
+{	
 	extern __shared__ real_gpu s_InputNeurons[];
 	real_gpu* s_InputWeights = &s_InputNeurons[p_iNumInputNeurons];
 
@@ -10,7 +10,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	
 	const real_gpu *d_LayerInputThisTest = dp_pLayerInput + blockIdx.x*iNumInputNeuronsAligned;
 	int iMoveWeightsForThisTest = threadIdx.x*p_iNumInputNeurons;
-	const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
+	//const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
 	real_gpu *d_pLayerOutputThisTest = dp_pLayerOutput + blockIdx.x*iNumOutputNeuronsAligned + threadIdx.x;
 	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + blockIdx.x*iNumOutputNeuronsAligned + threadIdx.x;
 
@@ -25,36 +25,47 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 	real_gpu dResult = 0.0f;
 	
-	/*if(threadIdx.x == 1 && blockIdx.x == 1)
-	{
-		printf("INPUT %d | WEIGHTS %d | OUTPUT %d\n",d_LayerInputThisTest - dp_pLayerInput,d_WeightsThisTest - dp_pWeights,d_pLayerOutputThisTest - dp_pLayerOutput);
-	}*/	
+	//if(threadIdx.x == 1 && blockIdx.x == 1)
+	//{
+	//	printf("INPUT %d | WEIGHTS %d | OUTPUT %d\n",d_LayerInputThisTest - dp_pLayerInput,d_WeightsThisTest - dp_pWeights,d_pLayerOutputThisTest - dp_pLayerOutput);
+	//}
 
 	int iNumOfWeights = p_iNumInputNeurons * p_iOutputNeuronCount;
 	int iNumOfWeightsAligned = ALIGN_UP(iNumOfWeights,blockDim.x);
 	for(int iWeightIndex = threadIdx.x, iWeightIndexBase = 0 ; iWeightIndex < iNumOfWeightsAligned ; iWeightIndex += blockDim.x, iWeightIndexBase += blockDim.x)
 	{
-		// first, we copy d_WeightsThisTest to s_InputWeights (it is only a part of weights)
-		if(iWeightIndex < iNumOfWeights)
+		/*if(threadIdx.x == 0)
 		{
-			s_InputWeights[threadIdx.x] = d_WeightsThisTest[iWeightIndex];
+			PRINT_DEBUG_INFO("GPU: NEW BATCH!!!!!!!!! iWeightIndexBase = %d , blockDim.x = %d\n",iWeightIndexBase,blockDim.x);
+		}*/
+
+		// first, we copy d_WeightsThisTest to s_InputWeights (it is only a part of weights)
+		if(iWeightIndex < iNumOfWeights) 
+		{ // JRTODO - without this 'if' it was 5% faster!
+			s_InputWeights[threadIdx.x] = dp_pWeights[iWeightIndex];
 		}
+
+		__syncthreads(); // We make sure that all data was written to shared memory
 
 		int iFirstElementInThisBatch = iMoveWeightsForThisTest - iWeightIndexBase;
 		int iLastElementInThisBatch = iFirstElementInThisBatch + p_iNumInputNeurons;
 
 		// Not all threads are used in calulations
-		if(threadIdx.x < p_iOutputNeuronCount && iLastElementInThisBatch < iWeightIndexBase+p_iOutputNeuronCount && iMoveWeightsForThisTest+iNumInputNeuronsAligned >= iWeightIndexBase)
+		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : iFirstElementInThisBatch %d , iLastElementInThisBatch %d , T1  = [%d] , T2 = [%d] , T3 = [%d]\n",blockIdx.x,threadIdx.x,iFirstElementInThisBatch,iLastElementInThisBatch,(threadIdx.x < p_iOutputNeuronCount),(iLastElementInThisBatch >= 0),(iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < blockDim.x));
+		if(threadIdx.x < p_iOutputNeuronCount && iLastElementInThisBatch >= 0 && (iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < blockDim.x))
 		{
-			int iFirstWeightIndex = min(0,iWeightIndexBase - iMoveWeightsForThisTest);
-			int iLastWeightIndex = max(p_iNumInputNeurons,iWeightIndexBase + p_iOutputNeuronCount - iMoveWeightsForThisTest);
+			int iFirstWeightIndex = max(0,-iFirstElementInThisBatch);
+			int iLastWeightIndex = min(p_iNumInputNeurons,p_iNumInputNeurons - (iLastElementInThisBatch - blockDim.x));
 			for(int iWeightIndex = iFirstWeightIndex;iWeightIndex < iLastWeightIndex; ++iWeightIndex)
 			{
-				int iWeightIndexHere = iWeightIndex + iWeightIndexBase - iMoveWeightsForThisTest;
+				int iWeightIndexHere = iWeightIndex - iWeightIndexBase + iMoveWeightsForThisTest;
 				PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , iWeightIndex %d : d_LayerInputThisTest %f , d_WeightsThisTest %f , iWeightIndexHere %d, val[%d] %f , MULT %f\n",blockIdx.x,threadIdx.x,iWeightIndex,d_LayerInputThisTest[iWeightIndex],d_WeightsThisTest[iWeightIndex],iWeightIndexHere,iWeightIndexHere,s_InputWeights[iWeightIndexHere],d_LayerInputThisTest[iWeightIndex] * d_WeightsThisTest[iWeightIndex]);
+
 				dResult += s_InputNeurons[iWeightIndex] * s_InputWeights[iWeightIndexHere];
 			}
 		}
+
+		__syncthreads(); // We make sure that all data was read by all threads
 	}
 
 	if(threadIdx.x <= p_iOutputNeuronCount)
@@ -68,15 +79,15 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 			case Neuron::NT_LINEAR: 
 				dDerivativeOfLastOutput = 1.0f;
 				break;	// Do nothing
-			case Neuron::NT_SIGMOID: 
-				double dExp = exp(-dResult);
-				dResult = 1.0 / (1.0 + dExp);
-				dDerivativeOfLastOutput = dExp / pow(1.0 + dExp,2);
-				break;	
+			case Neuron::NT_SIGMOID:
+				double dExp = __expf(-dResult);
+				dResult = 1.0f / (1.0f + dExp);
+				dDerivativeOfLastOutput = dExp / __powf(1.0f + dExp,2);
+				break;
 		}
 		
 		if(threadIdx.x == p_iOutputNeuronCount)
-			dResult = 1.0f; /* bias */
+			dResult = 1.0f; // bias
 			
 		*d_pLayerOutputThisTest = dResult;
 		

@@ -60,9 +60,7 @@ void printVectorDifferenceInfo(const InputTestSet &p_testSet,InputTestSet::Diffe
 }
 
 const int iInputs = 2;
-const int iHiddenNeurons = 5;
 const int iOutputs = 1;
-const int iNumTests = 1;
 
 vector< pair<double,double> > vecMinMax;
 
@@ -118,11 +116,13 @@ void makeTraining()
 	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 1600 };
+	const int iTrainedElementsArray[numElementsInArrays1] = { 160000 };
 	const double dEtaArray[numElementsInArrays2] = { 0.02 };
-	const int iTestsInTrainingArray[numElementsInArrays3] = { 10 };
+	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 };
 
 	const int numTriedTrainings = 3;
+	const int iNumTests = 1000;
+	const int iHiddenNeurons = 45;
 
 	InputTestSet::DifferenceStatisticsType eDifferenceType = InputTestSet::DST_CORRECT_AND_CPU;
 
@@ -200,9 +200,8 @@ void doExecuteNetworksAndSaveLoad()
 	// New MLP network
 	MLP dummyNet;
 
-	//const int iTrainedElements = 50000;
-	//const double dEta = 0.03;
-	//const int iTestsInTraining = 5;
+	const int iNumTests = 50000;
+	const int iHiddenNeurons = 45;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeurons,iInputs,Neuron::NT_SIGMOID));

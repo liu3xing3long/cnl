@@ -16,6 +16,7 @@ public:
 
 	virtual void randomizeWeights(double p_dAbsMax,MTRand *p_pRandomGenerator);
 	virtual void clearNetwork();
+	virtual void cleanTemporaryData();
 
 	virtual Layer *getLayerBefore(Layer * p_pLayer);
 	virtual Layer *getLayerAfter(Layer * p_pLayer);
