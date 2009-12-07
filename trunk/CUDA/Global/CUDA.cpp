@@ -78,6 +78,7 @@ void checkIfGPUTrainingIsOK()
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
 
+	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_SIGMOID));
 
 	// Output layer - 5 neurons, linear neurons

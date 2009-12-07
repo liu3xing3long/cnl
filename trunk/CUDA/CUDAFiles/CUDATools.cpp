@@ -179,7 +179,7 @@ void CUDATools::allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer)
 	p_Layer.md_pLayerWeights = setGPUMemoryForWeights(p_Layer);
 
 	// JRTODO - currently we only allocate memory for one test
-	int iBytesAllocated = p_Layer.getNeuronCount() * sizeof(real_gpu);
+	int iBytesAllocated = (p_Layer.getNeuronCount() + 1) * sizeof(real_gpu);
 
 	p_Layer.md_pDerivativeOfLastOutput = createZeroGPUMemory(iBytesAllocated);
 	p_Layer.md_pLastOutputWithOutputFunction = createZeroGPUMemory(iBytesAllocated);

@@ -51,7 +51,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 		int iLastElementInThisBatch = iFirstElementInThisBatch + p_iNumInputNeurons;
 
 		// Not all threads are used in calulations
-		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : iFirstElementInThisBatch %d , iLastElementInThisBatch %d , T1  = [%d] , T2 = [%d] , T3 = [%d]\n",blockIdx.x,threadIdx.x,iFirstElementInThisBatch,iLastElementInThisBatch,(threadIdx.x < p_iOutputNeuronCount),(iLastElementInThisBatch >= 0),(iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < blockDim.x));
+		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : iFirstElementInThisBatch %d , iLastElementInThisBatch %d , T1  = [%d] , T2 = [%d] , T3 = [%d]\n",blockIdx.x,threadIdx.x,iFirstElementInThisBatch,iLastElementInThisBatch,(threadIdx.x < p_iOutputNeuronCount),(iLastElementInThisBatch >= 0),(iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < blockDim.x));
 		if(threadIdx.x < p_iOutputNeuronCount && iLastElementInThisBatch >= 0 && (iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < blockDim.x))
 		{
 			int iFirstWeightIndex = max(0,-iFirstElementInThisBatch);
@@ -59,7 +59,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 			for(int iWeightIndex = iFirstWeightIndex;iWeightIndex < iLastWeightIndex; ++iWeightIndex)
 			{
 				int iWeightIndexHere = iWeightIndex - iWeightIndexBase + iMoveWeightsForThisTest;
-				PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , iWeightIndex %d : d_LayerInputThisTest %f , d_WeightsThisTest %f , iWeightIndexHere %d, val[%d] %f , MULT %f\n",blockIdx.x,threadIdx.x,iWeightIndex,d_LayerInputThisTest[iWeightIndex],d_WeightsThisTest[iWeightIndex],iWeightIndexHere,iWeightIndexHere,s_InputWeights[iWeightIndexHere],d_LayerInputThisTest[iWeightIndex] * d_WeightsThisTest[iWeightIndex]);
+				//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , iWeightIndex %d : d_LayerInputThisTest %f , d_WeightsThisTest %f , iWeightIndexHere %d, val[%d] %f , MULT %f\n",blockIdx.x,threadIdx.x,iWeightIndex,d_LayerInputThisTest[iWeightIndex],d_WeightsThisTest[iWeightIndex],iWeightIndexHere,iWeightIndexHere,s_InputWeights[iWeightIndexHere],d_LayerInputThisTest[iWeightIndex] * d_WeightsThisTest[iWeightIndex]);
 
 				dResult += s_InputNeurons[iWeightIndex] * s_InputWeights[iWeightIndexHere];
 			}
@@ -72,7 +72,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	{
 		double dDerivativeOfLastOutput = 0.0f;
 
-		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : dResult before output function %f\n",blockIdx.x,threadIdx.x,dResult);
+		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : dResult before output function %f\n",blockIdx.x,threadIdx.x,dResult);
 
 		switch(p_eNeuronType)
 		{		
@@ -89,13 +89,14 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 		if(threadIdx.x == p_iOutputNeuronCount)
 			dResult = 1.0f; // bias
 			
+		//PRINT_DEBUG_INFO("XXXXXXXXXXXXXXXXXXXXXXXXXXXXGPU: Test %d , Neuron %d : %d\n",blockIdx.x,threadIdx.x,blockIdx.x*iNumOutputNeuronsAligned + threadIdx.x);
 		*d_pLayerOutputThisTest = dResult;
 		
 		// We only need derivative of last output if we are in training!
 		if(dp_pDerivativeOfLastOutput != NULL)
 			*d_pDerivativeOfLastOutputThisTest = dDerivativeOfLastOutput;
 
-		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : first d_LayerInputThisTest %f , first d_WeightsThisTest %f , dResult %f , dDerivativeOfLastOutput %f\n",blockIdx.x,threadIdx.x,d_LayerInputThisTest[0],d_WeightsThisTest[0],dResult,dDerivativeOfLastOutput);
+		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : first d_LayerInputThisTest %f , first d_WeightsThisTest %f , dResult %f , dDerivativeOfLastOutput %f\n",blockIdx.x,threadIdx.x,d_LayerInputThisTest[0],d_WeightsThisTest[0],dResult,dDerivativeOfLastOutput);
 	}
 }
 
