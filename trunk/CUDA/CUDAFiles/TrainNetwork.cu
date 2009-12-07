@@ -17,7 +17,10 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 	
 	for(int iWeightIndex = 0;iWeightIndex < p_iNextLayerNeuronCount; ++iWeightIndex)
 	{
-		dError += dp_pNextLayerWeights[iWeightIndex*blockDim.x + threadIdx.x] * dp_pNextLayerError[iWeightIndex];
+		PRINT_DEBUG_INFO("GPU: Test index 0 , Neuron index %d , Weight index %d : dp_pNextLayerWeights [%d] = %f , dp_pNextLayerError[%d] = %f , MULT = %f\n"
+			,threadIdx.x,iWeightIndex,iWeightIndex*(blockDim.x + 1) + threadIdx.x,dp_pNextLayerWeights[iWeightIndex*(blockDim.x + 1) + threadIdx.x],iWeightIndex
+			,dp_pNextLayerError[iWeightIndex],dp_pNextLayerWeights[iWeightIndex*(blockDim.x + 1) + threadIdx.x] * dp_pNextLayerError[iWeightIndex]);
+		dError += dp_pNextLayerWeights[iWeightIndex*(blockDim.x + 1) + threadIdx.x] * dp_pNextLayerError[iWeightIndex];
 	}
 	
 	dp_pThisLayerError[threadIdx.x] = dError;

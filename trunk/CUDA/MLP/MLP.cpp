@@ -153,10 +153,10 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			}
 
 			logTextParamsDebug("Errors in layer %d , elements in vecOutputsLayerBefore: %d",uLayerIndex,vecOutputsLayerBefore.size());
-			for(int a=0;a<vecOutputsLayerBefore.size();++a)
+			for(unsigned a=0;a<vecOutputsLayerBefore.size();++a)
 			{
 				logTextParamsDebug("vecOutputsLayerBefore [%d], size %d",a,vecOutputsLayerBefore[a].size());
-				for(int b=0;b<vecOutputsLayerBefore[a].size();++b)
+				for(unsigned b=0;b<vecOutputsLayerBefore[a].size();++b)
 				{
 					logTextParamsDebug("vecOutputsLayerBefore [%d] [%d] = %f",a,b,vecOutputsLayerBefore[a][b]);
 				}

@@ -70,10 +70,10 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNet;
 
 	//const int iTrainedElements = 50000;
-	const double dEta = 0.3;
-	const int iTestsInTraining = 5;
-	const int iHiddenNeuronsInTesting = 100;
-	const int iNumTrainedElements = 9;
+	const double dEta = 0.5;
+	const int iTestsInTraining = 1;
+	const int iHiddenNeuronsInTesting = 2;
+	const int iNumTrainedElements = 1;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
@@ -94,8 +94,8 @@ void checkIfGPUTrainingIsOK()
 
 	dummyTestSet.setOutputFunction(vecMinMax,testingFunction,NULL);
 
-	dummyNet.executeNetwork(dummyTestSet);
-	dummyNetGPU.executeNetworkGPU(dummyTestSet);
+	//dummyNet.executeNetwork(dummyTestSet);
+	//dummyNetGPU.executeNetworkGPU(dummyTestSet);
 
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
 	MTRand rand1(7),rand2(7);
