@@ -44,7 +44,7 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 
 		logTextParamsDebug("iTrainedElement = %d",iTrainedElement);
 
-		for(int a=0;a<p_iNumTestsInBatch;++a)
+		for(int iTestInBatchIndex=0;iTestInBatchIndex<p_iNumTestsInBatch;++iTestInBatchIndex)
 		{
 			int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount()); // iTrainedElement % p_TestSet.getTestCount()
 
@@ -216,7 +216,7 @@ void MLP::executeNetworkGPU(InputTest &p_Test)
 	p_Test;
 }
 
-void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double p_dEta,int /*p_iNumTestsInBatch*/,MTRand *p_pRandomGenerator)
+void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator)
 {
 	// pomysl - indeksy uczonych elementow moga byc w read-only memory
 	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
@@ -224,18 +224,22 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		CUDATools::allocateAndSetGPUMemoryForLayerTraining(m_vecLayers[iLayerIndex]);
 	}
 
+	vector<int>vecTrainedElements;
 	real_gpu *d_pTestsInput = NULL; // tests input
 	real_gpu *d_pTestsOutput = NULL; // correct outputs
-	//real_gpu *d_pTestNumbers = NULL; // JRTODO - unused
 	int iSpaceBetweenTestsInInput; // index difference between each test in d_pTestInput
 	int iSpaceBetweenTestsInOutput; // index difference between each test in d_pTestInput
 	CUDATools::allocateAndSetGPUMemoryForTestTraining(d_pTestsInput,d_pTestsOutput,p_TestSet,iSpaceBetweenTestsInInput,iSpaceBetweenTestsInOutput);
 
 	for(int iTrainedElement=0;iTrainedElement<p_iTrainedElements;++iTrainedElement)
 	{
-		// We get test index to be used in training
-		int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount());
-		//InputTest &test = p_TestSet.getTest(iTestIndex);
+		vecTrainedElements.clear();
+		for(int iTestInBatchIndex=0;iTestInBatchIndex<p_iNumTestsInBatch;++iTestInBatchIndex)
+		{
+			// We get test index to be used in training
+			int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount());
+			vecTrainedElements.push_back(iTestIndex);
+		}
 
 		logTextParamsDebug("GPU: iTrainedElement = %d",iTrainedElement);
 		logTextParamsDebug("GPU: Test in batch nr 0 = %d",iTestIndex);
@@ -249,18 +253,18 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		
 			if(iLayerIndex == 0)
 			{
-				d_pLayerInput = d_pTestsInput + iTestIndex*iSpaceBetweenTestsInInput;
+				d_pLayerInput = d_pTestsInput;
 			}
 			else
 			{
 				d_pLayerInput = m_vecLayers[iLayerIndex-1].md_pLastOutputWithOutputFunction;
 			}
 
-			CUDATools::executeLayerGPUForTraining(d_pLayerInput,p_TestSet,thisLayer);
+			CUDATools::executeLayerGPUForTraining(d_pLayerInput,thisLayer,vecTrainedElements);
 		}
 
 		// calculate error in the last layer
-		CUDATools::calculateErrorInLastLayer(m_vecLayers[m_vecLayers.size()-1],d_pTestsOutput+iTestIndex*iSpaceBetweenTestsInOutput);
+		CUDATools::calculateErrorInLastLayer(m_vecLayers[m_vecLayers.size()-1],d_pTestsOutput);
 
 		// calculate error in other layers
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
@@ -276,7 +280,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 			int p_iNumOutputsLayerBefore = 0;
 			if(uLayerIndex == 0)
 			{
-				d_pOutputsLayerBefore = d_pTestsInput + iTestIndex*iSpaceBetweenTestsInInput;
+				d_pOutputsLayerBefore = d_pTestsInput;
 				p_iNumOutputsLayerBefore = p_TestSet.getInputCount();
 			}
 			else

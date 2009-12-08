@@ -21,7 +21,9 @@
 
 const int iMaxBlockDimSize = 65535;
 
-//#define NO_PRINT_DEBUG 1
+const int iMaxNumberOfTrainedElements = 128;
+
+#define NO_PRINT_DEBUG 1
 
 #ifndef NO_PRINT_DEBUG
 	#define PRINT_DEBUG_INFO(a,...) printf(a,__VA_ARGS__)
@@ -31,11 +33,13 @@ const int iMaxBlockDimSize = 65535;
 	#define logTextParamsDebug(a,...)
 #endif
 
-//#ifdef REAL_GPU_IS_FLOAT
+#define REAL_GPU_IS_FLOAT 1
+
+#ifdef REAL_GPU_IS_FLOAT
 	typedef float real_gpu;
-//#else
-//	typedef double real_gpu;
-//#endif
+#else
+	typedef double real_gpu;
+#endif
 
 using namespace std;
 

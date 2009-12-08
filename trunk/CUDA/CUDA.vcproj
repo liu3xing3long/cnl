@@ -79,6 +79,8 @@
 				OutputFile="$(OutDir)/CUDA.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(CUDA_LIB_PATH)"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/CUDA.pdb"
 				SubSystem="1"
@@ -257,6 +259,8 @@
 				OutputFile="$(OutDir)/CUDA.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(CUDA_LIB_PATH)"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/CUDA.pdb"
 				SubSystem="1"
@@ -514,10 +518,6 @@
 			</File>
 			<File
 				RelativePath=".\CUDAFiles\CUDATools.h"
-				>
-			</File>
-			<File
-				RelativePath=".\CUDAFiles\ExecuteNetwork.cu"
 				>
 			</File>
 			<File
