@@ -206,7 +206,7 @@ void doExecuteNetworksAndSaveLoad()
 	// New MLP network
 	MLP dummyNet;
 
-	const int iNumTests = 50000;
+	const int iNumTests = 500;
 	const int iHiddenNeurons = 45;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
@@ -265,11 +265,11 @@ int main()
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // First input variable
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // Second input variable
 
-	//doExecuteNetworksAndSaveLoad();
+	doExecuteNetworksAndSaveLoad();
 
 	//makeTraining();
 
-	checkIfGPUTrainingIsOK();
+	//checkIfGPUTrainingIsOK();
 
 	return 0;
 }

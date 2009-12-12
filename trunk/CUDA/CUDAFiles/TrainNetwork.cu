@@ -3,7 +3,7 @@
 __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 
 __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput
-								   ,int p_iNumInputNeurons, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount,bool p_bInTraining)
+								   ,int p_iNumInputNeurons,int p_iNumInputNeuronsAligned, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount,bool p_bInTraining)
 {
 	extern __shared__ real_gpu s_InputNeurons[];
 	real_gpu* s_InputWeights = &s_InputNeurons[p_iNumInputNeurons];
@@ -13,15 +13,12 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 		iTestIndex = blockIdx.x; //////iTestIndices[blockIdx.x];
 	else
 		iTestIndex = blockIdx.x;
-
-	int iNumInputNeuronsAligned = ALIGN_UP(p_iNumInputNeurons, HALF_WARP);
-	int iNumOutputNeuronsAligned = ALIGN_UP(blockDim.x, HALF_WARP);
 	
-	const real_gpu *d_LayerInputThisTest = dp_pLayerInput + iTestIndex*iNumInputNeuronsAligned;
+	const real_gpu *d_LayerInputThisTest = dp_pLayerInput + iTestIndex*p_iNumInputNeuronsAligned;
 	int iMoveWeightsForThisTest = threadIdx.x*p_iNumInputNeurons;
 	const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
-	real_gpu *d_pLayerOutputThisTest = dp_pLayerOutput + iTestIndex*iNumOutputNeuronsAligned + threadIdx.x;
-	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + iTestIndex*iNumOutputNeuronsAligned + threadIdx.x;
+	real_gpu *d_pLayerOutputThisTest = dp_pLayerOutput + iTestIndex*blockDim.x + threadIdx.x;
+	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + iTestIndex*blockDim.x + threadIdx.x;
 
 	// first, we copy d_LayerInputThisTest to s_InputNeurons
 	for(int iInputIndex = threadIdx.x;iInputIndex < p_iNumInputNeurons; iInputIndex+=blockDim.x)
@@ -122,7 +119,11 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 	{
 		cudaMemcpyToSymbol("iTestIndices",p_pVecTestIndices,p_iTestCount*sizeof(int),0);
 	}
-	executeLayerKernel <<<p_iTestCount,iBlockDimUpdated,iSharedMemorySize>>> (dp_pLayerInput,dp_pWeights,dp_pLayerOutput,dp_pDerivativeOfLastOutput,p_iNumInputNeurons,p_eNeuronType,p_iOutputNeuronCount,(p_pVecTestIndices!=NULL));
+
+	int iNumInputNeuronsAligned = ALIGN_UP(p_iNumInputNeurons, HALF_WARP);
+
+	executeLayerKernel <<<p_iTestCount,iBlockDimUpdated,iSharedMemorySize>>> (dp_pLayerInput,dp_pWeights,dp_pLayerOutput,dp_pDerivativeOfLastOutput,p_iNumInputNeurons
+		,iNumInputNeuronsAligned,p_eNeuronType,p_iOutputNeuronCount,(p_pVecTestIndices!=NULL));
 }
 
 
