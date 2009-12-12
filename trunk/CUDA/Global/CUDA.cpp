@@ -116,7 +116,7 @@ void makeTraining()
 	/*const int numElementsInArrays1 = 3;
 	const int numElementsInArrays2 = 4;
 	const int numElementsInArrays3 = 3;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 4000,8000,16000 };
+	const int iTrainedElementsArray[numElementsInArrays1] = { 4000,8000,16000 };c
 	const double dEtaArray[numElementsInArrays2] = { 0.01, 0.02, 0.04, 0.08 };
 	const int iTestsInTrainingArray[numElementsInArrays3] = { 1, 2, 4 };*/
 	const int numElementsInArrays1 = 1;
