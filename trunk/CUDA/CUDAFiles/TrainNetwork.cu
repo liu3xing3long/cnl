@@ -144,26 +144,31 @@ extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,
 }
 
 
-__global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iNextLayerNeuronCount)
+__global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iNextLayerNeuronCount,int p_iNextLayerNeuronCountAligned,int p_iThisLayerNeuronCountAligned)
 {
 	real_gpu dError = 0.0f;
+	int iNextLayerWeightsForOneNeuron = blockDim.x + 1;
+	const real_gpu *d_pNextLayerErrorThisTest = dp_pNextLayerError + p_iNextLayerNeuronCountAligned * blockIdx.x;
 	
 	for(int iWeightIndex = 0;iWeightIndex < p_iNextLayerNeuronCount; ++iWeightIndex)
 	{
-		PRINT_DEBUG_INFO("GPU: Test index 0 , Neuron index %d , Weight index %d : dp_pNextLayerWeights [%d] = %f , dp_pNextLayerError[%d] = %f , MULT = %f\n"
-			,threadIdx.x,iWeightIndex,iWeightIndex*(blockDim.x + 1) + threadIdx.x,dp_pNextLayerWeights[iWeightIndex*(blockDim.x + 1) + threadIdx.x],iWeightIndex
-			,dp_pNextLayerError[iWeightIndex],dp_pNextLayerWeights[iWeightIndex*(blockDim.x + 1) + threadIdx.x] * dp_pNextLayerError[iWeightIndex]);
-		dError += dp_pNextLayerWeights[iWeightIndex*(blockDim.x + 1) + threadIdx.x] * dp_pNextLayerError[iWeightIndex];
+		PRINT_DEBUG_INFO("GPU: Test index %d , Neuron index %d , Weight index %d : dp_pNextLayerWeights [%d] = %f , dp_pNextLayerError[%d] = %f , MULT = %f\n"
+			,blockIdx.x,threadIdx.x,iWeightIndex,iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x,dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x],iWeightIndex
+			,dp_pNextLayerError[iWeightIndex],dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * dp_pNextLayerError[iWeightIndex]);
+		dError += dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * d_pNextLayerErrorThisTest[iWeightIndex];
 	}
 	
-	dp_pThisLayerError[threadIdx.x] = dError;
+	dp_pThisLayerError[p_iThisLayerNeuronCountAligned*blockIdx.x + threadIdx.x] = dError;
 
-	PRINT_DEBUG_INFO("GPU: Test index 0 , Neuron index %d : Error %f\n",threadIdx.x,dError);
+	PRINT_DEBUG_INFO("GPU: Test index %d , Neuron index %d : Error %f\n",blockIdx.x,threadIdx.x,dError);
 }
 
 extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iThisLayerNeuronCount,int p_iNextLayerNeuronCount)
 {
-	calculateErrorInNotLastLayerKernel <<<1,p_iThisLayerNeuronCount>>> (dp_pNextLayerWeights,dp_pNextLayerError,dp_pThisLayerError,p_iNextLayerNeuronCount);
+	int iBytesAllocatedForOneTestInNextLayerAligned = ALIGN_UP(p_iNextLayerNeuronCount+1,HALF_WARP);
+	int iBytesAllocatedForOneTestInThisLayerAligned = ALIGN_UP(p_iThisLayerNeuronCount+1,HALF_WARP);
+
+	calculateErrorInNotLastLayerKernel <<<1,p_iThisLayerNeuronCount>>> (dp_pNextLayerWeights,dp_pNextLayerError,dp_pThisLayerError,p_iNextLayerNeuronCount,iBytesAllocatedForOneTestInNextLayerAligned,iBytesAllocatedForOneTestInThisLayerAligned);
 }
 
 
@@ -178,7 +183,7 @@ __global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError
 	PRINT_DEBUG_INFO("GPU: Test 0 , Neuron %d : First weight: %f , dErrorMultDerivativeMultEta: %f , p_iNumOutputsLayerBefore: %d\n",threadIdx.x,d_pThisNeuronWeights[0],dErrorMultDerivativeMultEta,p_iNumOutputsLayerBefore);
 	
 	for(unsigned uWeightIndex = 0;uWeightIndex < p_iNumOutputsLayerBefore;++uWeightIndex)
-	{ 
+	{
 		real_gpu dChange = dErrorMultDerivativeMultEta * dp_pLayerBeforeOutputs[uWeightIndex];
 		double dCurrentValue = d_pThisNeuronWeights[uWeightIndex];
 		double dChangedValue = dCurrentValue - dChange;
