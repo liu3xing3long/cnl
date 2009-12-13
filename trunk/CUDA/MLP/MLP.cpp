@@ -270,7 +270,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
 		{
 			logTextParamsDebug("GPU: Errors in layer %d",iLayerIndex);
-			CUDATools::calculateErrorInNotLastLayer(m_vecLayers[iLayerIndex]);
+			CUDATools::calculateErrorInNotLastLayer(m_vecLayers[iLayerIndex],vecTrainedElements.size());
 		}
 
 		// We can finally update weights in all neurons
@@ -278,10 +278,12 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		{
 			const real_gpu *d_pOutputsLayerBefore;
 			int p_iNumOutputsLayerBefore = 0;
+			bool bLayerBeforeOutputsHaveSpecificIndexes = false;
 			if(uLayerIndex == 0)
 			{
 				d_pOutputsLayerBefore = d_pTestsInput;
 				p_iNumOutputsLayerBefore = p_TestSet.getInputCount();
+				bLayerBeforeOutputsHaveSpecificIndexes = true;
 			}
 			else
 			{
@@ -292,7 +294,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 
 			logTextParamsDebug("GPU: Updating weights in layer %d",uLayerIndex);
 			
-			CUDATools::updateWeightsInTraining( m_vecLayers[uLayerIndex],d_pOutputsLayerBefore,p_iNumOutputsLayerBefore,p_dEta);
+			CUDATools::updateWeightsInTraining( m_vecLayers[uLayerIndex],d_pOutputsLayerBefore,p_iNumOutputsLayerBefore,p_dEta,vecTrainedElements.size(),bLayerBeforeOutputsHaveSpecificIndexes);
 		}
 	}
 

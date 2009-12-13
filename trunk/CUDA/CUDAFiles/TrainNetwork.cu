@@ -3,6 +3,7 @@
 __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 
 //JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
+// JRTDO - zmien mnozenie integerow na specjalna funkcje mnozaca najnizsze 24 bity
 
 __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput
 								   ,int p_iNumInputNeurons,int p_iNumInputNeuronsAligned, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount,bool p_bInTraining)
@@ -163,21 +164,40 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 	PRINT_DEBUG_INFO("GPU: Test index %d , Neuron index %d : Error %f\n",blockIdx.x,threadIdx.x,dError);
 }
 
-extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iThisLayerNeuronCount,int p_iNextLayerNeuronCount)
+extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iThisLayerNeuronCount,int p_iNextLayerNeuronCount,int p_iNumTestsInBatch)
 {
-	int iBytesAllocatedForOneTestInNextLayerAligned = ALIGN_UP(p_iNextLayerNeuronCount+1,HALF_WARP);
-	int iBytesAllocatedForOneTestInThisLayerAligned = ALIGN_UP(p_iThisLayerNeuronCount+1,HALF_WARP);
+	int iElementsAllocatedForOneTestInNextLayerAligned = ALIGN_UP(p_iNextLayerNeuronCount+1,HALF_WARP);
+	int iElementsAllocatedForOneTestInThisLayerAligned = ALIGN_UP(p_iThisLayerNeuronCount+1,HALF_WARP);
 
-	calculateErrorInNotLastLayerKernel <<<1,p_iThisLayerNeuronCount>>> (dp_pNextLayerWeights,dp_pNextLayerError,dp_pThisLayerError,p_iNextLayerNeuronCount,iBytesAllocatedForOneTestInNextLayerAligned,iBytesAllocatedForOneTestInThisLayerAligned);
+	calculateErrorInNotLastLayerKernel <<<p_iNumTestsInBatch,p_iThisLayerNeuronCount>>> (dp_pNextLayerWeights,dp_pNextLayerError,dp_pThisLayerError,p_iNextLayerNeuronCount,iElementsAllocatedForOneTestInNextLayerAligned,iElementsAllocatedForOneTestInThisLayerAligned);
 }
 
 
-__global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta,int p_iNumOutputsLayerBefore,real_gpu *dp_pThisLayerWeights)
+__global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta
+											  ,real_gpu *dp_pThisLayerWeights,int p_iNumTestsInBatch,int iElementsAllocatedForOneTestInThisLayerAligned,int p_iElementsAllocatedForOneTestInLayerBeforeAligned,bool p_bLayerBeforeOutputsHaveSpecificIndexes)
 {
-	//dp_pThisLayerWeights[0] = 3456;
+	// We change: neuron blockIdx.x , weight threadIdx.x
 
+	double dChange = 0.0f;
+	for(unsigned uTestIndex = 0;uTestIndex < p_iNumTestsInBatch;++uTestIndex)
+	{
+		double dError = dp_pThisLayerError[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x];
+		double dDerivativeOfLastOutput = dp_pDerivativeOfLastOutput[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x];
 
-	real_gpu *d_pThisNeuronWeights = dp_pThisLayerWeights + threadIdx.x * (p_iNumOutputsLayerBefore+1);
+		int iTestIndexForOutputBefore = ( p_bLayerBeforeOutputsHaveSpecificIndexes ? iTestIndices[uTestIndex] : uTestIndex );
+		double dLayerBeforeOutput = dp_pLayerBeforeOutputs[p_iElementsAllocatedForOneTestInLayerBeforeAligned*iTestIndexForOutputBefore + threadIdx.x];
+
+		double dChangeThisTest = dError * dDerivativeOfLastOutput * dLayerBeforeOutput * p_dEta;
+		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , Weight %d : dError %f , dDerivativeOfLastOutput %f , dLayerBeforeOutput %f , dChangeThisTest %f\n",uTestIndex,blockIdx.x,threadIdx.x,dError,dDerivativeOfLastOutput,dLayerBeforeOutput,dChangeThisTest);
+		dChange += dChangeThisTest;
+	}
+
+	//int iTestIndexForWeights = ( p_bLayerBeforeOutputsHaveSpecificIndexes ? iTestIndices[blockIdx.x] : blockIdx.x );
+	int iWeightIndex = blockDim.x*blockIdx.x + threadIdx.x;
+	PRINT_DEBUG_INFO("GPU: Neuron %d , Weight %d (index in array %d) : Old weight %f , Change %f , New weight %f\n",blockIdx.x,threadIdx.x,iWeightIndex,dp_pThisLayerWeights[iWeightIndex],dChange,dp_pThisLayerWeights[iWeightIndex] - dChange);
+	dp_pThisLayerWeights[iWeightIndex] = dp_pThisLayerWeights[iWeightIndex] - dChange;
+
+	/*real_gpu *d_pThisNeuronWeights = dp_pThisLayerWeights + threadIdx.x * (p_iNumOutputsLayerBefore+1);
 	real_gpu dErrorMultDerivativeMultEta = dp_pThisLayerError[threadIdx.x] * dp_pDerivativeOfLastOutput[threadIdx.x] * p_dEta;
 
 	PRINT_DEBUG_INFO("GPU: Test 0 , Neuron %d : First weight: %f , dErrorMultDerivativeMultEta: %f , p_iNumOutputsLayerBefore: %d\n",threadIdx.x,d_pThisNeuronWeights[0],dErrorMultDerivativeMultEta,p_iNumOutputsLayerBefore);
@@ -192,10 +212,15 @@ __global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError
 	}
 	
 	PRINT_DEBUG_INFO("GPU: Test 0 , Neuron %d , Bias : dChange %f\n",threadIdx.x,dErrorMultDerivativeMultEta);
-	d_pThisNeuronWeights[p_iNumOutputsLayerBefore] = d_pThisNeuronWeights[p_iNumOutputsLayerBefore] - dErrorMultDerivativeMultEta;
+	d_pThisNeuronWeights[p_iNumOutputsLayerBefore] = d_pThisNeuronWeights[p_iNumOutputsLayerBefore] - dErrorMultDerivativeMultEta;*/
 }
 
-extern "C" void updateWeightsInTrainingCUDA(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta,int p_iThisLayerNeuronCount,int p_iNumOutputsLayerBefore,real_gpu *dp_pThisLayerWeights)
+extern "C" void updateWeightsInTrainingCUDA(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta,int p_iThisLayerNeuronCount
+											,int p_iNumOutputsLayerBefore,real_gpu *dp_pThisLayerWeights,int p_iNumTestsInBatch,bool p_bLayerBeforeOutputsHaveSpecificIndexes)
 {
-	updateWeightsInTrainingKernel <<<1,p_iThisLayerNeuronCount>>> (dp_pThisLayerError,dp_pDerivativeOfLastOutput,dp_pLayerBeforeOutputs,p_dEta,p_iNumOutputsLayerBefore,dp_pThisLayerWeights);
+	int iElementsAllocatedForOneTestInThisLayerAligned = ALIGN_UP(p_iThisLayerNeuronCount+1,HALF_WARP);
+	int iElementsAllocatedForOneTestInLayerBeforeAligned = ALIGN_UP(p_iNumOutputsLayerBefore+1,HALF_WARP);
+
+	updateWeightsInTrainingKernel <<<p_iThisLayerNeuronCount,p_iNumOutputsLayerBefore+1>>> (dp_pThisLayerError,dp_pDerivativeOfLastOutput,dp_pLayerBeforeOutputs,p_dEta
+		,dp_pThisLayerWeights,p_iNumTestsInBatch,iElementsAllocatedForOneTestInThisLayerAligned,iElementsAllocatedForOneTestInLayerBeforeAligned,p_bLayerBeforeOutputsHaveSpecificIndexes);
 }

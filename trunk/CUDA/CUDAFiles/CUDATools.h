@@ -18,8 +18,8 @@ public:
 	static void allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer, int p_iNumTestsInBatch);
 	static void allocateAndSetGPUMemoryForTestTraining(real_gpu *&dp_pTestsInput,real_gpu *&dp_pTestsOutput,const InputTestSet &p_TestSet,int &p_iSpaceBetweenTestsInInput,int &p_iSpaceBetweenTestsInOutput);
 	static void calculateErrorInLastLayer(Layer &p_LastLayer,int p_iNumTestsInBatch,int p_iSpaceBetweenTestsInOutput,real_gpu *dp_pCorrectOutput);
-	static void calculateErrorInNotLastLayer(Layer &p_Layer);
-	static void updateWeightsInTraining(Layer &p_Layer,const real_gpu *d_pOutputsLayerBefore,int iNumOutputsLayerBefore, double p_dEta);
+	static void calculateErrorInNotLastLayer(Layer &p_Layer,int p_iNumTestsInBatch);
+	static void updateWeightsInTraining(Layer &p_Layer,const real_gpu *d_pOutputsLayerBefore,int p_iNumOutputsLayerBefore, double p_dEta,int p_iNumTestsInBatch,bool p_bLayerBeforeOutputsHaveSpecificIndexes);
 	static void retrieveGPUWeightsForLayerTraining(Layer &p_Layer);
 	static void freeGPUMemoryForTestTraining(real_gpu *&dp_pTestsInput,real_gpu *&dp_pTestsOutput);
 	static void freeGPUMemoryForLayerTraining(Layer &p_Layer);

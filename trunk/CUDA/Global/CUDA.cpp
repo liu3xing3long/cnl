@@ -71,9 +71,10 @@ void checkIfGPUTrainingIsOK()
 
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.5;
-	const int iTestsInTraining = 111;
+	const int iTestsInTraining = 77;
 	const int iHiddenNeuronsInTesting = 5;
-	const int iNumTrainedElements = 10;
+	const int iNumTrainedElements = 1;
+	const int iBatchSize = 2;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
@@ -101,9 +102,9 @@ void checkIfGPUTrainingIsOK()
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
 	MTRand rand1(7),rand2(7);
 	logText(Logging::LT_INFORMATION,"Started training CPU");
-	dummyNet.trainNetwork(dummyTestSet,iNumTrainedElements,dEta,1,&rand1);
+	dummyNet.trainNetwork(dummyTestSet,iNumTrainedElements,dEta,iBatchSize,&rand1);
 	logText(Logging::LT_INFORMATION,"Started training GPU");
-	dummyNetGPU.trainNetworkGPU(dummyTestSet,iNumTrainedElements,dEta,1,&rand2);
+	dummyNetGPU.trainNetworkGPU(dummyTestSet,iNumTrainedElements,dEta,iBatchSize,&rand2);
 	logText(Logging::LT_INFORMATION,"Finished training GPU");
 
 	dummyNet.executeNetwork(dummyTestSet);
