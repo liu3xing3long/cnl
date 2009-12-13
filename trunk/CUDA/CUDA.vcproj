@@ -128,7 +128,7 @@
 				Name="CUDA Build Rule"
 				Include="Global;NeuralNetwork;MLP;TinyXML;InputTests;CUDAFiles"
 				Arch="11"
-				Keep="true"
+				Keep="false"
 				Warning="3"
 			/>
 			<Tool

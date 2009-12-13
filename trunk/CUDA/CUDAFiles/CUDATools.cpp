@@ -179,8 +179,9 @@ void CUDATools::allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer, int p_iN
 {
 	p_Layer.md_pLayerWeights = setGPUMemoryForWeights(p_Layer);
 
-	int iBytesAllocatedForOneTest = (p_Layer.getNeuronCount() + 1) * sizeof(real_gpu);
-	int iBytesAllocatedForOneTestAligned = ALIGN_UP(iBytesAllocatedForOneTest,HALF_WARP);
+	int iElementsAllocatedForOneTest = (p_Layer.getNeuronCount() + 1);
+	int iElementsAllocatedForOneTestAligned = ALIGN_UP(iElementsAllocatedForOneTest,HALF_WARP);
+	int iBytesAllocatedForOneTestAligned = iElementsAllocatedForOneTestAligned * sizeof(real_gpu);
 	int iBytesAllocatedAllTestsAligned = iBytesAllocatedForOneTestAligned * p_iNumTestsInBatch;
 
 	p_Layer.md_pDerivativeOfLastOutput = createZeroGPUMemory(iBytesAllocatedAllTestsAligned);

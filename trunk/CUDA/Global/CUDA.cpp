@@ -70,9 +70,9 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNet;
 
 	//const int iTrainedElements = 50000;
-	const double dEta = 0.5;
-	const int iTestsInTraining = 77;
-	const int iHiddenNeuronsInTesting = 5;
+	const double dEta = 0.02;
+	const int iTestsInTraining = 2000;
+	const int iHiddenNeuronsInTesting = 10;
 	const int iNumTrainedElements = 1;
 	const int iBatchSize = 2;
 
@@ -101,10 +101,13 @@ void checkIfGPUTrainingIsOK()
 
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
 	MTRand rand1(7),rand2(7);
+	dummyNet.saveToFile("Before_train.xml");
 	logText(Logging::LT_INFORMATION,"Started training CPU");
 	dummyNet.trainNetwork(dummyTestSet,iNumTrainedElements,dEta,iBatchSize,&rand1);
+	dummyNet.saveToFile("Train_CPU.xml");
 	logText(Logging::LT_INFORMATION,"Started training GPU");
 	dummyNetGPU.trainNetworkGPU(dummyTestSet,iNumTrainedElements,dEta,iBatchSize,&rand2);
+	dummyNetGPU.saveToFile("Train_GPU.xml");
 	logText(Logging::LT_INFORMATION,"Finished training GPU");
 
 	dummyNet.executeNetwork(dummyTestSet);
