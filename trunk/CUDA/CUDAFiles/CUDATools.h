@@ -14,10 +14,10 @@ public:
 		,const InputTestSet &p_TestSet, const Layer &p_Layer);
 
 	// Methods for train network
-	static void executeLayerGPUForTraining(const real_gpu *dp_pLayerInput,const Layer &p_Layer,const vector<int> &p_vecTrainedElements);
-	static void allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer);
+	static void executeLayerGPUForTraining(const real_gpu *dp_pLayerInput,const Layer &p_Layer,const vector<int> &p_vecTrainedElements,bool p_bSetIndices);
+	static void allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer, int p_iNumTestsInBatch);
 	static void allocateAndSetGPUMemoryForTestTraining(real_gpu *&dp_pTestsInput,real_gpu *&dp_pTestsOutput,const InputTestSet &p_TestSet,int &p_iSpaceBetweenTestsInInput,int &p_iSpaceBetweenTestsInOutput);
-	static void calculateErrorInLastLayer(Layer &p_LastLayer,real_gpu *dp_pCorrectOutput);
+	static void calculateErrorInLastLayer(Layer &p_LastLayer,int p_iNumTestsInBatch,int p_iSpaceBetweenTestsInOutput,real_gpu *dp_pCorrectOutput);
 	static void calculateErrorInNotLastLayer(Layer &p_Layer);
 	static void updateWeightsInTraining(Layer &p_Layer,const real_gpu *d_pOutputsLayerBefore,int iNumOutputsLayerBefore, double p_dEta);
 	static void retrieveGPUWeightsForLayerTraining(Layer &p_Layer);

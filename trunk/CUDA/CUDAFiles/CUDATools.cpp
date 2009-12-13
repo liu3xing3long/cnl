@@ -21,7 +21,7 @@
 extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput
 								 ,int p_iTestCount,int p_iOutputNeuronCount,int p_iNumInputNeurons, Neuron::NeuronType p_eNeuronType,const int *p_pVecTestIndices);
 
-extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iOutputNeuronCount);
+extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iOutputNeuronCount,int p_iNumTestsInBatch,int p_iSpaceBetweenTestsInOutput);
 
 extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iThisLayerNeuronCount,int p_iNextLayerNeuronCount);
 
@@ -168,22 +168,24 @@ void CUDATools::executeLayerGPU(const real_gpu *dp_pLayerInput,const real_gpu *d
 	executeLayerCUDA(dp_pLayerInput,dp_pWeights,dp_pLayerOutput,NULL,p_TestSet.getTestCount(),p_Layer.getNeuronCount(),p_Layer.getWeightCount(),p_Layer.getNeuronType(),NULL);
 }
 
-void CUDATools::executeLayerGPUForTraining(const real_gpu *dp_pLayerInput,const Layer &p_Layer,const vector<int> &p_vecTrainedElements)
+void CUDATools::executeLayerGPUForTraining(const real_gpu *dp_pLayerInput,const Layer &p_Layer,const vector<int> &p_vecTrainedElements,bool p_bSetIndices)
 {
+	const int *pVecTestIndices = (p_bSetIndices ? &(*p_vecTrainedElements.begin()) : NULL);
 	executeLayerCUDA(dp_pLayerInput,p_Layer.md_pLayerWeights,p_Layer.md_pLastOutputWithOutputFunction,p_Layer.md_pDerivativeOfLastOutput
-		,p_vecTrainedElements.size(),p_Layer.getNeuronCount(),p_Layer.getWeightCount(),p_Layer.getNeuronType(),&(*p_vecTrainedElements.begin()));
+		,p_vecTrainedElements.size(),p_Layer.getNeuronCount(),p_Layer.getWeightCount(),p_Layer.getNeuronType(),pVecTestIndices);
 }
 
-void CUDATools::allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer)
+void CUDATools::allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer, int p_iNumTestsInBatch)
 {
 	p_Layer.md_pLayerWeights = setGPUMemoryForWeights(p_Layer);
 
-	// JRTODO - currently we only allocate memory for one test
-	int iBytesAllocated = (p_Layer.getNeuronCount() + 1) * sizeof(real_gpu);
+	int iBytesAllocatedForOneTest = (p_Layer.getNeuronCount() + 1) * sizeof(real_gpu);
+	int iBytesAllocatedForOneTestAligned = ALIGN_UP(iBytesAllocatedForOneTest,HALF_WARP);
+	int iBytesAllocatedAllTestsAligned = iBytesAllocatedForOneTestAligned * p_iNumTestsInBatch;
 
-	p_Layer.md_pDerivativeOfLastOutput = createZeroGPUMemory(iBytesAllocated);
-	p_Layer.md_pLastOutputWithOutputFunction = createZeroGPUMemory(iBytesAllocated);
-	p_Layer.md_pLastError = createZeroGPUMemory(iBytesAllocated);
+	p_Layer.md_pDerivativeOfLastOutput = createZeroGPUMemory(iBytesAllocatedAllTestsAligned);
+	p_Layer.md_pLastOutputWithOutputFunction = createZeroGPUMemory(iBytesAllocatedAllTestsAligned);
+	p_Layer.md_pLastError = createZeroGPUMemory(iBytesAllocatedAllTestsAligned);
 }
 
 void CUDATools::allocateAndSetGPUMemoryForTestTraining(real_gpu *&dp_pTestsInput,real_gpu *&dp_pTestsOutput,const InputTestSet &p_TestSet,int &p_iSpaceBetweenTestsInInput,int &p_iSpaceBetweenTestsInOutput)
@@ -192,9 +194,9 @@ void CUDATools::allocateAndSetGPUMemoryForTestTraining(real_gpu *&dp_pTestsInput
 	dp_pTestsOutput = CUDATools::setGPUMemoryForOutputLayer(p_TestSet,p_iSpaceBetweenTestsInOutput);
 }
 
-void CUDATools::calculateErrorInLastLayer(Layer &p_LastLayer,real_gpu *dp_pCorrectOutput)
+void CUDATools::calculateErrorInLastLayer(Layer &p_LastLayer,int p_iNumTestsInBatch,int p_iSpaceBetweenTestsInOutput, real_gpu *dp_pCorrectOutput)
 {
-	calculateErrorInLastLayerCUDA(dp_pCorrectOutput,p_LastLayer.md_pLastOutputWithOutputFunction,p_LastLayer.md_pLastError,p_LastLayer.getNeuronCount());
+	calculateErrorInLastLayerCUDA(dp_pCorrectOutput,p_LastLayer.md_pLastOutputWithOutputFunction,p_LastLayer.md_pLastError,p_LastLayer.getNeuronCount(),p_iNumTestsInBatch,p_iSpaceBetweenTestsInOutput);
 }
 
 void CUDATools::calculateErrorInNotLastLayer(Layer &p_Layer)
@@ -205,7 +207,8 @@ void CUDATools::calculateErrorInNotLastLayer(Layer &p_Layer)
 
 void CUDATools::updateWeightsInTraining(Layer &p_Layer,const real_gpu *d_pOutputsLayerBefore,int p_iNumOutputsLayerBefore, double p_dEta)
 {
-	updateWeightsInTrainingCUDA(p_Layer.md_pLastError,p_Layer.md_pDerivativeOfLastOutput,d_pOutputsLayerBefore,(real_gpu)p_dEta,p_Layer.getNeuronCount(),p_iNumOutputsLayerBefore,p_Layer.md_pLayerWeights);
+	updateWeightsInTrainingCUDA(p_Layer.md_pLastError,p_Layer.md_pDerivativeOfLastOutput,d_pOutputsLayerBefore
+		,(real_gpu)p_dEta,p_Layer.getNeuronCount(),p_iNumOutputsLayerBefore,p_Layer.md_pLayerWeights);
 }
 
 void CUDATools::retrieveGPUWeightsForLayerTraining(Layer &p_Layer)

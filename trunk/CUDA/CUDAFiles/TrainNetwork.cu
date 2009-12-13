@@ -2,6 +2,8 @@
 
 __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 
+//JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
+
 __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput
 								   ,int p_iNumInputNeurons,int p_iNumInputNeuronsAligned, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount,bool p_bInTraining)
 {
@@ -10,15 +12,15 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 	int iTestIndex;
 	if(p_bInTraining)
-		iTestIndex = blockIdx.x; //////iTestIndices[blockIdx.x];
+		iTestIndex = iTestIndices[blockIdx.x];
 	else
 		iTestIndex = blockIdx.x;
 	
 	const real_gpu *d_LayerInputThisTest = dp_pLayerInput + iTestIndex*p_iNumInputNeuronsAligned;
 	int iMoveWeightsForThisTest = threadIdx.x*p_iNumInputNeurons;
 	const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
-	real_gpu *d_pLayerOutputThisTest = dp_pLayerOutput + iTestIndex*blockDim.x + threadIdx.x;
-	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + iTestIndex*blockDim.x + threadIdx.x;
+	real_gpu *d_pLayerOutputThisTest = dp_pLayerOutput + blockIdx.x*blockDim.x + threadIdx.x;
+	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + blockIdx.x*blockDim.x + threadIdx.x;
 
 	// first, we copy d_LayerInputThisTest to s_InputNeurons
 	for(int iInputIndex = threadIdx.x;iInputIndex < p_iNumInputNeurons; iInputIndex+=blockDim.x)
@@ -33,7 +35,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	
 	//if(threadIdx.x == 1 && blockIdx.x == 1)
 	//{
-	//	printf("INPUT %d | WEIGHTS %d | OUTPUT %d\n",d_LayerInputThisTest - dp_pLayerInput,d_WeightsThisTest - dp_pWeights,d_pLayerOutputThisTest - dp_pLayerOutput);
+	//	PRINT_DEBUG_INFO("BX %d TX %d | INPUT %d | WEIGHTS %d | OUTPUT %d\n",blockIdx.x,threadIdx.x,d_LayerInputThisTest - dp_pLayerInput,d_WeightsThisTest - dp_pWeights,d_pLayerOutputThisTest - dp_pLayerOutput);
 	//}
 
 	int iNumOfWeights = p_iNumInputNeurons * p_iOutputNeuronCount;
@@ -94,10 +96,10 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 		
 		if(threadIdx.x == p_iOutputNeuronCount)
 			dResult = 1.0f; // bias
-			
+
 		//PRINT_DEBUG_INFO("XXXXXXXXXXXXXXXXXXXXXXXXXXXXGPU: Test %d , Neuron %d : %d\n",blockIdx.x,threadIdx.x,blockIdx.x*iNumOutputNeuronsAligned + threadIdx.x);
 		*d_pLayerOutputThisTest = dResult;
-		
+
 		// We only need derivative of last output if we are in training!
 		if(dp_pDerivativeOfLastOutput != NULL)
 			*d_pDerivativeOfLastOutputThisTest = dDerivativeOfLastOutput;
@@ -127,15 +129,18 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 }
 
 
-__global__ void calculateErrorInLastLayerKernel(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors)
+__global__ void calculateErrorInLastLayerKernel(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iSpaceBetweenTestsInOutput)
 {
-	dp_pErrors[threadIdx.x] = dp_pNetworkOutput[threadIdx.x] - dp_pCorrectOutput[threadIdx.x];
-	PRINT_DEBUG_INFO("GPU: Test in batch nr 0 , Output %d : Network = %f , Correct  = %f , Error = %f\n",threadIdx.x,dp_pNetworkOutput[threadIdx.x],dp_pCorrectOutput[threadIdx.x],dp_pErrors[threadIdx.x]);
+	int iElementIndexCorrectOutput = p_iSpaceBetweenTestsInOutput * iTestIndices[blockIdx.x] + threadIdx.x;
+	int iElementIndex = p_iSpaceBetweenTestsInOutput * blockIdx.x + threadIdx.x;
+	dp_pErrors[iElementIndex] = dp_pNetworkOutput[iElementIndex] - dp_pCorrectOutput[iElementIndexCorrectOutput];
+	PRINT_DEBUG_INFO("GPU: Test in batch nr %d (test %d) , Output %d (iElementIndex %d) : Network = %f , Correct  = %f , Error = %f\n",blockIdx.x,iTestIndices[blockIdx.x],threadIdx.x
+		,iElementIndex,dp_pNetworkOutput[iElementIndex],dp_pCorrectOutput[iElementIndex],dp_pErrors[iElementIndex]);
 }
 
-extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iOutputNeuronCount)
+extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iOutputNeuronCount,int p_iNumTestsInBatch,int p_iSpaceBetweenTestsInOutput)
 {
-	calculateErrorInLastLayerKernel <<<1,p_iOutputNeuronCount>>> (dp_pCorrectOutput,dp_pNetworkOutput,dp_pErrors);
+	calculateErrorInLastLayerKernel <<<p_iNumTestsInBatch,p_iOutputNeuronCount>>> (dp_pCorrectOutput,dp_pNetworkOutput,dp_pErrors,p_iSpaceBetweenTestsInOutput);
 }
 
 

@@ -71,15 +71,15 @@ void checkIfGPUTrainingIsOK()
 
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.5;
-	const int iTestsInTraining = 1;
-	const int iHiddenNeuronsInTesting = 2;
-	const int iNumTrainedElements = 1;
+	const int iTestsInTraining = 111;
+	const int iHiddenNeuronsInTesting = 5;
+	const int iNumTrainedElements = 10;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
 
-	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
-	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_SIGMOID));
+	//dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
+	//dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_SIGMOID));
 
 	// Output layer - 5 neurons, linear neurons
 	dummyNet.addNewLayer(Layer(iOutputs,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
@@ -265,11 +265,11 @@ int main()
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // First input variable
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // Second input variable
 
-	doExecuteNetworksAndSaveLoad();
+	//doExecuteNetworksAndSaveLoad();
 
 	//makeTraining();
 
-	//checkIfGPUTrainingIsOK();
+	checkIfGPUTrainingIsOK();
 
 	return 0;
 }
