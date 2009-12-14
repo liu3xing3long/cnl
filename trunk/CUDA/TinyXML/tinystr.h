@@ -94,7 +94,7 @@ class TiXmlString
 			return;
 		}
 
-		static char buffer[1024];
+		static char buffer[10240];
 		va_list args;
 		va_start (args, formatStr);
 		vsprintf (buffer,formatStr, args);

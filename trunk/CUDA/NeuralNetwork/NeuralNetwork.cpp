@@ -34,7 +34,7 @@ bool NeuralNetwork::saveToFile(const Str &p_sFileName) const
 	// Save the document
 	TiXmlPrinter printer;
 	doc.Accept( &printer );
-	fprintf( stdout, "%s", printer.CStr() );
+	//fprintf( stdout, "%s", printer.CStr() );
 	fprintf( pSaveFile, "%s", printer.CStr() );
 
 	fclose(pSaveFile);

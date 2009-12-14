@@ -86,7 +86,7 @@ TiXmlString& TiXmlString::append(const char* str, size_type len)
 // Romanowski added
 void TiXmlString::format (char * formatStr, ...)
 {
-	char buffer[1024];
+	char buffer[10240];
 	va_list args;
 	va_start (args, formatStr);
 	vsprintf (buffer,formatStr, args);
