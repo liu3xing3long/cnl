@@ -100,8 +100,9 @@ real_gpu* CUDATools::setGPUMemoryForWeights(const Layer &p_Layer)
 	// allocate memory (not padded)
 	int iNumNeurons = p_Layer.getNeuronCount(); 
 	int iNumberWeightInNeuron = p_Layer.getWeightCount(); //with bias
-	int iNumAllWeights = iNumNeurons * iNumberWeightInNeuron;
-	int iBytesAllocated = iNumAllWeights * sizeof(real_gpu);
+	int iNumAllWeightsUsed = iNumNeurons * iNumberWeightInNeuron;
+	int iNumAllWeightsWithPadding = iNumAllWeightsUsed + iMaxNumberOfTHreadsInBlock; // We add some more memory - we can remove 'if(iWeightIndex < iNumOfWeights)' from executeLayerKernel (it will make kernel faster)
+	int iBytesAllocated = iNumAllWeightsWithPadding * sizeof(real_gpu);
 	real_gpu *pHostMemory;
 	real_gpu *d_pGPUMemory;
 	allocateHostAndGPUMemory(iBytesAllocated,pHostMemory,d_pGPUMemory);

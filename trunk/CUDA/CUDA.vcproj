@@ -37,6 +37,7 @@
 				Include="Global;NeuralNetwork;MLP;TinyXML;InputTests;CUDAFiles"
 				Arch="11"
 				Warning="3"
+				Optimization="0"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -217,6 +218,7 @@
 				Arch="11"
 				Emulation="true"
 				Warning="3"
+				Optimization="0"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

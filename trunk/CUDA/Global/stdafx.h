@@ -20,8 +20,8 @@
 #define REAL_GPU_IS_FLOAT 1
 
 const int iMaxBlockDimSize = 65535;
-
 const int iMaxNumberOfTrainedElements = 1024;
+const int iMaxNumberOfTHreadsInBlock = 512;
 
 #define NO_PRINT_DEBUG 1
 

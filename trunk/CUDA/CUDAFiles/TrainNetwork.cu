@@ -5,8 +5,8 @@ __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 //JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
 // JRTDO - zmien mnozenie integerow na specjalna funkcje mnozaca najnizsze 24 bity
 
-__global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput
-								   ,int p_iNumInputNeurons,int p_iNumInputNeuronsAligned, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount,bool p_bInTraining)
+__global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput,int p_iNumInputNeurons
+								   ,int p_iNumInputNeuronsAligned, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount,bool p_bInTraining,int p_iHowMuchMemoryForWeights)
 {
 	extern __shared__ real_gpu s_InputNeurons[];
 	real_gpu* s_InputWeights = &s_InputNeurons[p_iNumInputNeurons];
@@ -41,18 +41,17 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 	int iNumOfWeights = p_iNumInputNeurons * p_iOutputNeuronCount;
 	int iNumOfWeightsAligned = ALIGN_UP(iNumOfWeights,blockDim.x);
-	for(int iWeightIndex = threadIdx.x, iWeightIndexBase = 0 ; iWeightIndex < iNumOfWeightsAligned ; iWeightIndex += blockDim.x, iWeightIndexBase += blockDim.x)
+	for(int iWeightIndex = threadIdx.x, iWeightIndexBase = 0 ; iWeightIndex < iNumOfWeightsAligned ; iWeightIndex += p_iHowMuchMemoryForWeights, iWeightIndexBase += p_iHowMuchMemoryForWeights)
 	{
 		/*if(threadIdx.x == 0)
 		{
 			PRINT_DEBUG_INFO("GPU: NEW BATCH!!!!!!!!! iWeightIndexBase = %d , blockDim.x = %d\n",iWeightIndexBase,blockDim.x);
 		}*/
 
-		// first, we copy d_WeightsThisTest to s_InputWeights (it is only a part of weights)
-		if(iWeightIndex < iNumOfWeights) 
-		{ // JRTODO - without this 'if' it was 5% faster!
-			s_InputWeights[threadIdx.x] = dp_pWeights[iWeightIndex];
-		}
+		// first, we copy d_WeightsThisTest to s_InputWeights (it is only a part of weights).
+		// We don't have to use 'if(iWeightIndex < iNumOfWeights)', because memory for weights was already padded (now it's about 5% faster)
+		for(int iCopiedWeightIndex = 0;iCopiedWeightIndex<p_iHowMuchMemoryForWeights;iCopiedWeightIndex += blockDim.x)
+			s_InputWeights[iCopiedWeightIndex + threadIdx.x] = dp_pWeights[iCopiedWeightIndex + iWeightIndex];
 
 		__syncthreads(); // We make sure that all data was written to shared memory
 
@@ -61,16 +60,16 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 		// Not all threads are used in calulations
 		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : iFirstElementInThisBatch %d , iLastElementInThisBatch %d , T1  = [%d] , T2 = [%d] , T3 = [%d]\n",blockIdx.x,threadIdx.x,iFirstElementInThisBatch,iLastElementInThisBatch,(threadIdx.x < p_iOutputNeuronCount),(iLastElementInThisBatch >= 0),(iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < blockDim.x));
-		if(threadIdx.x < p_iOutputNeuronCount && iLastElementInThisBatch >= 0 && (iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < blockDim.x))
+		if(threadIdx.x < p_iOutputNeuronCount && iLastElementInThisBatch >= 0 && (iFirstElementInThisBatch < 0 || iFirstElementInThisBatch < p_iHowMuchMemoryForWeights))
 		{
 			int iFirstWeightIndex = max(0,-iFirstElementInThisBatch);
-			int iLastWeightIndex = min(p_iNumInputNeurons,p_iNumInputNeurons - (iLastElementInThisBatch - blockDim.x));
-			for(int iWeightIndex = iFirstWeightIndex;iWeightIndex < iLastWeightIndex; ++iWeightIndex)
+			int iLastWeightIndex = min(p_iNumInputNeurons,p_iNumInputNeurons - (iLastElementInThisBatch - p_iHowMuchMemoryForWeights));
+			for(int iWeightIndexToAdd = iFirstWeightIndex;iWeightIndexToAdd < iLastWeightIndex; ++iWeightIndexToAdd)
 			{
-				int iWeightIndexHere = iWeightIndex - iWeightIndexBase + iMoveWeightsForThisTest;
-				//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , iWeightIndex %d : d_LayerInputThisTest %f , d_WeightsThisTest %f , iWeightIndexHere %d, val[%d] %f , MULT %f\n",blockIdx.x,threadIdx.x,iWeightIndex,d_LayerInputThisTest[iWeightIndex],d_WeightsThisTest[iWeightIndex],iWeightIndexHere,iWeightIndexHere,s_InputWeights[iWeightIndexHere],d_LayerInputThisTest[iWeightIndex] * d_WeightsThisTest[iWeightIndex]);
+				int iWeightIndexHere = iWeightIndexToAdd - iWeightIndexBase + iMoveWeightsForThisTest;
+				//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , iWeightIndexToAdd %d : d_LayerInputThisTest %f , d_WeightsThisTest %f , iWeightIndexHere %d, val[%d] %f , MULT %f\n",blockIdx.x,threadIdx.x,iWeightIndexToAdd,d_LayerInputThisTest[iWeightIndexToAdd],d_WeightsThisTest[iWeightIndexToAdd],iWeightIndexHere,iWeightIndexHere,s_InputWeights[iWeightIndexHere],d_LayerInputThisTest[iWeightIndexToAdd] * d_WeightsThisTest[iWeightIndexToAdd]);
 
-				dResult += s_InputNeurons[iWeightIndex] * s_InputWeights[iWeightIndexHere];
+				dResult += s_InputNeurons[iWeightIndexToAdd] * s_InputWeights[iWeightIndexHere];
 			}
 		}
 
@@ -115,7 +114,13 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 	// blockDim.x should be a multiple of 16 (half warp). We will be able to retrieve global data using coalescing
 	int iBlockDimUpdated = ALIGN_UP(p_iOutputNeuronCount+1,HALF_WARP);
 	int iSharedMemorySize = p_iNumInputNeurons * sizeof(real_gpu); // memory for input
-	iSharedMemorySize += iBlockDimUpdated * sizeof(real_gpu); // memory for weights
+
+
+	int iNumOfWeights = p_iNumInputNeurons * p_iOutputNeuronCount;
+	int iNumOfWeightsAligned = ALIGN_UP(iNumOfWeights,iBlockDimUpdated);
+	int iHowMuchMemoryForWeights = (min(iNumOfWeightsAligned,512) / iBlockDimUpdated) * iBlockDimUpdated;
+
+	iSharedMemorySize += iHowMuchMemoryForWeights * sizeof(real_gpu); // memory for weights
 
 	// If p_pVecTestIndices!=NULL , then we use constant memory to set test indices for the kernel
 	if(p_pVecTestIndices!=NULL)
@@ -126,7 +131,7 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 	int iNumInputNeuronsAligned = ALIGN_UP(p_iNumInputNeurons, HALF_WARP);
 
 	executeLayerKernel <<<p_iTestCount,iBlockDimUpdated,iSharedMemorySize>>> (dp_pLayerInput,dp_pWeights,dp_pLayerOutput,dp_pDerivativeOfLastOutput,p_iNumInputNeurons
-		,iNumInputNeuronsAligned,p_eNeuronType,p_iOutputNeuronCount,(p_pVecTestIndices!=NULL));
+		,iNumInputNeuronsAligned,p_eNeuronType,p_iOutputNeuronCount,(p_pVecTestIndices!=NULL),iHowMuchMemoryForWeights);
 }
 
 
