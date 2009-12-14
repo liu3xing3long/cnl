@@ -79,7 +79,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 	if(threadIdx.x <= p_iOutputNeuronCount)
 	{
-		double dDerivativeOfLastOutput = 0.0f;
+		real_gpu dDerivativeOfLastOutput = 0.0f;
 
 		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : dResult before output function %f\n",blockIdx.x,threadIdx.x,dResult);
 
@@ -89,7 +89,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 				dDerivativeOfLastOutput = 1.0f;
 				break;	// Do nothing
 			case Neuron::NT_SIGMOID:
-				double dExp = __expf(-dResult);
+				real_gpu dExp = __expf(-dResult);
 				dResult = 1.0f / (1.0f + dExp);
 				dDerivativeOfLastOutput = dExp / __powf(1.0f + dExp,2);
 				break;
@@ -178,16 +178,16 @@ __global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError
 {
 	// We change: neuron blockIdx.x , weight threadIdx.x
 
-	double dChange = 0.0f;
+	real_gpu dChange = 0.0f;
 	for(unsigned uTestIndex = 0;uTestIndex < p_iNumTestsInBatch;++uTestIndex)
 	{
-		double dError = dp_pThisLayerError[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x];
-		double dDerivativeOfLastOutput = dp_pDerivativeOfLastOutput[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x];
+		real_gpu dError = dp_pThisLayerError[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x];
+		real_gpu dDerivativeOfLastOutput = dp_pDerivativeOfLastOutput[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x];
 
 		int iTestIndexForOutputBefore = ( p_bLayerBeforeOutputsHaveSpecificIndexes ? iTestIndices[uTestIndex] : uTestIndex );
-		double dLayerBeforeOutput = dp_pLayerBeforeOutputs[p_iElementsAllocatedForOneTestInLayerBeforeAligned*iTestIndexForOutputBefore + threadIdx.x];
+		real_gpu dLayerBeforeOutput = dp_pLayerBeforeOutputs[p_iElementsAllocatedForOneTestInLayerBeforeAligned*iTestIndexForOutputBefore + threadIdx.x];
 
-		double dChangeThisTest = dError * dDerivativeOfLastOutput * dLayerBeforeOutput * p_dEta;
+		real_gpu dChangeThisTest = dError * dDerivativeOfLastOutput * dLayerBeforeOutput * p_dEta;
 		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , Weight %d : dError %f , dDerivativeOfLastOutput %f , dLayerBeforeOutput %f , dChangeThisTest %f\n",uTestIndex,blockIdx.x,threadIdx.x,dError,dDerivativeOfLastOutput,dLayerBeforeOutput,dChangeThisTest);
 		dChange += dChangeThisTest;
 	}
@@ -205,8 +205,8 @@ __global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError
 	for(unsigned uWeightIndex = 0;uWeightIndex < p_iNumOutputsLayerBefore;++uWeightIndex)
 	{
 		real_gpu dChange = dErrorMultDerivativeMultEta * dp_pLayerBeforeOutputs[uWeightIndex];
-		double dCurrentValue = d_pThisNeuronWeights[uWeightIndex];
-		double dChangedValue = dCurrentValue - dChange;
+		real_gpu dCurrentValue = d_pThisNeuronWeights[uWeightIndex];
+		real_gpu dChangedValue = dCurrentValue - dChange;
 		PRINT_DEBUG_INFO("GPU: Test 0 , Neuron %d , uWeightIndex %d: dCurrentValue = %f , dChange %f , dChangedValue %f\n",threadIdx.x,uWeightIndex,dCurrentValue,dChange,dChangedValue);
 		d_pThisNeuronWeights[uWeightIndex] = dChangedValue;
 	}
