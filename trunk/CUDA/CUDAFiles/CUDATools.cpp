@@ -28,6 +28,13 @@ extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWe
 extern "C" void updateWeightsInTrainingCUDA(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta,int p_iThisLayerNeuronCount
 											,int p_iNumOutputsLayerBefore,real_gpu *dp_pThisLayerWeights,int p_iNumTestsInBatch,bool p_bLayerBeforeOutputsHaveSpecificIndexes);
 
+//std::map<void*,int> CUDATools::m_mapAllocatedMemory;
+//const int iMemoryElementsSize = 1000;
+void *m_allocatedMemoryAddress[iMemoryElementsSize];
+int m_allocatedMemorySize[iMemoryElementsSize];
+bool m_WasUsed[iMemoryElementsSize];
+int m_iAllocatedMemoryElements;
+
 // t(a,b) - neuron 'b' of test 'a' (in case of 11 neurons) :
 // t(0,0),t(0,1),t(0,2),t(0,3)			,t(0,4)	,t(0,5)	,t(0,6)	,t(0,7)		<0-7>
 // t(0,8),t(0,9),t(0,10),t(0,11) == 1.0	,0		,0		,0		,0			<8-15>
@@ -253,6 +260,41 @@ void CUDATools::freeGPUMemoryForLayerTraining(Layer &p_Layer)
 
 void CUDATools::freeGPUMemory(real_gpu *&dp_pMemoryToDeallocate)
 {
+	bool bFound = false;
+	for(int iAllocatedElement=0;iAllocatedElement<m_iAllocatedMemoryElements;++iAllocatedElement)
+	{
+		if(m_allocatedMemoryAddress[iAllocatedElement] == dp_pMemoryToDeallocate)
+		{
+			bFound = true;
+			logTextParams(Logging::LT_MEMORY,"Freed memory: Address %x , size %d",(int)dp_pMemoryToDeallocate,m_allocatedMemorySize[iAllocatedElement]);
+			for(int iAllocatedElementToMove=iAllocatedElement;iAllocatedElementToMove<m_iAllocatedMemoryElements;++iAllocatedElementToMove)
+			{
+				m_allocatedMemoryAddress[iAllocatedElementToMove] = m_allocatedMemoryAddress[iAllocatedElementToMove+1];
+				m_allocatedMemorySize[iAllocatedElementToMove] = m_allocatedMemorySize[iAllocatedElementToMove+1];
+				m_WasUsed[iAllocatedElementToMove] = m_WasUsed[iAllocatedElementToMove+1];
+			}
+			--m_iAllocatedMemoryElements;
+			break;
+		}
+	}
+
+	if(!bFound)
+	{
+		logTextParams(Logging::LT_MEMORY,"ERROR: Cannot find memory (Address %x) in the map",(int)dp_pMemoryToDeallocate);
+	}
+
+	/*
+	std::map<void*,int>::iterator iter = m_mapAllocatedMemory.find(dp_pMemoryToDeallocate);
+	if(iter != m_mapAllocatedMemory.end())
+	{
+		logTextParams(Logging::LT_MEMORY,"Freed memory: Address %x , size %d",(int)dp_pMemoryToDeallocate,iter->second);
+		m_mapAllocatedMemory.erase(iter);
+	}
+	else
+	{
+		logTextParams(Logging::LT_MEMORY,"ERROR: Cannot find memory (Address %x) in the map",(int)dp_pMemoryToDeallocate);
+	}*/
+
 	cudaCheckError(cudaFree(dp_pMemoryToDeallocate));
 	dp_pMemoryToDeallocate=NULL;
 }
@@ -261,6 +303,35 @@ void CUDATools::allocateHostAndGPUMemory(int p_iBytes,real_gpu *&p_pHostMemory,r
 {
 	cudaCheckError(cudaMalloc((void **)&dp_pGPUMemory, p_iBytes));
 	cudaCheckError(cudaMallocHost((void **)&p_pHostMemory, p_iBytes));
+
+	logTextParams(Logging::LT_MEMORY,"Allocated memory: Address %x , size %d",(int)dp_pGPUMemory,p_iBytes);
+	bool bFound = false;
+	for(int iAllocatedElement=0;iAllocatedElement<m_iAllocatedMemoryElements;++iAllocatedElement)
+	{
+		if(m_allocatedMemoryAddress[iAllocatedElement] == dp_pGPUMemory)
+		{
+			bFound = true;
+			logTextParams(Logging::LT_MEMORY,"ERROR: Memory %x already allocated (previous size %d)",(int)dp_pGPUMemory,m_allocatedMemorySize[iAllocatedElement]);		
+			break;
+		}
+	}
+
+	if(!bFound)
+	{ // Adding new allocation information
+		m_allocatedMemoryAddress[m_iAllocatedMemoryElements] = dp_pGPUMemory;
+		m_allocatedMemorySize[m_iAllocatedMemoryElements] = p_iBytes;
+		m_WasUsed[m_iAllocatedMemoryElements++] = false;
+	}
+	
+	/*std::map<void*,int>::iterator iter = m_mapAllocatedMemory.find(dp_pGPUMemory);
+	if(iter != m_mapAllocatedMemory.end())
+	{
+		logTextParams(Logging::LT_MEMORY,"ERROR: Memory %x already allocated (previous size %d)",(int)dp_pGPUMemory,iter->second);		
+	}
+	else
+	{
+		m_mapAllocatedMemory.insert(std::pair<void*,int>(dp_pGPUMemory,p_iBytes));
+	}*/
 }
 
 real_gpu* CUDATools::createZeroGPUMemory(int p_iBytes)

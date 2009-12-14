@@ -30,10 +30,11 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 	Str sLoggingType;
 	switch(p_eLoggingType)
 	{
-		case LT_INFORMATION: sLoggingType = "INFORMATION"; break;
-		case LT_WARNING: sLoggingType = "WARNING    "; break;
-		case LT_ERROR: sLoggingType = "ERROR      "; break;
-		case LT_DEBUG: sLoggingType = "DEBUG      "; break;
+		case LT_INFORMATION:	sLoggingType = "INFORMATION"; break;
+		case LT_WARNING:		sLoggingType = "WARNING    "; break;
+		case LT_ERROR:			sLoggingType = "ERROR      "; break;
+		case LT_DEBUG:			sLoggingType = "DEBUG      "; break;
+		case LT_MEMORY:			sLoggingType = "MEMORY     "; break;
 	}
 
 	Str sFileName(p_sFileName);

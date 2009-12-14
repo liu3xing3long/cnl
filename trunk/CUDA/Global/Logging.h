@@ -15,6 +15,7 @@ public:
 		LT_WARNING,
 		LT_ERROR,
 		LT_DEBUG,
+		LT_MEMORY
 	};
 
 	static void makeSureLoggingFileExists();

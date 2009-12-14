@@ -2,8 +2,13 @@
 
 __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 
-//JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
-// JRTDO - zmien mnozenie integerow na specjalna funkcje mnozaca najnizsze 24 bity
+// JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
+// JRTODO - zmien mnozenie integerow na specjalna funkcje mnozaca najnizsze 24 bity
+
+//void *CUDATools::m_allocatedMemoryAddress[iMemoryElementsSize];
+//int CUDATools::m_allocatedMemorySize[iMemoryElementsSize];
+
+
 
 __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput,int p_iNumInputNeurons
 								   ,int p_iNumInputNeuronsAligned, Neuron::NeuronType p_eNeuronType,int p_iOutputNeuronCount,bool p_bInTraining,int p_iHowMuchMemoryForWeights)
@@ -27,6 +32,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	for(int iInputIndex = threadIdx.x;iInputIndex < p_iNumInputNeurons; iInputIndex+=blockDim.x)
 	{
 		s_InputNeurons[iInputIndex] = d_LayerInputThisTest[iInputIndex];
+		PRINT_MEMORY_INFO(dp_pLayerInput,&d_LayerInputThisTest[iInputIndex]);
 	}
 
 	// we have to make sure that all data was written to shared memory
@@ -51,7 +57,10 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 		// first, we copy d_WeightsThisTest to s_InputWeights (it is only a part of weights).
 		// We don't have to use 'if(iWeightIndex < iNumOfWeights)', because memory for weights was already padded (now it's about 5% faster)
 		for(int iCopiedWeightIndex = 0;iCopiedWeightIndex<p_iHowMuchMemoryForWeights;iCopiedWeightIndex += blockDim.x)
+		{
 			s_InputWeights[iCopiedWeightIndex + threadIdx.x] = dp_pWeights[iCopiedWeightIndex + iWeightIndex];
+			PRINT_MEMORY_INFO(dp_pWeights,&dp_pWeights[iCopiedWeightIndex + iWeightIndex]);
+		}
 
 		__syncthreads(); // We make sure that all data was written to shared memory
 
@@ -99,10 +108,14 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 		//PRINT_DEBUG_INFO("XXXXXXXXXXXXXXXXXXXXXXXXXXXXGPU: Test %d , Neuron %d : %d\n",blockIdx.x,threadIdx.x,blockIdx.x*iNumOutputNeuronsAligned + threadIdx.x);
 		*d_pLayerOutputThisTest = dResult;
+		PRINT_MEMORY_INFO(dp_pLayerOutput,d_pLayerOutputThisTest);
 
 		// We only need derivative of last output if we are in training!
 		if(dp_pDerivativeOfLastOutput != NULL)
+		{
 			*d_pDerivativeOfLastOutputThisTest = dDerivativeOfLastOutput;
+			PRINT_MEMORY_INFO(dp_pDerivativeOfLastOutput,d_pDerivativeOfLastOutputThisTest);
+		}
 
 		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : first d_LayerInputThisTest %f , first d_WeightsThisTest %f , dResult %f , dDerivativeOfLastOutput %f\n",blockIdx.x,threadIdx.x,d_LayerInputThisTest[0],d_WeightsThisTest[0],dResult,dDerivativeOfLastOutput);
 	}
@@ -142,6 +155,9 @@ __global__ void calculateErrorInLastLayerKernel(const real_gpu *dp_pCorrectOutpu
 	dp_pErrors[iElementIndex] = dp_pNetworkOutput[iElementIndex] - dp_pCorrectOutput[iElementIndexCorrectOutput];
 	PRINT_DEBUG_INFO("GPU: Test in batch nr %d (test %d) , Output %d (iElementIndex %d) : Network = %f , Correct  = %f , Error = %f\n",blockIdx.x,iTestIndices[blockIdx.x],threadIdx.x
 		,iElementIndex,dp_pNetworkOutput[iElementIndex],dp_pCorrectOutput[iElementIndex],dp_pErrors[iElementIndex]);
+	PRINT_MEMORY_INFO(dp_pErrors,&dp_pErrors[iElementIndex]);
+	PRINT_MEMORY_INFO(dp_pNetworkOutput,&dp_pNetworkOutput[iElementIndex]);
+	PRINT_MEMORY_INFO(dp_pCorrectOutput,&dp_pCorrectOutput[iElementIndexCorrectOutput]);
 }
 
 extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iOutputNeuronCount,int p_iNumTestsInBatch,int p_iSpaceBetweenTestsInOutput)
@@ -161,6 +177,7 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 	for(int iErrorIndex = threadIdx.x;iErrorIndex < p_iNextLayerNeuronCount; iErrorIndex += blockDim.x)
 	{
 		s_NextLayerErrorThisTest[iErrorIndex] = d_pNextLayerErrorThisTest[iErrorIndex];
+		PRINT_MEMORY_INFO(dp_pNextLayerError,&d_pNextLayerErrorThisTest[iErrorIndex]);
 	}
 
 	if(threadIdx.x < p_iThisLayerNeuronCount)
@@ -171,9 +188,11 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 				,blockIdx.x,threadIdx.x,iWeightIndex,iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x,dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x],iWeightIndex
 				,dp_pNextLayerError[iWeightIndex],dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * dp_pNextLayerError[iWeightIndex]);
 			dError += dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * s_NextLayerErrorThisTest[iWeightIndex];
+			PRINT_MEMORY_INFO(dp_pNextLayerWeights,&dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x]);
 		}
 		
 		dp_pThisLayerError[blockDim.x*blockIdx.x + threadIdx.x] = dError;
+		PRINT_MEMORY_INFO(dp_pThisLayerError,&dp_pThisLayerError[blockDim.x*blockIdx.x + threadIdx.x]);
 
 		PRINT_DEBUG_INFO("GPU: Test index %d , Neuron index %d : Error %f\n",blockIdx.x,threadIdx.x,dError);
 	}
@@ -206,12 +225,17 @@ __global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError
 		real_gpu dChangeThisTest = dError * dDerivativeOfLastOutput * dLayerBeforeOutput * p_dEta;
 		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , Weight %d : dError %f , dDerivativeOfLastOutput %f , dLayerBeforeOutput %f , dChangeThisTest %f\n",uTestIndex,blockIdx.x,threadIdx.x,dError,dDerivativeOfLastOutput,dLayerBeforeOutput,dChangeThisTest);
 		dChange += dChangeThisTest;
+
+		PRINT_MEMORY_INFO(dp_pThisLayerError,&dp_pThisLayerError[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x]);
+		PRINT_MEMORY_INFO(dp_pDerivativeOfLastOutput,&dp_pDerivativeOfLastOutput[iElementsAllocatedForOneTestInThisLayerAligned*uTestIndex + blockIdx.x]);
+		PRINT_MEMORY_INFO(dp_pLayerBeforeOutputs,&dp_pLayerBeforeOutputs[p_iElementsAllocatedForOneTestInLayerBeforeAligned*iTestIndexForOutputBefore + threadIdx.x]);
 	}
 
 	//int iTestIndexForWeights = ( p_bLayerBeforeOutputsHaveSpecificIndexes ? iTestIndices[blockIdx.x] : blockIdx.x );
 	int iWeightIndex = blockDim.x*blockIdx.x + threadIdx.x;
 	PRINT_DEBUG_INFO("GPU: Neuron %d , Weight %d (index in array %d) : Old weight %f , Change %f , New weight %f\n",blockIdx.x,threadIdx.x,iWeightIndex,dp_pThisLayerWeights[iWeightIndex],dChange,dp_pThisLayerWeights[iWeightIndex] - dChange);
 	dp_pThisLayerWeights[iWeightIndex] = dp_pThisLayerWeights[iWeightIndex] - dChange;
+	PRINT_MEMORY_INFO(dp_pThisLayerWeights,&dp_pThisLayerWeights[iWeightIndex]);
 
 	/*real_gpu *d_pThisNeuronWeights = dp_pThisLayerWeights + threadIdx.x * (p_iNumOutputsLayerBefore+1);
 	real_gpu dErrorMultDerivativeMultEta = dp_pThisLayerError[threadIdx.x] * dp_pDerivativeOfLastOutput[threadIdx.x] * p_dEta;

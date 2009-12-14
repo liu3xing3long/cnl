@@ -1,5 +1,11 @@
 #pragma once
 
+const int iMemoryElementsSize = 1000;
+extern void *m_allocatedMemoryAddress[iMemoryElementsSize];
+extern int m_allocatedMemorySize[iMemoryElementsSize];
+extern bool m_WasUsed[iMemoryElementsSize];
+extern int m_iAllocatedMemoryElements;
+
 class CUDATools
 {
 public:
@@ -25,6 +31,8 @@ public:
 	static void freeGPUMemoryForLayerTraining(Layer &p_Layer);
 
 	static void freeGPUMemory(real_gpu *&dp_pMemoryToDeallocate);
+
+	//static std::map<void*,int> m_mapAllocatedMemory;
 
 private:
 	static void allocateHostAndGPUMemory(int p_iBytes,real_gpu *&p_pHostMemory,real_gpu *&dp_pGPUMemory);

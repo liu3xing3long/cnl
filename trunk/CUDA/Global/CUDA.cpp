@@ -13,6 +13,7 @@
 // JRTODO - maybe a possibility to change eta during training?
 // JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
 // JRTODO - implementacja CPU uzywa double a GPU floata - wiec daje jej to przewage
+// JRTODO - problem z czytaniem/zapisywaniem pamieci niezadeklarowanej. Kiedy jest emu, to dziala OK, kiedy GPU, to pamiec nie jest zapisywana...
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
@@ -71,16 +72,16 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNet;
 
 	//const int iTrainedElements = 50000;
-	const double dEta = 0.5;
-	const int iTestsInTraining = 2000;
-	const int iHiddenNeuronsInTesting = 20;
+	const double dEta = 3;
+	const int iTestsInTraining = 1;
+	const int iHiddenNeuronsInTesting = 140;
 	const int iNumTrainedElements = 1;
-	const int iBatchSize = 1;
+	const int iBatchSize = 10;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
 
-	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
+	//dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
 	//dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_SIGMOID));
 
 	// Output layer - 5 neurons, linear neurons
@@ -96,7 +97,7 @@ void checkIfGPUTrainingIsOK()
 	dummyTestSet.randomizeTests(NULL);
 
 	dummyTestSet.setOutputFunction(vecMinMax,testingFunction,NULL);
-
+ 
 	//dummyNet.executeNetwork(dummyTestSet);
 	//dummyNetGPU.executeNetworkGPU(dummyTestSet);
 
