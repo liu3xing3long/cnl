@@ -73,8 +73,8 @@ void checkIfGPUTrainingIsOK()
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.02;
 	const int iTestsInTraining = 2000;
-	const int iHiddenNeuronsInTesting = 500;
-	const int iNumTrainedElements = 2;
+	const int iHiddenNeuronsInTesting = 32;
+	const int iNumTrainedElements = 1;
 	const int iBatchSize = 200;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
