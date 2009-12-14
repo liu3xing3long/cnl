@@ -21,7 +21,7 @@
 
 const int iMaxBlockDimSize = 65535;
 
-const int iMaxNumberOfTrainedElements = 128;
+const int iMaxNumberOfTrainedElements = 1024;
 
 #define NO_PRINT_DEBUG 1
 
