@@ -131,9 +131,9 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 	int iBlockDimUpdated = ALIGN_UP(p_iOutputNeuronCount+1,HALF_WARP);
 	int iSharedMemorySize = p_iNumInputNeurons * sizeof(real_gpu); // memory for input
 
-
 	int iNumOfWeights = p_iNumInputNeurons * p_iOutputNeuronCount;
 	int iNumOfWeightsAligned = ALIGN_UP(iNumOfWeights,iBlockDimUpdated);
+	// JRTODO - when there can be not many blocks on one processor, make more shared memory for one block!
 	int iHowMuchMemoryForWeights = (min(iNumOfWeightsAligned,512) / iBlockDimUpdated) * iBlockDimUpdated;
 
 	iSharedMemorySize += iHowMuchMemoryForWeights * sizeof(real_gpu); // memory for weights
