@@ -24,9 +24,12 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	
 	const real_gpu *d_LayerInputThisTest = dp_pLayerInput + iTestIndex*p_iNumInputNeuronsAligned;
 	int iMoveWeightsForThisTest = threadIdx.x*p_iNumInputNeurons;
-	const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
 	real_gpu *d_pLayerOutputThisTest = dp_pLayerOutput + blockIdx.x*blockDim.x + threadIdx.x;
 	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + blockIdx.x*blockDim.x + threadIdx.x;
+
+#ifndef NO_PRINT_DEBUG
+	const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
+#endif
 
 	// first, we copy d_LayerInputThisTest to s_InputNeurons
 	for(int iInputIndex = threadIdx.x;iInputIndex < p_iNumInputNeurons; iInputIndex+=blockDim.x)
