@@ -78,8 +78,8 @@ void checkIfGPUTrainingIsOK()
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.002;
 	const int iTestsInTraining = 100;
-	const int iHiddenNeuronsInTesting = 100;
-	const int iNumTrainedElements = 3000;
+	const int iHiddenNeuronsInTesting = 40;
+	const int iNumTrainedElements = 1;
 	const int iBatchSize = 16;
 
 	dummyNet.setInputNeuronCount(iInputs);

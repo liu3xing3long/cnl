@@ -22,7 +22,6 @@
 
 const int iMaxBlockDimSize = 65535;
 const int iMaxNumberOfTrainedElements = 1024;
-const int iMaxNumberOfSharedMemoryElementsForWeights = 3900;
 
 
 #define PRINT_MEMORY 1
@@ -79,6 +78,8 @@ const int iMaxNumberOfSharedMemoryElementsForWeights = 3900;
 #else
 	typedef double real_gpu;
 #endif
+
+const int iMaxNumberOfSharedMemoryElementsForWeights = 15600 / sizeof(real_gpu);
 
 using namespace std;
 
