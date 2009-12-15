@@ -8,13 +8,16 @@
 // JRTODO - napisz, ze kod bedzie dzialac pod 32bit i 64bit
 // JRTODO - I ze wazne bylo, zeby dzialal tez na innych platformach
 // JRTODO - Na CPU uzywam double do liczb zmiennoprzecinkowych, a na GPU - real_gpu (w zaleznosci od rodzaju GPU).
-// JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
-// JRTODO - skalowanie danych wejsciowych
-// JRTODO - maybe a possibility to change eta during training?
-// JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
 // JRTODO - implementacja CPU uzywa double a GPU floata - wiec daje jej to przewage
-// JRTODO - problem z czytaniem/zapisywaniem pamieci niezadeklarowanej. Kiedy jest emu, to dziala OK, kiedy GPU, to pamiec nie jest zapisywana...
+// JRTODO - problem z czytaniem/zapisywaniem pamieci niezadeklarowanej. Kiedy jest emu, to dziala OK, kiedy GPU, to pamiec nie jest zapisywana... (chyba to byl blad z synchronizacja)
 // JRTODO - napisz czemu nie mozna w pliku .cu uzywac logowania takiego jak gdzie indziej
+// JRTODO - opisz wybor zewnetrznych bibliotek
+
+// JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
+// JRTODO - maybe a possibility to change eta during training?
+// JRTODO - skalowanie danych wejsciowych
+// JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
+
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
@@ -73,11 +76,11 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNet;
 
 	//const int iTrainedElements = 50000;
-	const double dEta = 0.5;
+	const double dEta = 0.002;
 	const int iTestsInTraining = 1000;
-	const int iHiddenNeuronsInTesting = 22;
+	const int iHiddenNeuronsInTesting = 100;
 	const int iNumTrainedElements = 1;
-	const int iBatchSize = 20;
+	const int iBatchSize = 44;
 
 	dummyNet.setInputNeuronCount(iInputs);
 
@@ -118,6 +121,8 @@ void checkIfGPUTrainingIsOK()
 	dummyNet.executeNetwork(dummyTestSet);
 	dummyNetGPU.executeNetworkGPU(dummyTestSet);
 	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_GPU_AND_CPU);
+	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_CORRECT_AND_CPU);
+	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_CORRECT_AND_GPU);
 }
 
 void makeTraining()
@@ -279,9 +284,9 @@ int main()
 
 	//doExecuteNetworksAndSaveLoad();
 
-	makeTraining();
+	//makeTraining();
 
-	//checkIfGPUTrainingIsOK();
+	checkIfGPUTrainingIsOK();
 
 	return 0;
 }
