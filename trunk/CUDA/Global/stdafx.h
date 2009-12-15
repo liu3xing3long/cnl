@@ -24,39 +24,52 @@ const int iMaxBlockDimSize = 65535;
 const int iMaxNumberOfTrainedElements = 1024;
 const int iMaxNumberOfTHreadsInBlock = 512;
 
-#define NO_PRINT_DEBUG 1
 
-#define PRINT_MEMORY_INFO(a,b)
-#define PRINT_MEMORY_INFO2(a,b)																																\
-	/*if(blockIdx.x == gridDim.x-1 && threadIdx.x == blockDim.x-1)*/																							\
-	{																																						\
-		void *pPointer = (void*)(a);																														\
-		int iMove = ((int)((b)-(a)))*4;																														\
-		bool bFound = false;																																\
-		for(int iAllocatedElement=0;iAllocatedElement<m_iAllocatedMemoryElements;++iAllocatedElement)											\
-		{																																					\
-			if(m_allocatedMemoryAddress[iAllocatedElement] == pPointer)																			\
-			{																																				\
-				bFound = true;																																\
-				m_WasUsed[iAllocatedElement] = true;																										\
-				if(iMove < m_allocatedMemorySize[iAllocatedElement])																				\
-					/*printf("Used memory\t%x\tindex\t%d\t(OK , MAX %d)\n",pPointer,iMove,m_allocatedMemorySize[iAllocatedElement])*/;				\
-				else																																		\
-					printf("Used memory\t%x\tindex\t%d\t\t\t\t(TOO BIG , MAX %d)\n",pPointer,iMove,m_allocatedMemorySize[iAllocatedElement]);			\
-				break;																																		\
-			}																																				\
-		}																																					\
-		if(!bFound)																																			\
-			printf("Used memory\t%x\tindex\t%d\t\t\t\t(NOT FOUND)\n",pPointer,iMove);																				\
-	}
+//#define PRINT_MEMORY 1
+#define PRINT_DEBUG 1
 
-#ifndef NO_PRINT_DEBUG
+
+#if defined(PRINT_MEMORY) && defined(__DEVICE_EMULATION__)
+	#define PRINT_MEMORY_INFO(a,b)																																\
+		/*if(blockIdx.x == gridDim.x-1 && threadIdx.x == blockDim.x-1)*/																							\
+		{																																						\
+			void *pPointer = (void*)(a);																														\
+			int iMove = ((int)((b)-(a)))*4;																														\
+			bool bFound = false;																																\
+			for(int iAllocatedElement=0;iAllocatedElement<m_iAllocatedMemoryElements;++iAllocatedElement)											\
+			{																																					\
+				if(m_allocatedMemoryAddress[iAllocatedElement] == pPointer)																			\
+				{																																				\
+					bFound = true;																																\
+					m_WasUsed[iAllocatedElement] = true;																										\
+					if(iMove < m_allocatedMemorySize[iAllocatedElement])																				\
+						/*printf("Used memory\t%x\tindex\t%d\t(OK , MAX %d)\n",pPointer,iMove,m_allocatedMemorySize[iAllocatedElement])*/;				\
+					else																																		\
+						printf("Used memory\t%x\tindex\t%d\t\t\t\t(TOO BIG , MAX %d)\n",pPointer,iMove,m_allocatedMemorySize[iAllocatedElement]);			\
+					break;																																		\
+				}																																				\
+			}																																					\
+			if(!bFound)																																			\
+				printf("Used memory\t%x\tindex\t%d\t\t\t\t(NOT FOUND)\n",pPointer,iMove);																				\
+		}
+#else
+	#define PRINT_MEMORY_INFO(a,b)
+#endif
+
+
+
+#if defined(PRINT_DEBUG) && defined(__DEVICE_EMULATION__)
 	#define PRINT_DEBUG_INFO(a,...) printf(a,__VA_ARGS__)
-	#define logTextParamsDebug(a,...) logTextParams(Logging::LT_DEBUG,a,__VA_ARGS__)
 #else
 	#define PRINT_DEBUG_INFO(a,...)
+#endif
+
+#ifdef PRINT_DEBUG
+	#define logTextParamsDebug(a,...) logTextParams(Logging::LT_DEBUG,a,__VA_ARGS__)
+#else
 	#define logTextParamsDebug(a,...)
 #endif
+
 
 #define REAL_GPU_IS_FLOAT 1
 

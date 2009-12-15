@@ -27,7 +27,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	real_gpu *d_pLayerOutputThisTest = dp_pLayerOutput + blockIdx.x*blockDim.x + threadIdx.x;
 	real_gpu *d_pDerivativeOfLastOutputThisTest = dp_pDerivativeOfLastOutput + blockIdx.x*blockDim.x + threadIdx.x;
 
-#ifndef NO_PRINT_DEBUG
+#ifdef PRINT_DEBUG
 	const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
 #endif
 

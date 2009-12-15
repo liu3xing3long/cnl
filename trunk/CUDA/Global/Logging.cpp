@@ -21,7 +21,12 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 {
 	makeSureLoggingFileExists();
 
-#ifdef NO_PRINT_DEBUG
+#ifndef PRINT_MEMORY
+	if(p_eLoggingType == LT_MEMORY)
+		return;
+#endif
+
+#ifndef PRINT_DEBUG
 	if(p_eLoggingType == LT_DEBUG)
 		return;
 #endif

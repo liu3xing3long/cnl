@@ -73,9 +73,9 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNet;
 
 	//const int iTrainedElements = 50000;
-	const double dEta = 0.3;
+	const double dEta = 5;
 	const int iTestsInTraining = 1000;
-	const int iHiddenNeuronsInTesting = 5;
+	const int iHiddenNeuronsInTesting = 1;
 	const int iNumTrainedElements = 1;
 	const int iBatchSize = 1;
 
