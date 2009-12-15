@@ -133,8 +133,15 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 
 	int iNumOfWeights = p_iNumInputNeurons * p_iOutputNeuronCount;
 	int iNumOfWeightsAligned = ALIGN_UP(iNumOfWeights,iBlockDimUpdated);
+	int iMaxNumberOfSimulatenousBlocks = 512 / iBlockDimUpdated + ((512 % iBlockDimUpdated) != 0);
+	int iMaxMemPerBlock = max(0,(iMaxNumberOfSharedMemoryElementsForWeights / iMaxNumberOfSimulatenousBlocks - p_iNumInputNeurons));
 	// JRTODO - when there can be not many blocks on one processor, make more shared memory for one block!
-	int iHowMuchMemoryForWeights = (min(iNumOfWeightsAligned,512) / iBlockDimUpdated) * iBlockDimUpdated;
+	int iHowMuchMemoryForWeights = (min(iNumOfWeightsAligned,max(512,iMaxMemPerBlock)) / iBlockDimUpdated) * iBlockDimUpdated;
+	if(iHowMuchMemoryForWeights % iBlockDimUpdated != 0)
+	{
+		int r=2;
+		r++;
+	}
 
 	iSharedMemorySize += iHowMuchMemoryForWeights * sizeof(real_gpu); // memory for weights
 
@@ -172,6 +179,7 @@ extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,
 __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iNextLayerNeuronCount,int p_iNextLayerNeuronCountAligned,int p_iThisLayerNeuronCount)
 {
 	extern __shared__ real_gpu s_NextLayerErrorThisTest[];
+	real_gpu* s_NextLayerWeights = &s_NextLayerErrorThisTest[p_iNextLayerNeuronCount];
 	real_gpu dError = 0.0f;
 	int iNextLayerWeightsForOneNeuron = p_iThisLayerNeuronCount + 1;
 	const real_gpu *d_pNextLayerErrorThisTest = dp_pNextLayerError + p_iNextLayerNeuronCountAligned * blockIdx.x;
@@ -192,8 +200,24 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 			PRINT_DEBUG_INFO("GPU: Test index %d , Neuron index %d , Weight index %d : dp_pNextLayerWeights [%d] = %f , dp_pNextLayerError[%d] = %f , MULT = %f\n"
 				,blockIdx.x,threadIdx.x,iWeightIndex,iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x,dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x],iWeightIndex
 				,dp_pNextLayerError[iWeightIndex],dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * dp_pNextLayerError[iWeightIndex]);
-			dError += dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * s_NextLayerErrorThisTest[iWeightIndex];
+				
+			// we load weights twice - in case the first loaded weight position is not divisible by HALF_WARP
+			int iWeightFirstAddress = iWeightIndex*iNextLayerWeightsForOneNeuron;
+			int iFirstAddressToLoad = (iWeightFirstAddress / HALF_WARP) * HALF_WARP;
+			s_NextLayerWeights[threadIdx.x] = dp_pNextLayerWeights[iFirstAddressToLoad + threadIdx.x];
+			s_NextLayerWeights[blockDim.x + threadIdx.x] = dp_pNextLayerWeights[iFirstAddressToLoad + blockDim.x + threadIdx.x];
+			__syncthreads();
+
+			if(dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] != s_NextLayerWeights[iWeightFirstAddress - iFirstAddressToLoad + threadIdx.x])
+			{
+				int r=4;
+				//dError+=r;
+			}
+
+			dError += s_NextLayerWeights[iWeightFirstAddress - iFirstAddressToLoad + threadIdx.x]/*dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * */* s_NextLayerErrorThisTest[iWeightIndex];
 			PRINT_MEMORY_INFO(dp_pNextLayerWeights,&dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x]);
+
+			__syncthreads();
 		}
 		
 		dp_pThisLayerError[blockDim.x*blockIdx.x + threadIdx.x] = dError;
@@ -208,6 +232,7 @@ extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWe
 	int iElementsAllocatedForOneTestInNextLayerAligned = ALIGN_UP(p_iNextLayerNeuronCount+1,HALF_WARP);
 	int iElementsAllocatedForOneTestInThisLayerAligned = ALIGN_UP(p_iThisLayerNeuronCount+1,HALF_WARP);
 	int iSharedMemorySize = p_iNextLayerNeuronCount * sizeof(real_gpu); // memory for error
+	iSharedMemorySize += 2 * iElementsAllocatedForOneTestInThisLayerAligned * sizeof(real_gpu); // memory for weights
 
 	calculateErrorInNotLastLayerKernel <<<p_iNumTestsInBatch,iElementsAllocatedForOneTestInThisLayerAligned,iSharedMemorySize>>> (dp_pNextLayerWeights,dp_pNextLayerError,dp_pThisLayerError,p_iNextLayerNeuronCount,iElementsAllocatedForOneTestInNextLayerAligned,p_iThisLayerNeuronCount);
 }

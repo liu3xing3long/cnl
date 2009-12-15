@@ -22,10 +22,10 @@
 
 const int iMaxBlockDimSize = 65535;
 const int iMaxNumberOfTrainedElements = 1024;
-const int iMaxNumberOfTHreadsInBlock = 512;
+const int iMaxNumberOfSharedMemoryElementsForWeights = 3900;
 
 
-//#define PRINT_MEMORY 1
+#define PRINT_MEMORY 1
 //#define PRINT_DEBUG 1
 
 
@@ -45,12 +45,13 @@ const int iMaxNumberOfTHreadsInBlock = 512;
 					if(iMove < m_allocatedMemorySize[iAllocatedElement])																				\
 						/*printf("Used memory\t%x\tindex\t%d\t(OK , MAX %d)\n",pPointer,iMove,m_allocatedMemorySize[iAllocatedElement])*/;				\
 					else																																		\
-						printf("Used memory\t%x\tindex\t%d\t\t\t\t(TOO BIG , MAX %d)\n",pPointer,iMove,m_allocatedMemorySize[iAllocatedElement]);			\
+						printf("Used memory\t%x\tindex\t%d\t\t\t\t(TOO BIG , MAX %d)\tBlockIdx\t%d\tthreadIdx\t%d\n"											\
+							,pPointer,iMove,m_allocatedMemorySize[iAllocatedElement],blockIdx.x,threadIdx.x);			\
 					break;																																		\
 				}																																				\
 			}																																					\
 			if(!bFound)																																			\
-				printf("Used memory\t%x\tindex\t%d\t\t\t\t(NOT FOUND)\n",pPointer,iMove);																				\
+				printf("Used memory\t%x\tindex\t%d\t\t\t\t(NOT FOUND)\tBlockIdx\t%d\tthreadIdx\t%d\n",pPointer,iMove,blockIdx.x,threadIdx.x);							\
 		}
 #else
 	#define PRINT_MEMORY_INFO(a,b)
