@@ -193,7 +193,8 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 
 	__syncthreads();
 
-	if(threadIdx.x < p_iThisLayerNeuronCount)
+	// I can't check thread index, because later I use __syncthreads() ...
+	//if(threadIdx.x < p_iThisLayerNeuronCount)
 	{
 		for(int iWeightIndex = 0;iWeightIndex < p_iNextLayerNeuronCount; ++iWeightIndex)
 		{
@@ -208,22 +209,19 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 			s_NextLayerWeights[blockDim.x + threadIdx.x] = dp_pNextLayerWeights[iFirstAddressToLoad + blockDim.x + threadIdx.x];
 			__syncthreads();
 
-			if(dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] != s_NextLayerWeights[iWeightFirstAddress - iFirstAddressToLoad + threadIdx.x])
-			{
-				int r=4;
-				//dError+=r;
-			}
-
 			dError += s_NextLayerWeights[iWeightFirstAddress - iFirstAddressToLoad + threadIdx.x]/*dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * */* s_NextLayerErrorThisTest[iWeightIndex];
+			//dError += dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x] * s_NextLayerErrorThisTest[iWeightIndex];
 			PRINT_MEMORY_INFO(dp_pNextLayerWeights,&dp_pNextLayerWeights[iWeightIndex*iNextLayerWeightsForOneNeuron + threadIdx.x]);
 
 			__syncthreads();
 		}
 		
-		dp_pThisLayerError[blockDim.x*blockIdx.x + threadIdx.x] = dError;
-		PRINT_MEMORY_INFO(dp_pThisLayerError,&dp_pThisLayerError[blockDim.x*blockIdx.x + threadIdx.x]);
-
-		PRINT_DEBUG_INFO("GPU: Test index %d , Neuron index %d : Error %f\n",blockIdx.x,threadIdx.x,dError);
+		if(threadIdx.x < p_iThisLayerNeuronCount)
+		{
+			dp_pThisLayerError[blockDim.x*blockIdx.x + threadIdx.x] = dError;
+			PRINT_MEMORY_INFO(dp_pThisLayerError,&dp_pThisLayerError[blockDim.x*blockIdx.x + threadIdx.x]);
+			PRINT_DEBUG_INFO("GPU: Test index %d , Neuron index %d : Error %f\n",blockIdx.x,threadIdx.x,dError);
+		}
 	}
 }
 
