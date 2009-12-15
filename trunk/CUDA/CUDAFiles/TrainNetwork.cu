@@ -180,6 +180,8 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 		PRINT_MEMORY_INFO(dp_pNextLayerError,&d_pNextLayerErrorThisTest[iErrorIndex]);
 	}
 
+	__syncthreads();
+
 	if(threadIdx.x < p_iThisLayerNeuronCount)
 	{
 		for(int iWeightIndex = 0;iWeightIndex < p_iNextLayerNeuronCount; ++iWeightIndex)

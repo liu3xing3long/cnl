@@ -72,10 +72,10 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNet;
 
 	//const int iTrainedElements = 50000;
-	const double dEta = 3;
+	const double dEta = 0.03;
 	const int iTestsInTraining = 1;
 	const int iHiddenNeuronsInTesting = 140;
-	const int iNumTrainedElements = 1;
+	const int iNumTrainedElements = 20;
 	const int iBatchSize = 10;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
