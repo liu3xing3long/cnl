@@ -79,14 +79,16 @@ void checkIfGPUTrainingIsOK()
 	const int iNumTrainedElements = 1;
 	const int iBatchSize = 20;
 
-	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
-	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iInputs,Neuron::NT_SIGMOID));
+	dummyNet.setInputNeuronCount(iInputs);
 
-	dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
+	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
+	dummyNet.addNewLayer(iHiddenNeuronsInTesting,Neuron::NT_SIGMOID);
+
+	dummyNet.addNewLayer(iHiddenNeuronsInTesting+4,Neuron::NT_LINEAR);
 	//dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_SIGMOID));
 
 	// Output layer - 5 neurons, linear neurons
-	dummyNet.addNewLayer(Layer(iOutputs,iHiddenNeuronsInTesting,Neuron::NT_LINEAR));
+	dummyNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
 
 	// we randomize weights in a all layers
 	dummyNet.randomizeWeights(0.1,NULL);
@@ -129,7 +131,7 @@ void makeTraining()
 	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 160000 };
+	const int iTrainedElementsArray[numElementsInArrays1] = { 16000 };
 	const double dEtaArray[numElementsInArrays2] = { 0.02 };
 	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 };
 
@@ -170,9 +172,10 @@ void makeTraining()
 				for(int d=0;d<numTriedTrainings;++d)
 				{
 					MLP trainNet;
-					trainNet.addNewLayer(Layer(iHiddenNeurons,iInputs,Neuron::NT_SIGMOID));
-					trainNet.addNewLayer(Layer(iOutputs,iHiddenNeurons,Neuron::NT_LINEAR));
-					trainNet.randomizeWeights(0.01,&generatorInThread);
+					trainNet.setInputNeuronCount(iInputs);
+					trainNet.addNewLayer(iHiddenNeurons,Neuron::NT_SIGMOID);
+					trainNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
+					trainNet.randomizeWeights(0.01,&generatorInThread);	
 
 					InputTestSet trainTestSet(*testSetsInTraining[d]);
 
@@ -217,11 +220,12 @@ void doExecuteNetworksAndSaveLoad()
 	const int iHiddenNeurons = 45;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
-	dummyNet.addNewLayer(Layer(iHiddenNeurons,iInputs,Neuron::NT_SIGMOID));
+	dummyNet.setInputNeuronCount(iInputs);
+	dummyNet.addNewLayer(iHiddenNeurons,Neuron::NT_SIGMOID);
 	//dummyNet.addNewLayer(Layer(iHiddenNeurons,iHiddenNeurons,Neuron::NT_SIGMOID));
 
 	// Output layer - 5 neurons, linear neurons
-	dummyNet.addNewLayer(Layer(iOutputs,iHiddenNeurons,Neuron::NT_LINEAR));
+	dummyNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
 
 	// we randomize weights in a all layers
 	dummyNet.randomizeWeights(0.01,NULL);
@@ -275,9 +279,9 @@ int main()
 
 	//doExecuteNetworksAndSaveLoad();
 
-	//makeTraining();
+	makeTraining();
 
-	checkIfGPUTrainingIsOK();
+	//checkIfGPUTrainingIsOK();
 
 	return 0;
 }

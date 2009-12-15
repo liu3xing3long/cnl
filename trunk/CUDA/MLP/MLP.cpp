@@ -393,9 +393,21 @@ MLP::MLP(const MLP &p_Other)
 	}
 }
 
-void MLP::addNewLayer(Layer p_LayerToAdd)
+void MLP::setInputNeuronCount(int p_iInputNeuronCount)
 {
-	p_LayerToAdd.m_pNetwork = this;
-	p_LayerToAdd.m_iLayerIndex = m_vecLayers.size();
-	m_vecLayers.push_back(p_LayerToAdd);
+	m_iInputNeuronCount = p_iInputNeuronCount;
+}
+
+void MLP::addNewLayer(unsigned p_uNumberNeurons,Neuron::NeuronType p_eNeuronType)
+{
+	int iWeightCount = 0;
+	if(m_vecLayers.size() != 0)
+		iWeightCount = m_vecLayers[m_vecLayers.size()-1].getNeuronCount();
+	else
+		iWeightCount = m_iInputNeuronCount;
+
+	m_vecLayers.push_back(Layer(p_uNumberNeurons,iWeightCount,p_eNeuronType));
+
+	m_vecLayers[m_vecLayers.size()-1].m_pNetwork = this;
+	m_vecLayers[m_vecLayers.size()-1].m_iLayerIndex = m_vecLayers.size()-1;
 }

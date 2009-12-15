@@ -3,6 +3,9 @@
 class MLP : public NeuralNetwork
 {
 private:
+	int m_iInputNeuronCount;
+	vector<Layer> m_vecLayers;
+
 	virtual void executeNetwork(InputTest &p_Test);
 	virtual void executeNetworkGPU(InputTest &p_Test);
 
@@ -27,9 +30,6 @@ public:
 	MLP();
 	MLP(const MLP &p_Other);
 
-	void addNewLayer(Layer p_LayerToAdd);
-
-	vector<Layer> m_vecLayers;
-	//int m_iNumInputNeurons;
-	//int m_iNumOutputNeurons;
+	void setInputNeuronCount(int p_iNeuronCount);
+	void addNewLayer(unsigned p_uNumberNeurons,Neuron::NeuronType p_eNeuronType);
 };
