@@ -157,7 +157,7 @@ __global__ void calculateErrorInLastLayerKernel(const real_gpu *dp_pCorrectOutpu
 	int iElementIndex = p_iSpaceBetweenTestsInOutput * blockIdx.x + threadIdx.x;
 	dp_pErrors[iElementIndex] = dp_pNetworkOutput[iElementIndex] - dp_pCorrectOutput[iElementIndexCorrectOutput];
 	PRINT_DEBUG_INFO("GPU: Test in batch nr %d (test %d) , Output %d (iElementIndex %d) : Network = %f , Correct  = %f , Error = %f\n",blockIdx.x,iTestIndices[blockIdx.x],threadIdx.x
-		,iElementIndex,dp_pNetworkOutput[iElementIndex],dp_pCorrectOutput[iElementIndex],dp_pErrors[iElementIndex]);
+		,iElementIndex,dp_pNetworkOutput[iElementIndex],dp_pCorrectOutput[iElementIndexCorrectOutput],dp_pErrors[iElementIndex]);
 	PRINT_MEMORY_INFO(dp_pErrors,&dp_pErrors[iElementIndex]);
 	PRINT_MEMORY_INFO(dp_pNetworkOutput,&dp_pNetworkOutput[iElementIndex]);
 	PRINT_MEMORY_INFO(dp_pCorrectOutput,&dp_pCorrectOutput[iElementIndexCorrectOutput]);
@@ -173,7 +173,7 @@ __global__ void calculateErrorInNotLastLayerKernel(const real_gpu *dp_pNextLayer
 {
 	extern __shared__ real_gpu s_NextLayerErrorThisTest[];
 	real_gpu dError = 0.0f;
-	int iNextLayerWeightsForOneNeuron = blockDim.x + 1;
+	int iNextLayerWeightsForOneNeuron = p_iThisLayerNeuronCount + 1;
 	const real_gpu *d_pNextLayerErrorThisTest = dp_pNextLayerError + p_iNextLayerNeuronCountAligned * blockIdx.x;
 
 	// Copying error data from global to shared memory

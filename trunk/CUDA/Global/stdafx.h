@@ -26,7 +26,7 @@ const int iMaxNumberOfTHreadsInBlock = 512;
 
 
 //#define PRINT_MEMORY 1
-#define PRINT_DEBUG 1
+//#define PRINT_DEBUG 1
 
 
 #if defined(PRINT_MEMORY) && defined(__DEVICE_EMULATION__)
