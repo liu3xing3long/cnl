@@ -4,6 +4,7 @@ __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 
 // JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
 // JRTODO - zmien mnozenie integerow na specjalna funkcje mnozaca najnizsze 24 bity
+// JRTODO - wersja z tablicami w kernelu jest BARDZO wolna - ok. 10 razy
 
 //void *CUDATools::m_allocatedMemoryAddress[iMemoryElementsSize];
 //int CUDATools::m_allocatedMemorySize[iMemoryElementsSize];
@@ -31,19 +32,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 			iTestIndex[iNumTestExecute] = iNumTestsInOneExecuteBlock*blockIdx.x+iNumTestExecute;
 	}
 	
-	const real_gpu *d_LayerInputThisTest[iNumTestsInOneExecuteBlock];
-	for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-		d_LayerInputThisTest[iNumTestExecute] = dp_pLayerInput + iTestIndex[iNumTestExecute]*p_iNumInputNeuronsAligned;
-	
 	int iMoveWeightsForThisTest = threadIdx.x*p_iNumInputNeurons;
-	
-	real_gpu *d_pLayerOutputThisTest[iNumTestsInOneExecuteBlock];
-	for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-		d_pLayerOutputThisTest[iNumTestExecute] = dp_pLayerOutput + (iNumTestsInOneExecuteBlock*blockIdx.x+iNumTestExecute)*blockDim.x + threadIdx.x;
-
-	real_gpu *d_pDerivativeOfLastOutputThisTest[iNumTestsInOneExecuteBlock];
-	for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-		d_pDerivativeOfLastOutputThisTest[iNumTestExecute] = dp_pDerivativeOfLastOutput + (iNumTestsInOneExecuteBlock*blockIdx.x+iNumTestExecute)*blockDim.x + threadIdx.x;
 
 #ifdef PRINT_DEBUG
 	const real_gpu *d_WeightsThisTest = dp_pWeights + iMoveWeightsForThisTest;
@@ -52,17 +41,18 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 	// first, we copy d_LayerInputThisTest to s_InputNeurons
 	for(int iInputIndex = threadIdx.x;iInputIndex < p_iNumInputNeurons; iInputIndex+=blockDim.x)
 	{
-		for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-			s_InputNeurons[p_iNumInputNeurons*iNumTestExecute+iInputIndex] = d_LayerInputThisTest[iNumTestExecute][iInputIndex];
+		for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)  
+			s_InputNeurons[p_iNumInputNeurons*iNumTestExecute+iInputIndex] = dp_pLayerInput[iTestIndex[iNumTestExecute]*p_iNumInputNeuronsAligned+iInputIndex];
 		PRINT_MEMORY_INFO(dp_pLayerInput,&d_LayerInputThisTest[iInputIndex]);
 	} 
 
 	// we have to make sure that all data was written to shared memory
 	__syncthreads();
 
-	real_gpu dResult[iNumTestsInOneExecuteBlock];
-	for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-		dResult[iNumTestExecute] = 0.0f;
+	real_gpu dResult1 = 0.0f;
+	real_gpu dResult2 = 0.0f;
+	real_gpu dResult3 = 0.0f;
+	real_gpu dResult4 = 0.0f;
 	
 	//if(threadIdx.x == 1 && blockIdx.x == 1)
 	//{
@@ -102,8 +92,11 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 				int iWeightIndexHere = iWeightIndexToAdd - iWeightIndexBase + iMoveWeightsForThisTest;
 				//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , iWeightIndexToAdd %d : d_LayerInputThisTest %f , d_WeightsThisTest %f , iWeightIndexHere %d, val[%d] %f , MULT %f\n",blockIdx.x,threadIdx.x,iWeightIndexToAdd,d_LayerInputThisTest[iWeightIndexToAdd],d_WeightsThisTest[iWeightIndexToAdd],iWeightIndexHere,iWeightIndexHere,s_InputWeights[iWeightIndexHere],d_LayerInputThisTest[iWeightIndexToAdd] * d_WeightsThisTest[iWeightIndexToAdd]);
 
-				for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-					dResult[iNumTestExecute] += s_InputNeurons[p_iNumInputNeurons*iNumTestExecute+iWeightIndexToAdd] * s_InputWeights[iWeightIndexHere];
+				//for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
+				dResult1 += s_InputNeurons[p_iNumInputNeurons*0+iWeightIndexToAdd] * s_InputWeights[iWeightIndexHere];
+				dResult2 += s_InputNeurons[p_iNumInputNeurons*1+iWeightIndexToAdd] * s_InputWeights[iWeightIndexHere];
+				dResult3 += s_InputNeurons[p_iNumInputNeurons*2+iWeightIndexToAdd] * s_InputWeights[iWeightIndexHere];
+				dResult4 += s_InputNeurons[p_iNumInputNeurons*3+iWeightIndexToAdd] * s_InputWeights[iWeightIndexHere];
 			}
 		}
 
@@ -112,45 +105,64 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 	if(threadIdx.x <= p_iOutputNeuronCount)
 	{
-		real_gpu dDerivativeOfLastOutput[iNumTestsInOneExecuteBlock];
-		for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-			dDerivativeOfLastOutput[iNumTestExecute] = 0.0f;
+		real_gpu dDerivativeOfLastOutput1 = 0.0f;
+		real_gpu dDerivativeOfLastOutput2 = 0.0f;
+		real_gpu dDerivativeOfLastOutput3 = 0.0f;
+		real_gpu dDerivativeOfLastOutput4 = 0.0f;
 
 		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : dResult before output function %f\n",blockIdx.x,threadIdx.x,dResult);
 
 		switch(p_eNeuronType)
 		{		
 			case Neuron::NT_LINEAR: 
-				for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-					dDerivativeOfLastOutput[iNumTestExecute] = 1.0f;
-				break;	
+				dDerivativeOfLastOutput1 = 1.0f;
+				dDerivativeOfLastOutput2 = 1.0f;
+				dDerivativeOfLastOutput3 = 1.0f;
+				dDerivativeOfLastOutput4 = 1.0f;
+				break;
 			case Neuron::NT_SIGMOID:
-				for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-				{
-					real_gpu dExp = __expf(-dResult[iNumTestExecute]);
-					dResult[iNumTestExecute] = 1.0f / (1.0f + dExp);
-					dDerivativeOfLastOutput[iNumTestExecute] = dExp / __powf(1.0f + dExp,2);
-				}
+				real_gpu dExp = __expf(-dResult1);
+				dResult1 = 1.0f / (1.0f + dExp);
+				dDerivativeOfLastOutput1 = dExp / __powf(1.0f + dExp,2);
+
+				dExp = __expf(-dResult2);
+				dResult2 = 1.0f / (1.0f + dExp);
+				dDerivativeOfLastOutput2 = dExp / __powf(1.0f + dExp,2);
+
+				dExp = __expf(-dResult3);
+				dResult3 = 1.0f / (1.0f + dExp);
+				dDerivativeOfLastOutput3 = dExp / __powf(1.0f + dExp,2);
+
+				dExp = __expf(-dResult4);
+				dResult4 = 1.0f / (1.0f + dExp);
+				dDerivativeOfLastOutput4 = dExp / __powf(1.0f + dExp,2);
+
 				break;
 		}
 		
 		if(threadIdx.x == p_iOutputNeuronCount)
 		{
-			for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-				dResult[iNumTestExecute] = 1.0f; // bias
+			dResult1 = 1.0f; // bias
+			dResult2 = 1.0f;
+			dResult3 = 1.0f;
+			dResult4 = 1.0f;
 		}
 
 		//PRINT_DEBUG_INFO("XXXXXXXXXXXXXXXXXXXXXXXXXXXXGPU: Test %d , Neuron %d : %d\n",blockIdx.x,threadIdx.x,blockIdx.x*iNumOutputNeuronsAligned + threadIdx.x);
-		for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-			*(d_pLayerOutputThisTest[iNumTestExecute]) = dResult[iNumTestExecute];
+		dp_pLayerOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+0)*blockDim.x + threadIdx.x] = dResult1;
+		dp_pLayerOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+1)*blockDim.x + threadIdx.x] = dResult2;
+		dp_pLayerOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+2)*blockDim.x + threadIdx.x] = dResult3;
+		dp_pLayerOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+3)*blockDim.x + threadIdx.x] = dResult4;
 
 		PRINT_MEMORY_INFO(dp_pLayerOutput,d_pLayerOutputThisTest);
 
 		// We only need derivative of last output if we are in training!
 		if(dp_pDerivativeOfLastOutput != NULL)
 		{
-			for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
-				*(d_pDerivativeOfLastOutputThisTest[iNumTestExecute]) = dDerivativeOfLastOutput[iNumTestExecute];
+			dp_pDerivativeOfLastOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+0)*blockDim.x + threadIdx.x] = dDerivativeOfLastOutput1;
+			dp_pDerivativeOfLastOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+1)*blockDim.x + threadIdx.x] = dDerivativeOfLastOutput2;
+			dp_pDerivativeOfLastOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+2)*blockDim.x + threadIdx.x] = dDerivativeOfLastOutput3;
+			dp_pDerivativeOfLastOutput[(iNumTestsInOneExecuteBlock*blockIdx.x+3)*blockDim.x + threadIdx.x] = dDerivativeOfLastOutput4;
 
 			PRINT_MEMORY_INFO(dp_pDerivativeOfLastOutput,d_pDerivativeOfLastOutputThisTest);
 		}
