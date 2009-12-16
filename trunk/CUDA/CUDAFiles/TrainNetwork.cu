@@ -136,14 +136,14 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 	int iMaxNumberOfSimulatenousBlocks = 512 / iBlockDimUpdated + ((512 % iBlockDimUpdated) != 0);
 
 	int iMaxMemPerBlock = 0;
-	if(iMaxNumberOfSimulatenousBlocks > 7)
+	/*if(iMaxNumberOfSimulatenousBlocks > 7)
 	{ // We give some more shared memory...
-		iMaxMemPerBlock = max(0,((iMaxNumberOfSharedMemoryElementsForWeights*2) / iMaxNumberOfSimulatenousBlocks - p_iNumInputNeurons));
+		iMaxMemPerBlock = max(0,((iMaxNumberOfSharedMemoryElementsForWeights) / iMaxNumberOfSimulatenousBlocks - p_iNumInputNeurons));
 	}
 	else
-	{
+	{*/
 		iMaxMemPerBlock = max(0,(iMaxNumberOfSharedMemoryElementsForWeights / iMaxNumberOfSimulatenousBlocks - p_iNumInputNeurons));
-	}
+	//}
 
 	int iHowMuchMemoryForWeights = (min(iNumOfWeightsAligned,max(512,iMaxMemPerBlock)) / iBlockDimUpdated) * iBlockDimUpdated;
 	if(iHowMuchMemoryForWeights % iBlockDimUpdated != 0)

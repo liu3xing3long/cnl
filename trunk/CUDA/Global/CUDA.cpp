@@ -12,6 +12,7 @@
 // JRTODO - problem z czytaniem/zapisywaniem pamieci niezadeklarowanej. Kiedy jest emu, to dziala OK, kiedy GPU, to pamiec nie jest zapisywana... (chyba to byl blad z synchronizacja)
 // JRTODO - napisz czemu nie mozna w pliku .cu uzywac logowania takiego jak gdzie indziej
 // JRTODO - opisz wybor zewnetrznych bibliotek
+// JRTODO - opisz sposob tworzenia programu, problemy, rozwiazania problemow
 
 // JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
 // JRTODO - maybe a possibility to change eta during training?
@@ -78,7 +79,7 @@ void checkIfGPUTrainingIsOK()
 	//const int iTrainedElements = 50000;
 	const double dEta = 0.002;
 	const int iTestsInTraining = 100;
-	const int iHiddenNeuronsInTesting = 40;
+	const int iHiddenNeuronsInTesting = 500;
 	const int iNumTrainedElements = 1;
 	const int iBatchSize = 16;
 
@@ -136,8 +137,8 @@ void makeTraining()
 	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 16000 };
-	const double dEtaArray[numElementsInArrays2] = { 0.02 };
+	const int iTrainedElementsArray[numElementsInArrays1] = { 300000 };
+	const double dEtaArray[numElementsInArrays2] = { 0.03 };
 	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 };
 
 	const int numTriedTrainings = 3;
@@ -180,7 +181,7 @@ void makeTraining()
 					trainNet.setInputNeuronCount(iInputs);
 					trainNet.addNewLayer(iHiddenNeurons,Neuron::NT_SIGMOID);
 					trainNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
-					trainNet.randomizeWeights(0.01,&generatorInThread);	
+					trainNet.randomizeWeights(0.001,&generatorInThread);	
 
 					InputTestSet trainTestSet(*testSetsInTraining[d]);
 
@@ -284,9 +285,9 @@ int main()
 
 	//doExecuteNetworksAndSaveLoad();
 
-	//makeTraining();
+	makeTraining();
 
-	checkIfGPUTrainingIsOK();
+	//checkIfGPUTrainingIsOK();
 
 	return 0;
 }
