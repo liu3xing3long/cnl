@@ -55,7 +55,7 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 		for(int iNumTestExecute = 0;iNumTestExecute < iNumTestsToCalculate; ++iNumTestExecute)
 			s_InputNeurons[p_iNumInputNeurons*iNumTestExecute+iInputIndex] = d_LayerInputThisTest[iNumTestExecute][iInputIndex];
 		PRINT_MEMORY_INFO(dp_pLayerInput,&d_LayerInputThisTest[iInputIndex]);
-	}
+	} 
 
 	// we have to make sure that all data was written to shared memory
 	__syncthreads();
