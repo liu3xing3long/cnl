@@ -24,10 +24,10 @@ Str Neuron::getNeuronTypeString() const
 		case NT_OFF: return Str("NT_OFF");
 		case NT_LINEAR: return Str("NT_LINEAR");
 		case NT_SIGMOID: return Str("NT_SIGMOID");
-		case NT_TANH: return Str("NT_TANH");
+/*		case NT_TANH: return Str("NT_TANH");
 		case NT_GAUSS: return Str("NT_GAUSS");
 		case NT_SOFTMAX: return Str("NT_SOFTMAX");
-		case NT_EXTERNAL: return Str("NT_EXTERNAL");
+		case NT_EXTERNAL: return Str("NT_EXTERNAL");*/
 		default:
 			logTextParams(Logging::LT_ERROR,"Incorrect neuron type: %d",m_eNeuronType);
 			return Str("");
@@ -39,10 +39,10 @@ void Neuron::setNeuronTypeString(Str p_sXMLNeuronTypeString)
 	if(p_sXMLNeuronTypeString == "NT_OFF")		{ m_eNeuronType = NT_OFF;		return; }
 	if(p_sXMLNeuronTypeString == "NT_LINEAR")	{ m_eNeuronType = NT_LINEAR;	return; }
 	if(p_sXMLNeuronTypeString == "NT_SIGMOID")	{ m_eNeuronType = NT_SIGMOID;	return; }
-	if(p_sXMLNeuronTypeString == "NT_TANH")		{ m_eNeuronType = NT_TANH;		return; }
+	/*if(p_sXMLNeuronTypeString == "NT_TANH")		{ m_eNeuronType = NT_TANH;		return; }
 	if(p_sXMLNeuronTypeString == "NT_GAUSS")	{ m_eNeuronType = NT_GAUSS;		return; }
 	if(p_sXMLNeuronTypeString == "NT_SOFTMAX")	{ m_eNeuronType = NT_SOFTMAX;	return; }
-	if(p_sXMLNeuronTypeString == "NT_EXTERNAL")	{ m_eNeuronType = NT_EXTERNAL;	return; }
+	if(p_sXMLNeuronTypeString == "NT_EXTERNAL")	{ m_eNeuronType = NT_EXTERNAL;	return; }*/
 
 	m_eNeuronType = NT_OFF;
 	logTextParams(Logging::LT_ERROR,"Incorrect neuron type string: %s",p_sXMLNeuronTypeString.c_str());

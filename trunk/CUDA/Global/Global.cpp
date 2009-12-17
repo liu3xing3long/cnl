@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 const char cDivider = ';';
-const int randomSeed = 45632;
+const int randomSeed = 2576;
 
 double getRandom01(MTRand *p_pRandomGenerator)
 {
@@ -13,23 +13,27 @@ double getRandom01(MTRand *p_pRandomGenerator)
 		return randomGenerator.randExc();
 }
 
-void saveDoubleVectorToXML(const vector<double>&p_vecToConvert, TiXmlElement &p_XML, Str p_sNameToSave)
+void saveDoubleVectorToXML(const vector<double>&p_vecToConvert, TiXmlElement &p_XML, Str p_sNameToSave,vector< pair<double,double> > *p_vecMinMaxInData)
 {
-	Str vectorString = getDoubleVectorXMLString(p_vecToConvert);
+	Str vectorString = getDoubleVectorXMLString(p_vecToConvert,p_vecMinMaxInData);
 	TiXmlElement elementToXML(p_sNameToSave.c_str());
 	TiXmlText valueToSave(vectorString.c_str());
 	elementToXML.InsertEndChild(valueToSave);
 	p_XML.InsertEndChild(elementToXML);
 }
 
-Str getDoubleVectorXMLString(const vector<double>&p_vecToConvert)
+Str getDoubleVectorXMLString(const vector<double>&p_vecToConvert,vector< pair<double,double> > *p_vecMinMaxInData)
 {
 	size_t uSize = (unsigned) p_vecToConvert.size();
 	char *sBuffer = new char[17 * uSize];
 	char *sPointer=sBuffer;
 	for(size_t uIndex=0;uIndex<uSize;++uIndex)
 	{
-		sprintf(sPointer,"%lf",p_vecToConvert[uIndex]);
+		if(p_vecMinMaxInData != NULL && p_vecMinMaxInData->size() != 0)
+			sprintf(sPointer,"%lf",((p_vecToConvert[uIndex]+1.0)/2)*(p_vecMinMaxInData->at(uIndex).second-p_vecMinMaxInData->at(uIndex).first) - p_vecMinMaxInData->at(uIndex).first);
+		else
+			sprintf(sPointer,"%lf",p_vecToConvert[uIndex]);
+
 		sPointer += strlen(sPointer);
 		*sPointer = cDivider;
 		++sPointer;

@@ -20,6 +20,7 @@
 // JRTODO - maybe a possibility to change eta during training?
 // JRTODO - skalowanie danych wejsciowych
 // JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
+// JRTODO - zrob asserty
 
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
@@ -79,10 +80,10 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNet;
 
 	//const int iTrainedElements = 50000;
-	const double dEta = 0.002;
-	const int iTestsInTraining = 100;
-	const int iHiddenNeuronsInTesting = 500;
-	const int iNumTrainedElements = 1;
+	const double dEta = 0.02;
+	const int iTestsInTraining = 1000;
+	const int iHiddenNeuronsInTesting = 45;
+	const int iNumTrainedElements = 160000;
 	const int iBatchSize = 16;
 
 	dummyNet.setInputNeuronCount(iInputs);
@@ -90,14 +91,14 @@ void checkIfGPUTrainingIsOK()
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.addNewLayer(iHiddenNeuronsInTesting,Neuron::NT_SIGMOID);
 
-	dummyNet.addNewLayer(iHiddenNeuronsInTesting+4,Neuron::NT_LINEAR);
+	//dummyNet.addNewLayer(iHiddenNeuronsInTesting+4,Neuron::NT_SIGMOID);
 	//dummyNet.addNewLayer(Layer(iHiddenNeuronsInTesting,iHiddenNeuronsInTesting,Neuron::NT_SIGMOID));
 
 	// Output layer - 5 neurons, linear neurons
 	dummyNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
 
 	// we randomize weights in a all layers
-	dummyNet.randomizeWeights(0.1,NULL);
+	dummyNet.randomizeWeights(0.001,NULL);
 
 	MLP dummyNetGPU (dummyNet);
 
@@ -139,7 +140,7 @@ void makeTraining()
 	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 300000 };
+	const int iTrainedElementsArray[numElementsInArrays1] = { 160000 };
 	const double dEtaArray[numElementsInArrays2] = { 0.03 };
 	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 };
 
@@ -268,7 +269,7 @@ void doExecuteNetworksAndSaveLoad()
 	// check differences before training network
 	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_CORRECT_AND_CPU);
 
-	/*dummyNet.saveToFile("NetworkStruct.xml");
+	dummyNet.saveToFile("NetworkStruct.xml");
 	dummyTestSet.saveToFile("TestSet.xml");
 
 	NeuralNetwork *pToLoad = NULL;
@@ -277,7 +278,7 @@ void doExecuteNetworksAndSaveLoad()
 	testSetToLoad.loadFromFile("TestSet.xml");
 
 	pToLoad->saveToFile("NetworkStruct2.xml");
-	testSetToLoad.saveToFile("TestSet2.xml");*/
+	testSetToLoad.saveToFile("TestSet2.xml");
 }
  
 int main()
@@ -287,9 +288,9 @@ int main()
 
 	//doExecuteNetworksAndSaveLoad();
 
-	//makeTraining();
+	makeTraining();
 
-	checkIfGPUTrainingIsOK();
+	//checkIfGPUTrainingIsOK();
 
 	return 0;
 }

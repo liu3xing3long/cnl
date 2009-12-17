@@ -106,7 +106,7 @@ void Layer::updateErrorValues()
 		for(int iNeuronIndex=0;iNeuronIndex<getNeuronCount();++iNeuronIndex)
 		{
 			double dError = 0.0;
-			for(int iNeuronIndexAfter=0;iNeuronIndexAfter<iNeuronsInLayerAfter;++iNeuronIndexAfter)
+			for(unsigned iNeuronIndexAfter=0;iNeuronIndexAfter<iNeuronsInLayerAfter;++iNeuronIndexAfter)
 			{
 				logTextParamsDebug("Test index %d , Neuron index %d , iNeuronIndexAfter %d : Weight %f , AfterLayerLastError %f , MULT %f"
 					,a,iNeuronIndex,iNeuronIndexAfter,vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecWeights[iNeuronIndex],vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecLastError[a]

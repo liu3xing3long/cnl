@@ -81,6 +81,7 @@ void InputTestSet::setOutputFunction(const vector< pair<double,double> > &p_vecM
 	{
 		m_vecTests[uTestIndex].setOutputFunction(p_vecMinMax,p_fTestingFunction,p_pRandomGenerator);
 	}
+	normalizeTests();
 }
 
 bool InputTestSet::saveToFile(Str p_sFileName) const
@@ -163,6 +164,8 @@ bool InputTestSet::loadFromFile(Str p_sFileName)
 
 	fclose(pLoadFile);
 
+	normalizeTests();
+
 	return true;
 }
 
@@ -201,13 +204,19 @@ void InputTestSet::loadFromXML(const TiXmlElement &p_XML)
 	}
 }
 
+bool InputTestSet::loadFromCSVFile(Str p_sFileName)
+{
+	cleanObject();
+
+	normalizeTests();
+	return true;
+}
+
 InputTestSet::InputTestSet(const InputTestSet &p_TestSet)
 {
-	// we don't copy md_pTestSetMemory, because we unallocate this memory in destructor
 	m_vecTests.assign(p_TestSet.m_vecTests.begin(),p_TestSet.m_vecTests.end());
 	m_vecInColumnNames.assign(p_TestSet.m_vecInColumnNames.begin(),p_TestSet.m_vecInColumnNames.end());
 	m_vecOutColumnNames.assign(p_TestSet.m_vecOutColumnNames.begin(),p_TestSet.m_vecOutColumnNames.end());
-	md_pTestSetMemory = NULL;
 }
 
 InputTestSet::InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsigned p_uNumberOutputs)
@@ -224,12 +233,10 @@ InputTestSet::InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsi
 
 InputTestSet::InputTestSet()
 {
-	md_pTestSetMemory = NULL;
 }
 
 InputTestSet::~InputTestSet()
 {
-	// JRTODO deallocate md_pTestSetMemory
 }
 
 void InputTestSet::cleanObject()
@@ -237,4 +244,51 @@ void InputTestSet::cleanObject()
 	m_vecTests.clear();
 	m_vecInColumnNames.clear();
 	m_vecOutColumnNames.clear();
+	m_vecMinMaxInData.clear();
+	m_vecMinMaxOutData.clear();
+}
+
+void InputTestSet::normalizeTests()
+{
+	unsigned uTestCount = getTestCount();
+	
+	m_vecMinMaxInData.clear();
+	unsigned uInputCount = getInputCount();
+	for(unsigned uInputIndex=0;uInputIndex<uInputCount;++uInputIndex)
+	{
+		double dMin = m_vecTests[0].m_vecInputs[uInputIndex];
+		double dMax = m_vecTests[0].m_vecInputs[uInputIndex];
+		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
+		{
+			dMin = min(dMin,m_vecTests[uTestIndex].m_vecInputs[uInputIndex]);
+			dMax = max(dMax,m_vecTests[uTestIndex].m_vecInputs[uInputIndex]);
+		}
+
+		m_vecMinMaxInData.push_back(pair<double,double> (dMin,dMax));
+
+		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
+		{
+			m_vecTests[uTestIndex].m_vecInputs[uInputIndex] = (m_vecTests[uTestIndex].m_vecInputs[uInputIndex] - dMin) / (dMax-dMin) * 2.0 - 1;
+		}
+	}
+
+	m_vecMinMaxOutData.clear();
+	unsigned uOutputCount = getOutputCount();
+	for(unsigned uOutputIndex=0;uOutputIndex<uOutputCount;++uOutputIndex)
+	{
+		double dMin = m_vecTests[0].m_vecCorrectOutputs[uOutputIndex];
+		double dMax = m_vecTests[0].m_vecCorrectOutputs[uOutputIndex];
+		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
+		{
+			dMin = min(dMin,m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex]);
+			dMax = max(dMax,m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex]);
+		}
+
+		m_vecMinMaxOutData.push_back(pair<double,double> (dMin,dMax));
+
+		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
+		{
+			m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex] = (m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex] - dMin) / (dMax-dMin) * 2.0 - 1;
+		}
+	}
 }

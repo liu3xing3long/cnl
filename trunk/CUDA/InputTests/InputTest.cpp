@@ -37,9 +37,9 @@ void InputTest::setOutputFunction(const vector< pair<double,double> > &p_vecMinM
 void InputTest::saveToXML(TiXmlElement &p_XML) const
 {
 	// we save Inputs
-	saveDoubleVectorToXML(m_vecInputs,p_XML,m_XMLInputs);
+	saveDoubleVectorToXML(m_vecInputs,p_XML,m_XMLInputs,&m_pParentTestSet->m_vecMinMaxInData);
 	// we save Correct Outputs
-	saveDoubleVectorToXML(m_vecCorrectOutputs,p_XML,m_XMLCorrectOutputs);
+	saveDoubleVectorToXML(m_vecCorrectOutputs,p_XML,m_XMLCorrectOutputs,&m_pParentTestSet->m_vecMinMaxOutData);
 	// we save Network Outputs
 	saveDoubleVectorToXML(m_vecNetworkOutputs,p_XML,m_XMLNetworkOutputs);
 	// we save Network Outputs GPU
