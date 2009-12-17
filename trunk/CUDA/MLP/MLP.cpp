@@ -264,13 +264,13 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		}
 
 		// calculate error in the last layer
-		CUDATools::calculateErrorInLastLayer(m_vecLayers[m_vecLayers.size()-1],vecTrainedElements.size(),iSpaceBetweenTestsInOutput,d_pTestsOutput);
+		CUDATools::calculateErrorInLastLayer(m_vecLayers[m_vecLayers.size()-1],(int)vecTrainedElements.size(),iSpaceBetweenTestsInOutput,d_pTestsOutput);
 
 		// calculate error in other layers
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
 		{
 			logTextParamsDebug("GPU: Errors in layer %d",iLayerIndex);
-			CUDATools::calculateErrorInNotLastLayer(m_vecLayers[iLayerIndex],vecTrainedElements.size());
+			CUDATools::calculateErrorInNotLastLayer(m_vecLayers[iLayerIndex],(int)vecTrainedElements.size());
 		}
 
 		// We can finally update weights in all neurons
@@ -294,7 +294,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 
 			logTextParamsDebug("GPU: Updating weights in layer %d",uLayerIndex);
 			
-			CUDATools::updateWeightsInTraining( m_vecLayers[uLayerIndex],d_pOutputsLayerBefore,p_iNumOutputsLayerBefore,p_dEta,vecTrainedElements.size(),bLayerBeforeOutputsHaveSpecificIndexes);
+			CUDATools::updateWeightsInTraining( m_vecLayers[uLayerIndex],d_pOutputsLayerBefore,p_iNumOutputsLayerBefore,p_dEta,(int)vecTrainedElements.size(),bLayerBeforeOutputsHaveSpecificIndexes);
 		}
 	}
 
@@ -409,5 +409,5 @@ void MLP::addNewLayer(unsigned p_uNumberNeurons,Neuron::NeuronType p_eNeuronType
 	m_vecLayers.push_back(Layer(p_uNumberNeurons,iWeightCount,p_eNeuronType));
 
 	m_vecLayers[m_vecLayers.size()-1].m_pNetwork = this;
-	m_vecLayers[m_vecLayers.size()-1].m_iLayerIndex = m_vecLayers.size()-1;
+	m_vecLayers[m_vecLayers.size()-1].m_iLayerIndex = (int)m_vecLayers.size()-1;
 }

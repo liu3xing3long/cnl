@@ -10,7 +10,7 @@ const Str m_XMLTest("Test");
 
 unsigned InputTestSet::getTestCount() const
 {
-	return m_vecTests.size();
+	return (unsigned) m_vecTests.size();
 }
 
 const InputTest& InputTestSet::getTest(int p_iIndex) const
@@ -25,12 +25,12 @@ InputTest& InputTestSet::getTest(int p_iIndex)
 
 unsigned InputTestSet::getInputCount() const
 {
-	return m_vecTests[0].m_vecInputs.size();
+	return(unsigned)  m_vecTests[0].m_vecInputs.size();
 }
 
 unsigned InputTestSet::getOutputCount() const
 {
-	return m_vecTests[0].m_vecCorrectOutputs.size();
+	return (unsigned) m_vecTests[0].m_vecCorrectOutputs.size();
 }
 
 bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErrors,vector<double> &p_vecMeanAbsoluteErrors, DifferenceStatisticsType p_eDifferenceType) const
@@ -42,11 +42,11 @@ bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErro
 		return false;
 	}
 
-	unsigned uOutputsSize = m_vecOutColumnNames.size();
+	size_t uOutputsSize = m_vecOutColumnNames.size();
 	p_vecMaxAbsoluteErrors.assign(uOutputsSize,0);
 	p_vecMeanAbsoluteErrors.assign(uOutputsSize,0);
 
-	unsigned uNumTests = m_vecTests.size();
+	size_t uNumTests = m_vecTests.size();
 
 	for(unsigned uTestIndex=0;uTestIndex<uNumTests;++uTestIndex)
 	{

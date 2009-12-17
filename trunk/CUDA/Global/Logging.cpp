@@ -43,7 +43,7 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 	}
 
 	Str sFileName(p_sFileName);
-	int iFound = sFileName.rfind('\\');
+	size_t iFound = sFileName.rfind('\\');
 	if(iFound != -1)
 		sFileName = sFileName.substring(iFound+1);
 	else if((iFound = sFileName.rfind('/')) != -1)

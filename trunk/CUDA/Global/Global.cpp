@@ -24,10 +24,10 @@ void saveDoubleVectorToXML(const vector<double>&p_vecToConvert, TiXmlElement &p_
 
 Str getDoubleVectorXMLString(const vector<double>&p_vecToConvert)
 {
-	unsigned uSize = p_vecToConvert.size();
+	size_t uSize = (unsigned) p_vecToConvert.size();
 	char *sBuffer = new char[17 * uSize];
 	char *sPointer=sBuffer;
-	for(unsigned uIndex=0;uIndex<uSize;++uIndex)
+	for(size_t uIndex=0;uIndex<uSize;++uIndex)
 	{
 		sprintf(sPointer,"%lf",p_vecToConvert[uIndex]);
 		sPointer += strlen(sPointer);

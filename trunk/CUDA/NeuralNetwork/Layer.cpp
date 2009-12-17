@@ -80,7 +80,7 @@ int Layer::getWeightCount() const
 
 int Layer::getNeuronCount() const
 {
-	return m_vecNeurons.size();
+	return (int) m_vecNeurons.size();
 }
 
 Neuron::NeuronType Layer::getNeuronType() const
@@ -100,7 +100,7 @@ Neuron::NeuronType Layer::getNeuronType() const
 void Layer::updateErrorValues()
 {
 	vector<Neuron> &vecNeuronsLayerAfter = getLayerAfter()->m_vecNeurons;
-	int iNeuronsInLayerAfter = vecNeuronsLayerAfter.size();
+	size_t iNeuronsInLayerAfter = vecNeuronsLayerAfter.size();
 	for(unsigned a=0;a<vecNeuronsLayerAfter[0].m_vecLastError.size();++a)
 	{
 		for(int iNeuronIndex=0;iNeuronIndex<getNeuronCount();++iNeuronIndex)

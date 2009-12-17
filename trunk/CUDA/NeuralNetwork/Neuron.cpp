@@ -50,7 +50,7 @@ void Neuron::setNeuronTypeString(Str p_sXMLNeuronTypeString)
 
 void Neuron::executeNeuron(const vector<double> &p_vecLayerInput, double &p_dResult)
 {
-	unsigned uInputCount = p_vecLayerInput.size();
+	size_t uInputCount = p_vecLayerInput.size();
 	p_dResult = m_vecWeights[uInputCount]; // Bias
 	for(unsigned uWeightIndex = 0;uWeightIndex < uInputCount;++uWeightIndex)
 	{
@@ -112,7 +112,7 @@ void Neuron::randomizeWeights(double p_dAbsMax,MTRand *p_pRandomGenerator)
 
 int Neuron::getWeightsSize() const
 {
-	return m_vecWeights.size();
+	return (int) m_vecWeights.size();
 }
 
 Neuron::NeuronType Neuron::getNeuronType() const

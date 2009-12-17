@@ -180,7 +180,7 @@ void CUDATools::executeLayerGPUForTraining(const real_gpu *dp_pLayerInput,const 
 {
 	const int *pVecTestIndices = (p_bSetIndices ? &(*p_vecTrainedElements.begin()) : NULL);
 	executeLayerCUDA(dp_pLayerInput,p_Layer.md_pLayerWeights,p_Layer.md_pLastOutputWithOutputFunction,p_Layer.md_pDerivativeOfLastOutput
-		,p_vecTrainedElements.size(),p_Layer.getNeuronCount(),p_Layer.getWeightCount(),p_Layer.getNeuronType(),pVecTestIndices);
+		,(int) p_vecTrainedElements.size(),p_Layer.getNeuronCount(),p_Layer.getWeightCount(),p_Layer.getNeuronType(),pVecTestIndices);
 }
 
 void CUDATools::allocateAndSetGPUMemoryForLayerTraining(Layer &p_Layer, int p_iNumTestsInBatch)
