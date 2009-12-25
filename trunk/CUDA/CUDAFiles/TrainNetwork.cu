@@ -5,9 +5,6 @@ __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 // JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
 // JRTODO - zmien mnozenie integerow na specjalna funkcje mnozaca najnizsze 24 bity
 
-//void *CUDATools::m_allocatedMemoryAddress[iMemoryElementsSize];
-//int CUDATools::m_allocatedMemorySize[iMemoryElementsSize];
-
 
 
 __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput,int p_iNumInputNeurons

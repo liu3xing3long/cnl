@@ -237,6 +237,31 @@ class TiXmlString
 		return sToReturn;
 	}
 
+	// Romanowski added
+	// returns a list of strings separated with a specified separator
+	inline vector<TiXmlString> split (char cSeparator) const
+	{
+		const char *sPointer = data();
+		vector<TiXmlString> vecToReturn;
+
+		while(*sPointer != 0)
+		{
+			const char *sPointerEnd = strchr(sPointer,cSeparator);
+			if(sPointerEnd != NULL)
+			{
+				vecToReturn.push_back(TiXmlString(sPointer,(int)(sPointerEnd - sPointer)));
+			}
+			else
+			{
+				vecToReturn.push_back(TiXmlString(sPointer));
+				break;
+			}
+			sPointer = sPointerEnd + 1;
+		}
+
+		return vecToReturn;
+	}
+
 	inline void clear ()
 	{
 		//Lee:

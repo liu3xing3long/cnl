@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="CUDA"
 	ProjectGUID="{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}"
 	RootNamespace="CUDA"
@@ -821,6 +821,14 @@
 		<Filter
 			Name="InputTests"
 			>
+			<File
+				RelativePath=".\InputTests\AttributeMapping.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\InputTests\AttributeMapping.h"
+				>
+			</File>
 			<File
 				RelativePath=".\InputTests\InputTest.cpp"
 				>

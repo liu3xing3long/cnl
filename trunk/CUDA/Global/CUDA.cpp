@@ -21,6 +21,7 @@
 // JRTODO - skalowanie danych wejsciowych
 // JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
 // JRTODO - zrob asserty
+// JRTODO - zakladamy, ze plik XML jest poprawny. Najwiecej sprawdzania jest przy wczytywaniu danych z pliku CSV. W pracy MGR opisz, jakie zrobiles sprawdzania CSV
 
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)

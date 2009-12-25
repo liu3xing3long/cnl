@@ -98,6 +98,7 @@ using namespace std;
 
 // Other project headers
 #include "Logging.h"
+#include "AttributeMapping.h"
 #include "Global.h"
 #include "InputTest.h"
 #include "InputTestSet.h"
