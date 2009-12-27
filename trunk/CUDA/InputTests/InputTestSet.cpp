@@ -114,26 +114,22 @@ bool InputTestSet::saveToFile(Str p_sFileName) const
 
 void InputTestSet::saveToXML(TiXmlElement &p_XML) const
 {
-	// we save in column names
+	// we save in/out column names
 	TiXmlElement inColumnElements(m_XMLInColumns.c_str());
-	for(unsigned uColumnIndex = 0;uColumnIndex < m_vecInColumnNames.size();++uColumnIndex)
+	TiXmlElement outColumnElements(m_XMLOutColumns.c_str());
+	for(unsigned uColumnIndex = 0;uColumnIndex < m_vecAttributeMappings.size();++uColumnIndex)
 	{
-		TiXmlElement newInColumnElement(m_XMLInColumnElement.c_str());
-		TiXmlText newInColumnElementValue(m_vecInColumnNames[uColumnIndex].c_str());
-		newInColumnElement.InsertEndChild(newInColumnElementValue);
-		inColumnElements.InsertEndChild(newInColumnElement);
+		AttributeMapping &mappingNow = m_vecAttributeMappings[uColumnIndex];
+		TiXmlElement newColumnElement(m_XMLInColumnElement.c_str());
+		TiXmlText newColumnElementValue(mappingNow.getColumnName().c_str());
+		newColumnElement.InsertEndChild(newInColumnElementValue);
+
+		if(mappingNow.m_bOutputAttribute)
+			inColumnElements.InsertEndChild(newInColumnElement);
+		else
+			outColumnElements.InsertEndChild(newInColumnElement);
 	}
 	p_XML.InsertEndChild(inColumnElements);
-
-	// we save out column names
-	TiXmlElement outColumnElements(m_XMLOutColumns.c_str());
-	for(unsigned uColumnIndex = 0;uColumnIndex < m_vecOutColumnNames.size();++uColumnIndex)
-	{
-		TiXmlElement newOutColumnElement(m_XMLOutColumnElement.c_str());
-		TiXmlText newOutColumnElementValue(m_vecOutColumnNames[uColumnIndex].c_str());
-		newOutColumnElement.InsertEndChild(newOutColumnElementValue);
-		outColumnElements.InsertEndChild(newOutColumnElement);
-	}
 	p_XML.InsertEndChild(outColumnElements);
 
 	// we save all tests
@@ -503,6 +499,7 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 							return false;
 						}
 					}
+					iElementInStructure++;
 				}
 				else
 				{
@@ -518,6 +515,7 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 								vecToAdd.push_back(((uAddedElement == iFoundIndex) ? dMaxNeuralNetworkValue : dMinNeuralNetworkValue);
 						}
 					}
+					iElementInStructure += uPossibleValues;
 				}
 			}
 			else
@@ -535,6 +533,7 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 					vector<double> &vecToAdd = (bIsOutputVector ? m_vecTests[uTestIndex].m_vecCorrectOutputs : m_vecTests[uTestIndex].m_vecInputs);
 					vecToAdd.push_back(dNewValueNormalized);
 				}
+				iElementInStructure++;
 			}
 		}
 	}
