@@ -11,6 +11,8 @@ class AttributeMapping
 	bool m_bLiteralAttribute;
 	bool m_bOutputAttribute;
 
-	int m_iAttributeInInput;
+	int m_iColumnInInputFile;
 	int m_iFirstAttributeInStructure;
+
+
 };

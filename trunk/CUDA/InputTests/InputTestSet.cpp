@@ -42,7 +42,7 @@ bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErro
 		return false;
 	}
 
-	size_t uOutputsSize = m_vecOutColumnNames.size();
+	size_t uOutputsSize = getOutputCount();
 	p_vecMaxAbsoluteErrors.assign(uOutputsSize,0);
 	p_vecMeanAbsoluteErrors.assign(uOutputsSize,0);
 
@@ -450,6 +450,96 @@ void InputTestSet::printDataAboutColumns(const vector<int> &p_vecColumnIndexes,S
 	}
 }
 
+bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int> &p_vecInputColumns,const vector<int> &p_vecOutputColumns
+			,const vector< pair<double,double> > &p_vecMinMaxData,const vector< vector<Str> > &p_vecPossibleValuesData
+			,const vector<Str> &p_vecColumnNames,const vector<bool> &p_vecIsLiteral,const vector< vector<Str> > &p_vecElements)
+{
+	m_vecAttributeMappings.clear();
+	m_vecTests.clear();
+	unsigned uVecSize = p_vecElements.size();
+	for(unsigned uTestIndex=0;uTestIndex<uVecSize;++uTestIndex)
+	{
+		m_vecTests.push_back(InputTest(this,0,0));
+	}
+
+	vector<int> *pVectorsColumnIndices[2] = { p_vecInputColumns , p_vecOutputColumns };
+	for(int iVectorIndex = 0;iVectorIndex < 2;++iVectorIndex)
+	{
+		vector<int> &vecNow = *pVectorsColumnIndices[iVectorIndex];
+		bool bIsOutputVector = (iVectorIndex == 1);
+		int iElementInStructure = 0;
+		for(unsigned uColumnIndex = 0;uColumnIndex < vecNow.size();++uColumnIndex)
+		{
+			int iColumnIndexInVecElements = vecNow[uColumnIndex];
+			Str sColumnName = (p_vecColumnNames.size() != 0 ? p_vecColumnNames[iColumnIndexInVecElements] : "");
+			
+			// We add an element to m_vecAttributeMappings
+			m_vecAttributeMappings.push_back(AttributeMapping(sColumnName,bIsOutputVector,iColumnIndexInVecElements,iElementInStructure);
+			AttributeMapping &lastAttributeMapping = m_vecAttributeMappings[m_vecAttributeMappings.size()-1];
+			if(p_vecIsLiteral[iColumnIndexInVecElements])
+			{
+				const vector<Str> &vecPosibleValues = p_vecPossibleValuesData[iColumnIndexInVecElements];
+				lastAttributeMapping.setLiteralPossibleValues(vecPosibleValues);
+
+				// if there are only 2 possible values, we make only one input/output. 
+				// If more, we have the ame number of inputs/outputs as the number of possible values
+				unsigned uPossibleValues = vecPosibleValues.size();
+				if(iPossibleValues == 2)
+				{
+					Str sFirstValue = vecPosibleValues[0];
+					Str sSecondValue = vecPosibleValues[1];
+					for(unsigned uTestIndex=0;uTestIndex<uVecSize;++uTestIndex)
+					{
+						vector<double> &vecToAdd = (bIsOutputVector ? m_vecTests[uTestIndex].m_vecCorrectOutputs : m_vecTests[uTestIndex].m_vecInputs);
+						Str sValueInVector = p_vecElements[uTestIndex][iColumnIndexInVecElements];
+						if(sValueInVector == sFirstValue)
+							vecToAdd.push_back(dMinNeuralNetworkValue);
+						else if(sValueInVector == sSecondValue)
+							vecToAdd.push_back(dMaxNeuralNetworkValue);
+						else
+						{
+							logTextParams(Logging::LT_ERROR,"Unknown value in column %d = %s . Known values are %s and %s"
+								,iColumnIndexInVecElements,sValueInVector,sFirstValue,sSecondValue);
+							return false;
+						}
+					}
+				}
+				else
+				{
+					for(unsigned uTestIndex=0;uTestIndex<uVecSize;++uTestIndex)
+					{
+						vector<double> &vecToAdd = (bIsOutputVector ? m_vecTests[uTestIndex].m_vecCorrectOutputs : m_vecTests[uTestIndex].m_vecInputs);
+						Str sValueInVector = p_vecElements[uTestIndex][iColumnIndexInVecElements];
+						vector<Str>::iterator iter = find(vecPosibleValues.begin(),vecPosibleValues.end(),sValueInVector);
+						if(iter != vecPosibleValues.end())
+						{
+							int iFoundIndex = iter - vecPosibleValues.begin();
+							for(unsigned uAddedElement=0;uAddedElement<uPossibleValues;++uAddedElement)
+								vecToAdd.push_back(((uAddedElement == iFoundIndex) ? dMaxNeuralNetworkValue : dMinNeuralNetworkValue);
+						}
+					}
+				}
+			}
+			else
+			{
+				lastAttributeMapping.setPossibleRange(p_vecMinMaxData[iColumnIndexInVecElements]);
+				double dMin = p_vecMinMaxData[iColumnIndexInVecElements].first;
+				double dMax = p_vecMinMaxData[iColumnIndexInVecElements].second;
+
+				for(unsigned uTestIndex=0;uTestIndex<uVecSize;++uTestIndex)
+				{
+					double dNewValue;
+					sscanf(p_vecElements[uTestIndex][iColumnIndexInVecElements].c_str(),"%lf",&dNewValue);
+					double dNewValueNormalized = (dNewValue - dMin) / (dMax - dMin) * (dMaxNeuralNetworkValue - dMinNeuralNetworkValue) - dMinNeuralNetworkValue;
+
+					vector<double> &vecToAdd = (bIsOutputVector ? m_vecTests[uTestIndex].m_vecCorrectOutputs : m_vecTests[uTestIndex].m_vecInputs);
+					vecToAdd.push_back(dNewValueNormalized);
+				}
+			}
+		}
+	}
+}
+
 bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,char p_cSeparator,const vector<int> &p_vecOutputColumns,const vector<int> &p_vecUnusedColumns)
 {
 	if(p_vecOutputColumns.size() == 0)
@@ -519,17 +609,11 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 	printDataAboutColumns(p_vecOutputColumns,"Output",vecIsLiteral,vecMinMaxData,vecPossibleValuesData,vecColumnNames);
 	printDataAboutColumns(p_vecUnusedColumns,"Unused",vecIsLiteral,vecMinMaxData,vecPossibleValuesData,vecColumnNames);
 
-	// fill in m_vecAttributeMappings attribute
-	generateAttributeMappingsForCSVFile(vecInputColumns,p_vecOutputColumns,vecMinMaxData,vecPossibleValuesData);
+	// finally fill in m_vecAttributeMappings and m_vecTests attribute
+	if(!generateAttributeMappingsAndTestsForCSVFile(vecInputColumns,p_vecOutputColumns,vecMinMaxData,vecPossibleValuesData,vecColumnNames,vecElements))
+		return false;
 
-
-
-
-
-
-
-
-	normalizeTests();
+	//normalizeTests();
 	return true;
 }
 

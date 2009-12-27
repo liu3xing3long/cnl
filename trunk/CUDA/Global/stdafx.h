@@ -16,6 +16,8 @@
 
 // On Visual Studio 2008, M_PI constant is not defined even when math.h is included
 #define M_PI       3.14159265358979323846
+const double dMinNeuralNetworkValue = -1.0;
+const double dMaxNeuralNetworkValue = 1.0;
 
 // If true, floating point numbers on a GPU is float. If false, it is double (possible only on 1.3 CUDA devices)
 #define REAL_GPU_IS_FLOAT 1
