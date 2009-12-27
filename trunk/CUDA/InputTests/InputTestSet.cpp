@@ -204,10 +204,8 @@ void InputTestSet::loadFromXML(const TiXmlElement &p_XML)
 	}
 }
 
-bool InputTestSet::loadElementsFromCSVFile(char p_cSeparator, FILE *p_pLoadFile, vector<vector<Str>> &p_vecElements, bool &p_bShouldReturn)
+bool InputTestSet::loadElementsFromCSVFile(char p_cSeparator, FILE *p_pLoadFile, vector<vector<Str>> &p_vecElements)
 {
-	p_vecElements = 0;
-	p_bShouldReturn = false;
 	const int iStringLen = 100000;
 	char sLoadedLine[iStringLen];
 	// lines containing divided values
@@ -221,21 +219,22 @@ bool InputTestSet::loadElementsFromCSVFile(char p_cSeparator, FILE *p_pLoadFile,
 		if(iLineLen >= iStringLen-2)
 		{
 			logTextParams(Logging::LT_ERROR,"Line %d of file %s is longer than %d characters",iLineNumber,p_sFileName.c_str(),iStringLen);
-			p_bShouldReturn = true;
 			return false;
 		}
 
 		p_vecElements.push_back(Str(sLoadedLine).split(p_cSeparator));
 	}
-	return false;
+	return true;
 }
-void InputTestSet::removeIncorrectCSVElements(bool p_bContainsColumnNames, vector<vector<Str>> &p_vecElements, unsigned &p_uVecSize, unsigned p_uColumnsNumber)
+void InputTestSet::removeIncorrectCSVElements(bool p_bContainsColumnNames, vector<vector<Str>> &p_vecElements)
 {
 	int iErasedElements;
+	unsigned uVecSize = p_vecElements.size();
+	unsigned pColumnsNumber = p_vecElements[0].size();
 	for(unsigned uLineIndex = (unsigned) p_bContainsColumnNames;uLineIndex < p_uVecSize;++uLineIndex)
 	{
 		bool bToErase = false;
-		for(unsigned uColumnIndex = 0;uColumnIndex < p_uColumnsNumber;++uColumnIndex)
+		for(unsigned uColumnIndex = 0;uColumnIndex < pColumnsNumber;++uColumnIndex)
 		{
 			if(p_vecElements[uLineIndex][uColumnIndex] == "?")
 			{
@@ -248,7 +247,7 @@ void InputTestSet::removeIncorrectCSVElements(bool p_bContainsColumnNames, vecto
 		{
 			p_vecElements.erase(p_vecElements.begin() + uLineIndex);
 			uLineIndex--;
-			p_uVecSize--;
+			uVecSize--;
 			++iErasedElements;
 		}
 	}
@@ -256,9 +255,9 @@ void InputTestSet::removeIncorrectCSVElements(bool p_bContainsColumnNames, vecto
 	logTextParams(Logging::LT_INFORMATION,"Column names: %s , tests before: %d , tests removed: %d , tests after: %d"
 		,(p_bContainsColumnNames ? "true":"false"),uVecSize+iErasedElements-(int)p_bContainsColumnNames,iErasedElements,uVecSize-(int)p_bContainsColumnNames);	
 }
-bool InputTestSet::loadFromCSVFileExtracted(bool p_bContainsColumnNames, vector<vector<Str>> &p_vecElements, vector<bool> &p_vecIsLiteral, bool &p_bShouldReturn)
+bool InputTestSet::checkKindsOfColumnsInCSVFile(bool p_bContainsColumnNames, const vector<vector<Str>> &p_vecElements, vector<bool> &p_vecIsLiteral)
 {
-	p_bShouldReturn = false;
+	unsigned uVecSize = p_vecElements.size();
 	for(unsigned uLineIndex = 0;uLineIndex < uVecSize;++uLineIndex)
 	{
 		for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
@@ -267,7 +266,6 @@ bool InputTestSet::loadFromCSVFileExtracted(bool p_bContainsColumnNames, vector<
 			if(sElement.size() == 0)
 			{
 				logTextParams(Logging::LT_ERROR,"Line %d, element %d - element is empty",uLineIndex,uColumnIndex);
-				p_bShouldReturn = true;
 				return false;
 			}
 
@@ -292,61 +290,11 @@ bool InputTestSet::loadFromCSVFileExtracted(bool p_bContainsColumnNames, vector<
 			}
 		}
 	}
-	return false;
+	return true;
 }
-bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,char p_cSeparator,vector<int> p_vecOutputColumns,vector<int> p_vecUnusedColumns)
+
+bool InputTestSet::checkColumnIndexCorrectnessInCSVFile(vector<int> &p_vecOutputColumns,vector<int> &p_vecUnusedColumns)
 {
-	if(p_vecOutputColumns.size() == 0)
-	{
-		logTextParams(Logging::LT_ERROR,"No output elements specified in p_vecOutputColumns");
-		return false;
-	}
-
-	cleanObject();
-
-	FILE *pLoadFile = TiXmlFOpen(p_sFileName.c_str(),"r");
-	if(!pLoadFile)
-		return false;
-
-	bool bShouldReturn;
-	vector<vector<Str>> vecElements;
-	bool bResult = loadElementsFromCSVFile(p_cSeparator, pLoadFile, vecElements, bShouldReturn);
-	if (bShouldReturn)
-		return bResult;
-
-	fclose(pLoadFile);
-
-	unsigned uVecSize = vecElements.size();
-
-	// All lines need to have the same number of elements
-	if(uVecSize < 1 + (unsigned) p_bContainsColumnNames)
-	{
-		logTextParams(Logging::LT_ERROR,"Too small number of lines: %d",vecElements.size());
-		return false;
-	}
-
-	unsigned uColumnsNumber = vecElements[0].size();
-
-	for(unsigned uLineIndex = 1;uLineIndex < uVecSize;++uLineIndex)
-	{
-		if(vecElements[uLineIndex].size() != uColumnsNumber)
-		{
-			logTextParams(Logging::LT_ERROR,"Number of elements in line %d(%d) is different than in line %d(%d)",uLineIndex,vecElements[uLineIndex].size(),0,uColumnsNumber);
-			return false;
-		}
-	}
-
-	// remove elements with '?' - we don't want tests with unknown parameters
-	removeIncorrectCSVElements(p_bContainsColumnNames, vecElements, uVecSize, uColumnsNumber, iErasedElements);
-
-	// checking which columns are literal, and which are numbers
-	vector<bool> vecIsLiteral(uColumnsNumber,false);
-	bool lShouldReturn;
-	bool lResult = loadFromCSVFileExtracted(p_bContainsColumnNames, vecElements, uVecSize, uColumnsNumber, vecIsLiteral, lShouldReturn);
-	if (lShouldReturn)
-		return lResult;
-
-	// We check correctness of p_vecOutputColumns and p_vecUnusedColumns
 	for(unsigned uColumnIndex = 0;uColumnIndex < p_vecOutputColumns.size();++uColumnIndex)
 	{
 		if(p_vecOutputColumns[uColumnIndex] < 0 || p_vecOutputColumns[uColumnIndex] >= uColumnsNumber)
@@ -369,42 +317,22 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 			return false;
 		}
 	}
+}
 
-	// we generate a vector of input column indexes
-	vector<int> vecInputColumns;
-	for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
+bool InputTestSet::getColumnRangesFromCSVFile(bool p_bContainsColumnNames, const vector<vector<Str>> &p_vecElements, const vector<bool> &p_vecIsLiteral, vector< pair<double,double> > &p_vecMinMaxData, vector<vector<Str>> &p_vecPossibleValuesData)
+{
+	for(unsigned uColumnIndex = 0;uColumnIndex < p_uColumnsNumber;++uColumnIndex)
 	{
-		if(find( p_vecOutputColumns.begin(),p_vecOutputColumns.end(),uColumnIndex) == p_vecOutputColumns.end()
-			&& find( p_vecUnusedColumns.begin(),p_vecUnusedColumns.end(),uColumnIndex) == p_vecUnusedColumns.end())
-		{
-			vecInputColumns.push_back(uColumnIndex);
-		}
-	}
-
-	if(vecInputColumns.size() == 0)
-	{
-		logTextParams(Logging::LT_ERROR,"There are no input columns...");
-		return false;
-	}
-
-	// We retrieve min/max and values data 
-	// Also, we check if there are columns with only one value (if yes, it is an error)
-	vector< pair<double,double> > vecMinMaxData; // min and max values for numerid data
-	vecMinMaxData.resize(uColumnsNumber);
-	vector< vector<Str> > vecPossibleValuesData; // all possible values for literal data
-	vecPossibleValuesData.resize(uColumnsNumber);
-	for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
-	{
-		if(vecIsLiteral[uColumnIndex])
+		if(p_vecIsLiteral[uColumnIndex])
 		{
 			vector<Str> vecPossibleValuesThisColumn;
-			for(unsigned uLineIndex = (unsigned)p_bContainsColumnNames;uLineIndex < uVecSize;++uLineIndex)
+			for(unsigned uLineIndex = (unsigned)p_bContainsColumnNames;uLineIndex < p_uVecSize;++uLineIndex)
 			{
-				Str sElement = vecElements[uLineIndex][uColumnIndex];
+				Str sElement = p_vecElements[uLineIndex][uColumnIndex];
 				if(find(vecPossibleValuesThisColumn.begin(),vecPossibleValuesThisColumn.end(),sElement) == vecPossibleValuesThisColumn.end())
 					vecPossibleValuesThisColumn.push_back(sElement);
 			}
-			vecPossibleValuesData[uColumnIndex] = vecPossibleValuesThisColumn;
+			p_vecPossibleValuesData[uColumnIndex] = vecPossibleValuesThisColumn;
 
 			if(vecPossibleValuesThisColumn.size() < 2)
 			{
@@ -415,8 +343,8 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 		else
 		{
 			unsigned uFirstIndex = (unsigned)p_bContainsColumnNames;
-			double dMin = vecElements[uFirstIndex][uColumnIndex];
-			double dMax = vecElements[uFirstIndex][uColumnIndex];
+			double dMin = p_vecElements[uFirstIndex][uColumnIndex];
+			double dMax = p_vecElements[uFirstIndex][uColumnIndex];
 			for(unsigned uTestIndex=uFirstIndex+1;uTestIndex<uTestCount;++uTestIndex)
 			{
 				dMin = min(dMin,m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex]);
@@ -432,6 +360,99 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 			}
 		}
 	}
+	return true;
+}
+bool InputTestSet::generateInputColumnsVectorForCSVFile(vector<int> &p_vecOutputColumns, vector<int> &p_vecUnusedColumns, unsigned uColumnsNumber, vector<int> &p_vecInputColumns, bool &pShouldReturn)
+{
+	pShouldReturn = false;
+	for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
+	{
+		if(find( p_vecOutputColumns.begin(),p_vecOutputColumns.end(),uColumnIndex) == p_vecOutputColumns.end()
+			&& find( p_vecUnusedColumns.begin(),p_vecUnusedColumns.end(),uColumnIndex) == p_vecUnusedColumns.end())
+		{
+			p_vecInputColumns.push_back(uColumnIndex);
+		}
+	}
+
+	if(p_vecInputColumns.size() == 0)
+	{
+		logTextParams(Logging::LT_ERROR,"There are no input columns...");
+		pShouldReturn = true;
+		return false;
+	}
+	return false;
+}
+bool InputTestSet::checkBasicValidityInCSVFile(bool p_bContainsColumnNames, vector<vector<Str>> &vecElements)
+{
+	unsigned uVecSize = vecElements.size();
+	if(uVecSize < 1 + (unsigned) p_bContainsColumnNames)
+	{
+		logTextParams(Logging::LT_ERROR,"Too small number of lines: %d",vecElements.size());
+		return false;
+	}
+
+	unsigned uColumnsNumber = vecElements[0].size();
+	// All lines need to have the same number of elements
+	for(unsigned uLineIndex = 1;uLineIndex < uVecSize;++uLineIndex)
+	{
+		if(vecElements[uLineIndex].size() != uColumnsNumber)
+		{
+			logTextParams(Logging::LT_ERROR,"Number of elements in line %d(%d) is different than in line %d(%d)",uLineIndex,vecElements[uLineIndex].size(),0,uColumnsNumber);
+			return false;
+		}
+	}
+	return true;
+}
+bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,char p_cSeparator,const vector<int> &p_vecOutputColumns,const vector<int> &p_vecUnusedColumns)
+{
+	if(p_vecOutputColumns.size() == 0)
+	{
+		logTextParams(Logging::LT_ERROR,"No output elements specified in p_vecOutputColumns");
+		return false;
+	}
+
+	cleanObject();
+
+	FILE *pLoadFile = TiXmlFOpen(p_sFileName.c_str(),"r");
+	if(!pLoadFile)
+		return false;
+
+	vector<vector<Str>> vecElements;
+	if(!loadElementsFromCSVFile(p_cSeparator, pLoadFile, vecElements))
+		return false;
+
+	fclose(pLoadFile);
+
+	if(!checkBasicValidityInCSVFile(p_bContainsColumnNames, vecElements))
+		return false;
+
+	// remove elements with '?' - we don't want tests with unknown parameters
+	removeIncorrectCSVElements(p_bContainsColumnNames, vecElements, uVecSize, uColumnsNumber, iErasedElements);
+
+	// checking which columns are literal, and which are numbers
+	vector<bool> vecIsLiteral(uColumnsNumber,false);
+	if(!checkKindsOfColumnsInCSVFile(p_bContainsColumnNames, vecElements, vecIsLiteral, bShouldReturn))
+		return false;
+
+	// We check correctness of p_vecOutputColumns and p_vecUnusedColumns
+	if(!checkColumnIndexCorrectnessInCSVFile(p_vecOutputColumns,p_vecUnusedColumns))
+		return false;
+
+	// we generate a vector of input column indexes
+	vector<int> vecInputColumns;
+	bool lShouldReturn1;
+	bool lResult1 = generateInputColumnsVectorForCSVFile(p_vecOutputColumns, p_vecUnusedColumns, uColumnsNumber, vecInputColumns, lShouldReturn1);
+	if (lShouldReturn1)
+		return lResult1;
+
+	// We retrieve min/max and values data 
+	// Also, we check if there are columns with only one value (if yes, it is an error)
+	vector< pair<double,double> > vecMinMaxData; // min and max values for numerid data
+	vecMinMaxData.resize(uColumnsNumber);
+	vector< vector<Str> > vecPossibleValuesData; // all possible values for literal data
+	vecPossibleValuesData.resize(uColumnsNumber);
+	if(!getColumnRangesFromCSVFile(p_bContainsColumnNames, vecElements, uVecSize, uColumnsNumber, vecIsLiteral, vecMinMaxData,vecPossibleValuesData);
+		return false;
 
 	printDataAboutColumns(vecInputColumns,"Input",vecIsLiteral,vecMinMaxData,vecPossibleValuesData,p_bContainsColumnNames,vecElements[0]);
 	printDataAboutColumns(p_vecOutputColumns,"Output",vecIsLiteral,vecMinMaxData,vecPossibleValuesData,p_bContainsColumnNames,vecElements[0]);
