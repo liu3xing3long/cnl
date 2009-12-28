@@ -293,7 +293,7 @@ void checkIfCSVReasingIsOK()
 	vecOutputColumns.push_back(12);
 	vector<int> vecUnusedColumns;
 	testSetCSV.loadFromCSVFile("forestfires.csv",true,',',vecOutputColumns,vecUnusedColumns);
-	testSetCSV.saveToFile("TestSetFromCSV");
+	testSetCSV.saveToFile("TestSetFromCSV.xml");
 }
  
 int main()

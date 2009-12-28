@@ -444,9 +444,9 @@ void InputTestSet::printDataAboutColumns(const vector<int> &p_vecColumnIndexes,S
 			unsigned uColumnIndexInInput = p_vecColumnIndexes[uColumnIndex];
 			Str sLogText;
 			if(p_vecColumnNames.size())
-					sLogText.format("Columns type %s , column index %d , column in input %d, column name \"%s\":",p_sColumnType.c_str(),uColumnIndex,uColumnIndexInInput,p_vecColumnNames[uColumnIndexInInput]);
-				else
-					sLogText.format("Columns type %s , column index %d , column in input %d:",p_sColumnType.c_str(),uColumnIndex,uColumnIndexInInput);
+				sLogText.format("Columns type %s , column index %d , column in input %d, column name \"%s\":",p_sColumnType.c_str(),uColumnIndex,uColumnIndexInInput,p_vecColumnNames[uColumnIndexInInput].c_str());
+			else
+				sLogText.format("Columns type %s , column index %d , column in input %d:",p_sColumnType.c_str(),uColumnIndex,uColumnIndexInInput);
 
 			if(p_vecIsLiteral[uColumnIndexInInput])
 			{
@@ -554,7 +554,7 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 				{
 					double dNewValue;
 					sscanf(p_vecElements[uTestIndex][iColumnIndexInVecElements].c_str(),"%lf",&dNewValue);
-					double dNewValueNormalized = (dNewValue - dMin) / (dMax - dMin) * (dMaxNeuralNetworkValue - dMinNeuralNetworkValue) - dMinNeuralNetworkValue;
+					double dNewValueNormalized = (dNewValue - dMin) / (dMax - dMin) * (dMaxNeuralNetworkValue - dMinNeuralNetworkValue) + dMinNeuralNetworkValue;
 
 					vector<double> &vecToAdd = (bIsOutputVector ? m_vecTests[uTestIndex].m_vecCorrectOutputs : m_vecTests[uTestIndex].m_vecInputs);
 					vecToAdd.push_back(dNewValueNormalized);

@@ -37,60 +37,64 @@ void InputTest::setOutputFunction(const vector< pair<double,double> > &p_vecMinM
 void InputTest::saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValues,TiXmlElement &p_XML,Str p_sNameToSave,bool p_bOutputAttribute) const
 {
 	Str sTextToWrite;
-	const vector<AttributeMapping> &vecAttributeMappings = m_pParentTestSet->m_vecAttributeMappings;
-	unsigned uAttributesMappingSize = vecAttributeMappings.size();
-	for(unsigned uAttributeIndex = 0;uAttributeIndex < uAttributesMappingSize;++uAttributeIndex)
+
+	if(p_vecDoubleValues.size() > 0)
 	{
-		const AttributeMapping &attributeMappingData = vecAttributeMappings[uAttributeIndex];
-		if(attributeMappingData.isOutputAttribute() != p_bOutputAttribute)
-			continue; // we don't want this attribute data
-
-		Str sToAdd;
-		if(!sTextToWrite.empty())
-			sToAdd.format("%c",cDivider);
-
-		int iFirstAttributeInStructure = attributeMappingData.getFirstAttributeInStructure();
-		double dFirstValue = p_vecDoubleValues[iFirstAttributeInStructure];
-
-		if(attributeMappingData.isLiteralAttribute())
+		const vector<AttributeMapping> &vecAttributeMappings = m_pParentTestSet->m_vecAttributeMappings;
+		unsigned uAttributesMappingSize = vecAttributeMappings.size();
+		for(unsigned uAttributeIndex = 0;uAttributeIndex < uAttributesMappingSize;++uAttributeIndex)
 		{
-			unsigned uAttributeValuesCount = attributeMappingData.getAttributeValuesCount();
-			if(uAttributeValuesCount == 2)
+			const AttributeMapping &attributeMappingData = vecAttributeMappings[uAttributeIndex];
+			if(attributeMappingData.isOutputAttribute() != p_bOutputAttribute)
+				continue; // we don't want this attribute data
+
+			Str sToAdd;
+			if(!sTextToWrite.empty())
+				sToAdd.format("%c",cDivider);
+
+			int iFirstAttributeInStructure = attributeMappingData.getFirstAttributeInStructure();
+			double dFirstValue = p_vecDoubleValues[iFirstAttributeInStructure];
+
+			if(attributeMappingData.isLiteralAttribute())
 			{
-				int iIndexChosenValue = ( (dFirstValue >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
-				sToAdd += Str("%c%lf%c%c%s%c",XML_CLASSIFICATION_CHAR_START,dFirstValue
-					,XML_CLASSIFICATION_CHAR_END,XML_CLASSIFICATION_CHAR_START
-					,attributeMappingData.getAttributeValue(iIndexChosenValue),XML_CLASSIFICATION_CHAR_END);
+				unsigned uAttributeValuesCount = attributeMappingData.getAttributeValuesCount();
+				if(uAttributeValuesCount == 2)
+				{
+					int iIndexChosenValue = ( (dFirstValue >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
+					sToAdd += Str("%c%lf%c%c%s%c",XML_CLASSIFICATION_CHAR_START,dFirstValue
+						,XML_CLASSIFICATION_CHAR_END,XML_CLASSIFICATION_CHAR_START
+						,attributeMappingData.getAttributeValue(iIndexChosenValue).c_str(),XML_CLASSIFICATION_CHAR_END);
+				}
+				else
+				{
+					double dMaxFoundValue = dFirstValue;
+					int iMaxFoundValueIndex = 0;
+					sToAdd.format("%s%c",sToAdd.c_str(),XML_CLASSIFICATION_CHAR_START);
+					for(unsigned uPossibleAttributeIndex = 0;uPossibleAttributeIndex < uAttributeValuesCount;++uPossibleAttributeIndex)
+					{
+						double dThisIndexValue = p_vecDoubleValues[iFirstAttributeInStructure + uPossibleAttributeIndex];
+						if(dThisIndexValue > dMaxFoundValue)
+						{
+							dMaxFoundValue = dThisIndexValue;
+							iMaxFoundValueIndex = uPossibleAttributeIndex;
+						}
+
+						char cToAddAfterAttributeValue = ((uPossibleAttributeIndex == uAttributeValuesCount-1) ? XML_CLASSIFICATION_CHAR_END : cDivider);
+						sToAdd += Str("%lf%c",dThisIndexValue,cToAddAfterAttributeValue);
+					}
+					sToAdd += Str("%c%s%c",XML_CLASSIFICATION_CHAR_START,attributeMappingData.getAttributeValue(iMaxFoundValueIndex).c_str(),XML_CLASSIFICATION_CHAR_END);
+				}
 			}
 			else
 			{
-				double dMaxFoundValue = dFirstValue;
-				int iMaxFoundValueIndex = 0;
-				sToAdd.format("%s%c",sToAdd.c_str(),XML_CLASSIFICATION_CHAR_START);
-				for(unsigned uPossibleAttributeIndex = 0;uPossibleAttributeIndex < uAttributeValuesCount;++uPossibleAttributeIndex)
-				{
-					double dThisIndexValue = p_vecDoubleValues[iFirstAttributeInStructure + uPossibleAttributeIndex];
-					if(dThisIndexValue > dMaxFoundValue)
-					{
-						dMaxFoundValue = dThisIndexValue;
-						iMaxFoundValueIndex = uPossibleAttributeIndex;
-					}
-
-					char cToAddAfterAttributeValue = ((uPossibleAttributeIndex == uAttributeValuesCount-1) ? XML_CLASSIFICATION_CHAR_END : cDivider);
-					sToAdd += Str("%lf%c",dThisIndexValue,cToAddAfterAttributeValue);
-				}
-				sToAdd += Str("%c%s%c",XML_CLASSIFICATION_CHAR_START,attributeMappingData.getAttributeValue(iMaxFoundValueIndex),XML_CLASSIFICATION_CHAR_END);
+				double dMin = attributeMappingData.getMinValue();
+				double dMax = attributeMappingData.getMaxValue();
+				double dUnnormalizedValue = (dFirstValue-dMinNeuralNetworkValue) / (dMaxNeuralNetworkValue-dMinNeuralNetworkValue) * (dMax-dMin) + dMin;
+				sToAdd += Str("%lf",dUnnormalizedValue);
 			}
-		}
-		else
-		{
-			double dMin = attributeMappingData.getMinValue();
-			double dMax = attributeMappingData.getMaxValue();
-			double dUnnormalizedValue = (dFirstValue-dMinNeuralNetworkValue) / (dMaxNeuralNetworkValue-dMinNeuralNetworkValue) * (dMax-dMin) + dMin;
-			sToAdd += Str("%lf",dUnnormalizedValue);
-		}
 
-		sTextToWrite += sToAdd;
+			sTextToWrite += sToAdd;
+		}
 	}
 
 	TiXmlElement elementToXML(p_sNameToSave.c_str());

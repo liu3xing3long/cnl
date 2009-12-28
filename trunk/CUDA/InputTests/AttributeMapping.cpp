@@ -93,7 +93,7 @@ void AttributeMapping::setPossibleRange(double p_dMin,double p_dMax)
 {
 	m_dMin = p_dMin;
 	m_dMax = p_dMax;
-	m_bLiteralAttribute = true;
+	m_bLiteralAttribute = false;
 }
 
 int AttributeMapping::getFirstAttributeInStructure() const
