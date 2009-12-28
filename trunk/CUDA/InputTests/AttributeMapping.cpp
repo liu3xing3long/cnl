@@ -95,3 +95,23 @@ void AttributeMapping::setPossibleRange(double p_dMin,double p_dMax)
 	m_dMax = p_dMax;
 	m_bLiteralAttribute = true;
 }
+
+int AttributeMapping::getFirstAttributeInStructure() const
+{
+	return m_iFirstAttributeInStructure;
+}
+
+bool AttributeMapping::isLiteralAttribute() const
+{
+	return m_bLiteralAttribute;
+}
+
+unsigned AttributeMapping::getAttributeValuesCount() const
+{
+	return m_vecAttributeValues.size();
+}
+
+Str AttributeMapping::getAttributeValue(unsigned p_uIndex) const
+{
+	return m_vecAttributeValues[p_uIndex];
+}

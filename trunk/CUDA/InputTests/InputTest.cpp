@@ -45,8 +45,55 @@ void InputTest::saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValue
 		if(attributeMappingData.isOutputAttribute() != p_bOutputAttribute)
 			continue; // we don't want this attribute data
 
-		if(
+		Str sToAdd;
+		if(!sTextToWrite.empty())
+			sToAdd.format("%c",cDivider);
+
+		int iFirstAttributeInStructure = attributeMappingData.getFirstAttributeInStructure();
+
+		if(attributeMappingData.isLiteralAttribute())
+		{
+			unsigned uAttributeValuesCount = attributeMappingData.getAttributeValuesCount();
+			if(uAttributeValuesCount == 2)
+			{
+				double dValue = p_vecDoubleValues[iFirstAttributeInStructure];
+				int iIndexChosenValue = ( (dValue >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
+				sToAdd += Str("%c%lf%c%c%s%c",XML_CLASSIFICATION_CHAR_START,dValue
+					,XML_CLASSIFICATION_CHAR_END,XML_CLASSIFICATION_CHAR_START
+					,attributeMappingData.getAttributeValue(iIndexChosenValue),XML_CLASSIFICATION_CHAR_END);
+			}
+			else
+			{
+				double dMaxFoundValue = p_vecDoubleValues[iFirstAttributeInStructure];
+				int iMaxFoundValueIndex = 0;
+				sToAdd.format("%s%c",sToAdd.c_str(),XML_CLASSIFICATION_CHAR_START);
+				for(unsigned uPossibleAttributeIndex = 0;uPossibleAttributeIndex < uAttributeValuesCount;++uPossibleAttributeIndex)
+				{
+					double dThisIndexValue = p_vecDoubleValues[iFirstAttributeInStructure + uPossibleAttributeIndex];
+					if(dThisIndexValue > dMaxFoundValue)
+					{
+						dMaxFoundValue = dThisIndexValue;
+						iMaxFoundValueIndex = uPossibleAttributeIndex;
+					}
+
+					char cToAddAfterAttributeValue = ((uPossibleAttributeIndex == uAttributeValuesCount-1) ? XML_CLASSIFICATION_CHAR_END : cDivider);
+					sToAdd += Str("%lf%c",dThisIndexValue,cToAddAfterAttributeValue);
+				}
+				sToAdd += Str("%c%s%c",XML_CLASSIFICATION_CHAR_START,attributeMappingData.getAttributeValue(iMaxFoundValueIndex),XML_CLASSIFICATION_CHAR_END);
+			}
+		}
+		else
+		{
+
+		}
+
+		sTextToWrite += sToAdd;
 	}
+
+	TiXmlElement elementToXML(p_sNameToSave.c_str());
+	TiXmlText valueToSave(sTextToWrite.c_str());
+	elementToXML.InsertEndChild(valueToSave);
+	p_XML.InsertEndChild(elementToXML);
 }
 
 void InputTest::saveToXML(TiXmlElement &p_XML) const

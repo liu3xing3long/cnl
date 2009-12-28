@@ -18,6 +18,7 @@
 // JRTODO - sprawdz, czy wszystkie parametry metod/funkcji sa p_ , a skladniki klas/obiektow sa m_
 // JRTODO - popularne metody powinny byc inline
 // JRTODO - opisz w pracy te wszystkie kroki opisane w JRTODO ktore zrobilem, zeby program byl bardziej spojny
+// JRTODO - ustal, czy stale maja byc robione przez #define czy const xxx
 
 // JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
 // JRTODO - maybe a possibility to change eta during training?

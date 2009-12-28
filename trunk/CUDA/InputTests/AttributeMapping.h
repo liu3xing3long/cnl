@@ -25,4 +25,8 @@ public:
 	void loadFromXML(const TiXmlElement &p_XML);
 	void setLiteralPossibleValues(const vector<Str> &p_vecPosibleValues);
 	void setPossibleRange(double p_dMin,double p_dMax);
+	int getFirstAttributeInStructure() const;
+	bool isLiteralAttribute() const;
+	unsigned getAttributeValuesCount() const;
+	Str getAttributeValue(unsigned p_uIndex) const; 
 };
