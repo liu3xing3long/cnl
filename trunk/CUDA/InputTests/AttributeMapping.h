@@ -28,5 +28,7 @@ public:
 	int getFirstAttributeInStructure() const;
 	bool isLiteralAttribute() const;
 	unsigned getAttributeValuesCount() const;
-	Str getAttributeValue(unsigned p_uIndex) const; 
+	Str getAttributeValue(unsigned p_uIndex) const;
+	double getMinValue() const; 
+	double getMaxValue() const;
 };

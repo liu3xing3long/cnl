@@ -50,21 +50,21 @@ void InputTest::saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValue
 			sToAdd.format("%c",cDivider);
 
 		int iFirstAttributeInStructure = attributeMappingData.getFirstAttributeInStructure();
+		double dFirstValue = p_vecDoubleValues[iFirstAttributeInStructure];
 
 		if(attributeMappingData.isLiteralAttribute())
 		{
 			unsigned uAttributeValuesCount = attributeMappingData.getAttributeValuesCount();
 			if(uAttributeValuesCount == 2)
 			{
-				double dValue = p_vecDoubleValues[iFirstAttributeInStructure];
-				int iIndexChosenValue = ( (dValue >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
-				sToAdd += Str("%c%lf%c%c%s%c",XML_CLASSIFICATION_CHAR_START,dValue
+				int iIndexChosenValue = ( (dFirstValue >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
+				sToAdd += Str("%c%lf%c%c%s%c",XML_CLASSIFICATION_CHAR_START,dFirstValue
 					,XML_CLASSIFICATION_CHAR_END,XML_CLASSIFICATION_CHAR_START
 					,attributeMappingData.getAttributeValue(iIndexChosenValue),XML_CLASSIFICATION_CHAR_END);
 			}
 			else
 			{
-				double dMaxFoundValue = p_vecDoubleValues[iFirstAttributeInStructure];
+				double dMaxFoundValue = dFirstValue;
 				int iMaxFoundValueIndex = 0;
 				sToAdd.format("%s%c",sToAdd.c_str(),XML_CLASSIFICATION_CHAR_START);
 				for(unsigned uPossibleAttributeIndex = 0;uPossibleAttributeIndex < uAttributeValuesCount;++uPossibleAttributeIndex)
@@ -84,7 +84,10 @@ void InputTest::saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValue
 		}
 		else
 		{
-
+			double dMin = attributeMappingData.getMinValue();
+			double dMax = attributeMappingData.getMaxValue();
+			double dUnnormalizedValue = (dFirstValue-dMinNeuralNetworkValue) / (dMaxNeuralNetworkValue-dMinNeuralNetworkValue) * (dMax-dMin) + dMin;
+			sToAdd += Str("%lf",dUnnormalizedValue);
 		}
 
 		sTextToWrite += sToAdd;

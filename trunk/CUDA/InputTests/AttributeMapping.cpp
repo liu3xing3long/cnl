@@ -115,3 +115,13 @@ Str AttributeMapping::getAttributeValue(unsigned p_uIndex) const
 {
 	return m_vecAttributeValues[p_uIndex];
 }
+
+double AttributeMapping::getMinValue() const
+{
+	return m_dMin;
+}
+
+double AttributeMapping::getMaxValue() const
+{
+	return m_dMax;
+}
