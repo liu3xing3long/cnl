@@ -24,6 +24,7 @@ class InputTest
 	void randomizeTest(MTRand *p_pRandomGenerator);
 	void setOutputFunction(const vector< pair<double,double> > &p_vecMinMax, void (*p_fTestingFunction)(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters),MTRand *p_pRandomGenerator);
 
+	void saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValues,TiXmlElement &p_XML,Str p_sNameToSave,bool p_bOutputAttribute) const;
 	void saveToXML(TiXmlElement &p_XML) const;
 	void loadFromXML(const TiXmlElement &p_XML);
 };

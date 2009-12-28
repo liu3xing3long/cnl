@@ -21,6 +21,7 @@ public:
 	AttributeMapping(Str p_sColumnName = "",bool p_bIsOutputVector = false
 		,int p_iColumnIndexInVecElements = -1,int p_iElementInStructure = -1);
 
+	void saveToXML(TiXmlElement &p_XML) const;
 	void loadFromXML(const TiXmlElement &p_XML);
 	void setLiteralPossibleValues(const vector<Str> &p_vecPosibleValues);
 	void setPossibleRange(double p_dMin,double p_dMax);

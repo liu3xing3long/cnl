@@ -34,18 +34,31 @@ void InputTest::setOutputFunction(const vector< pair<double,double> > &p_vecMinM
 	p_fTestingFunction(m_vecInputs,m_vecCorrectOutputs);
 }
 
+void InputTest::saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValues,TiXmlElement &p_XML,Str p_sNameToSave,bool p_bOutputAttribute) const
+{
+	Str sTextToWrite;
+	const vector<AttributeMapping> &vecAttributeMappings = m_pParentTestSet->m_vecAttributeMappings;
+	unsigned uAttributesMappingSize = vecAttributeMappings.size();
+	for(unsigned uAttributeIndex = 0;uAttributeIndex < uAttributesMappingSize;++uAttributeIndex)
+	{
+		const AttributeMapping &attributeMappingData = vecAttributeMappings[uAttributeIndex];
+		if(attributeMappingData.isOutputAttribute() != p_bOutputAttribute)
+			continue; // we don't want this attribute data
+
+		if(
+	}
+}
+
 void InputTest::saveToXML(TiXmlElement &p_XML) const
 {
-	// JRTODO - correct this method
-	/*
 	// we save Inputs
-	saveDoubleVectorToXML(m_vecInputs,p_XML,m_XMLInputs,&m_pParentTestSet->m_vecMinMaxInData);
+	saveDoubleTestVectorToXML(m_vecInputs,p_XML,m_XMLInputs,false);
 	// we save Correct Outputs
-	saveDoubleVectorToXML(m_vecCorrectOutputs,p_XML,m_XMLCorrectOutputs,&m_pParentTestSet->m_vecMinMaxOutData);
+	saveDoubleTestVectorToXML(m_vecCorrectOutputs,p_XML,m_XMLCorrectOutputs,true);
 	// we save Network Outputs
-	saveDoubleVectorToXML(m_vecNetworkOutputs,p_XML,m_XMLNetworkOutputs);
+	saveDoubleTestVectorToXML(m_vecNetworkOutputs,p_XML,m_XMLNetworkOutputs,true);
 	// we save Network Outputs GPU
-	saveDoubleVectorToXML(m_vecNetworkOutputsGPU,p_XML,m_XMLNetworkOutputsGPU);*/
+	saveDoubleTestVectorToXML(m_vecNetworkOutputsGPU,p_XML,m_XMLNetworkOutputsGPU,true);
 }
 
 void InputTest::loadFromXML(const TiXmlElement &p_XML)

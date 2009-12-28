@@ -16,6 +16,8 @@
 // JRTODO - zmiana executeLayerKernel na uzycie 2 testow na raz - przede wszystkim pomaga przy duzych sieciach. Przy 500 * 500 praktycznie 2 razy szybciej . Przy 20 * 20, 10% wolniej - ale w tym przypadku i tak z 80% czasu to jest ladowanie kernela...
 // JRTODO - ja optymalizowalem wszystko, zeby dzialalo szybko w przypadku duzych sieci, a nie malych (jak sa male to i tak dziala wolno, bo CPU duzo zabiera...)
 // JRTODO - sprawdz, czy wszystkie parametry metod/funkcji sa p_ , a skladniki klas/obiektow sa m_
+// JRTODO - popularne metody powinny byc inline
+// JRTODO - opisz w pracy te wszystkie kroki opisane w JRTODO ktore zrobilem, zeby program byl bardziej spojny
 
 // JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
 // JRTODO - maybe a possibility to change eta during training?

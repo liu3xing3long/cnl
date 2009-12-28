@@ -31,6 +31,33 @@ AttributeMapping::AttributeMapping(Str p_sColumnName,bool p_bIsOutputVector, int
 	m_bLiteralAttribute = false;
 }
 
+void AttributeMapping::saveToXML(TiXmlElement &p_XML) const
+{
+	// We save neuron type
+	p_XML.SetAttribute(m_XMLColumnName.c_str(),m_sColumnName.c_str());
+	Str sTemp = (m_bOutputAttribute ? m_XMLTrue : m_XMLFalse);
+	p_XML.SetAttribute(m_XMLIsOutputAttribute.c_str(),sTemp.c_str());
+	p_XML.SetAttribute(m_XMLColumnIndexInInputFile.c_str(),Str("%d",m_iColumnInInputFile).c_str());
+	p_XML.SetAttribute(m_XMLColumnIndexInStructure.c_str(),Str("%d",m_iFirstAttributeInStructure).c_str());
+	sTemp = (m_bLiteralAttribute ? m_XMLTrue : m_XMLFalse);
+	p_XML.SetAttribute(m_XMLIsLiteralAttribute.c_str(),sTemp.c_str());
+	if(m_bLiteralAttribute == true)
+	{
+		for(unsigned uAttributeValueIndex = 0;uAttributeValueIndex < m_vecAttributeValues.size();++uAttributeValueIndex)
+		{
+			TiXmlElement elementToXML(m_XMLColumnElementName.c_str());
+			TiXmlText valueToSave(m_vecAttributeValues[uAttributeValueIndex].c_str());
+			elementToXML.InsertEndChild(valueToSave);
+			p_XML.InsertEndChild(elementToXML);
+		}
+	}
+	else
+	{
+		p_XML.SetAttribute(m_XMLMinValue.c_str(),Str("%lf",m_dMin).c_str());
+		p_XML.SetAttribute(m_XMLMaxValue.c_str(),Str("%lf",m_dMax).c_str());
+	}
+}
+
 void AttributeMapping::loadFromXML(const TiXmlElement &p_XML)
 {
 	m_sColumnName = p_XML.Attribute(m_XMLColumnName.c_str());
@@ -40,12 +67,7 @@ void AttributeMapping::loadFromXML(const TiXmlElement &p_XML)
 
 	Str sIsLiteralAttribute = p_XML.Attribute(m_XMLIsLiteralAttribute.c_str());
 	m_bLiteralAttribute = (sIsLiteralAttribute == m_XMLTrue);
-	if(m_bLiteralAttribute == false)
-	{
-		m_dMin = atof(p_XML.Attribute(m_XMLMinValue.c_str()));
-		m_dMax = atof(p_XML.Attribute(m_XMLMaxValue.c_str()));
-	}
-	else
+	if(m_bLiteralAttribute == true)
 	{
 		const TiXmlElement *pXMLColumnElementName = p_XML.FirstChildElement(m_XMLColumnElementName.c_str());
 		while(pXMLColumnElementName)
@@ -53,6 +75,11 @@ void AttributeMapping::loadFromXML(const TiXmlElement &p_XML)
 			m_vecAttributeValues.push_back(pXMLColumnElementName->GetText());
 			pXMLColumnElementName = pXMLColumnElementName->NextSiblingElement(m_XMLColumnElementName.c_str());
 		}
+	}
+	else
+	{
+		m_dMin = atof(p_XML.Attribute(m_XMLMinValue.c_str()));
+		m_dMax = atof(p_XML.Attribute(m_XMLMaxValue.c_str()));
 	}
 }
 

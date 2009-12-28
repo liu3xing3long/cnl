@@ -115,25 +115,16 @@ bool InputTestSet::saveToFile(Str p_sFileName) const
 
 void InputTestSet::saveToXML(TiXmlElement &p_XML) const
 {
-	// JRTODO - update it
-	/*
-	// we save in/out column names
-	TiXmlElement inColumnElements(m_XMLInColumns.c_str());
-	TiXmlElement outColumnElements(m_XMLOutColumns.c_str());
-	for(unsigned uColumnIndex = 0;uColumnIndex < m_vecAttributeMappings.size();++uColumnIndex)
+	p_XML.SetAttribute(m_XMLSourceFileName.c_str(),m_sSourceDataFileName.c_str());
+	// we save attribute mappings
+	TiXmlElement attributeMappingsElement(m_XMLAttributeMappings.c_str());
+	for(unsigned uAttributeMappingIndex = 0;uAttributeMappingIndex < m_vecAttributeMappings.size();++uAttributeMappingIndex)
 	{
-		const AttributeMapping &mappingNow = m_vecAttributeMappings[uColumnIndex];
-		TiXmlElement newColumnElement(m_XMLInColumnElement.c_str());
-		TiXmlText newColumnElementValue(mappingNow.getColumnName().c_str());
-		newColumnElement.InsertEndChild(newColumnElementValue);
-
-		if(mappingNow.isOutputAttribute())
-			inColumnElements.InsertEndChild(newColumnElement);
-		else
-			outColumnElements.InsertEndChild(newColumnElement);
+		TiXmlElement newAttributeMappingElement(m_XMLAttributeMapping.c_str());
+		m_vecAttributeMappings[uAttributeMappingIndex].saveToXML(newAttributeMappingElement);
+		attributeMappingsElement.InsertEndChild(newAttributeMappingElement);
 	}
-	p_XML.InsertEndChild(inColumnElements);
-	p_XML.InsertEndChild(outColumnElements);
+	p_XML.InsertEndChild(attributeMappingsElement);
 
 	// we save all tests
 	TiXmlElement testsElement(m_XMLTests.c_str());
@@ -143,7 +134,7 @@ void InputTestSet::saveToXML(TiXmlElement &p_XML) const
 		m_vecTests[uTestIndex].saveToXML(newTestElement);
 		testsElement.InsertEndChild(newTestElement);
 	}
-	p_XML.InsertEndChild(testsElement);*/
+	p_XML.InsertEndChild(testsElement);
 }
 
 bool InputTestSet::loadFromFile(Str p_sFileName)
@@ -236,6 +227,23 @@ void InputTestSet::retriveColumnNamesFromCSVFile(vector< vector<Str> > &p_vecEle
 		Str sElement = p_vecElements[0][uColumnIndex];
 		if(sElement[0] == '\"' && sElement[sElement.size()-1] == '\"')
 			sElement = sElement.substring(1,sElement.size()-2);
+
+		// we remove all XML_CLASSIFICATION_CHAR_START and XML_CLASSIFICATION_CHAR_END elements
+		size_t iPos;
+		do
+		{
+			iPos = sElement.find(XML_CLASSIFICATION_CHAR_START);
+			if(iPos == Str::npos || sElement.find(XML_CLASSIFICATION_CHAR_END) < iPos)
+				iPos = sElement.find(XML_CLASSIFICATION_CHAR_END);
+
+			if(iPos != Str::npos)
+			{
+				logTextParams(Logging::LT_WARNING,"Column name %d = \"%s\" has incorrect character(s) at position %d - this character will be removed",uColumnIndex,sElement,iPos);
+				sElement = sElement.substring(0,iPos) + sElement.substring(iPos+1);
+			}
+		}
+		while(iPos != Str::npos);
+
 		p_vecColumnNames.push_back(sElement);
 	}
 	p_vecElements.erase(p_vecElements.begin());

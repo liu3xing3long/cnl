@@ -20,6 +20,8 @@
 #define M_PI       3.14159265358979323846
 const double dMinNeuralNetworkValue = -1.0;
 const double dMaxNeuralNetworkValue = 1.0;
+#define XML_CLASSIFICATION_CHAR_START	'['
+#define XML_CLASSIFICATION_CHAR_END		']'
 
 // If true, floating point numbers on a GPU is float. If false, it is double (possible only on 1.3 CUDA devices)
 #define REAL_GPU_IS_FLOAT 1
