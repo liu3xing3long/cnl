@@ -47,7 +47,7 @@ Str getDoubleVectorXMLString(const vector<double>&p_vecToConvert,vector< pair<do
 
 void loadDoubleVectorFromXML(vector<double>&p_vecToConvert, const TiXmlElement &p_XML, Str p_sNameToLoad)
 {
-	const TiXmlElement *pElementToLoad = p_XML.FirstChildElement(p_sNameToLoad);
+	const TiXmlElement *pElementToLoad = p_XML.FirstChildElement(p_sNameToLoad.c_str());
 	logAssert(pElementToLoad);
 	Str sConnectedValues = pElementToLoad->GetText();
 	setDoubleVectorXMLString(p_vecToConvert,sConnectedValues);

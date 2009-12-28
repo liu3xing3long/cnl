@@ -149,7 +149,7 @@ class TiXmlString
 	}
 
 	// Romanowski added
-	inline operator const char*() { return rep_->str; }
+	//inline operator const char*() { return rep_->str; }
 
 	// Convert a TiXmlString into a null-terminated char *
 	inline const char * c_str () const { return rep_->str; }

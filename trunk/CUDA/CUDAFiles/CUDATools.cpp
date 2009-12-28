@@ -12,9 +12,9 @@
 	cudaError_t resultCudaOperation = (oper);									\
 	if( cudaSuccess != resultCudaOperation)										\
 	{																			\
-		logText(Logging::LT_ERROR,"Error performing operation \""				\
+		logText(Logging::LT_ERROR,("Error performing operation \""				\
 			+ Str(#oper)+"\". Error: "											\
-			+ Str(cudaGetErrorString( resultCudaOperation)));					\
+			+ Str(cudaGetErrorString( resultCudaOperation))).c_str());			\
     }																			\
 }
 

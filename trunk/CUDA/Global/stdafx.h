@@ -12,6 +12,8 @@
 #include <map>
 #include <stdarg.h>
 #include <limits.h>
+#include <algorithm>
+#include <limits>
 //#include <math.h>
 
 // On Visual Studio 2008, M_PI constant is not defined even when math.h is included

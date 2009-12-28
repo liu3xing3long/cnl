@@ -15,6 +15,7 @@
 // JRTODO - opisz sposob tworzenia programu, problemy, rozwiazania problemow
 // JRTODO - zmiana executeLayerKernel na uzycie 2 testow na raz - przede wszystkim pomaga przy duzych sieciach. Przy 500 * 500 praktycznie 2 razy szybciej . Przy 20 * 20, 10% wolniej - ale w tym przypadku i tak z 80% czasu to jest ladowanie kernela...
 // JRTODO - ja optymalizowalem wszystko, zeby dzialalo szybko w przypadku duzych sieci, a nie malych (jak sa male to i tak dziala wolno, bo CPU duzo zabiera...)
+// JRTODO - sprawdz, czy wszystkie parametry metod/funkcji sa p_ , a skladniki klas/obiektow sa m_
 
 // JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
 // JRTODO - maybe a possibility to change eta during training?
@@ -22,7 +23,7 @@
 // JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
 // JRTODO - zrob asserty
 // JRTODO - zakladamy, ze plik XML jest poprawny. Najwiecej sprawdzania jest przy wczytywaniu danych z pliku CSV. W pracy MGR opisz, jakie zrobiles sprawdzania CSV
-
+// JRTODO - ustal, czsy w deklaracjach klas sa najpierw zmienne, czy metody (i czy najpierw konstruktor/destruktor, czy inne. czy public, czy private)
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {

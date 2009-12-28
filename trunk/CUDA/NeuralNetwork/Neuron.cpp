@@ -131,7 +131,6 @@ void Neuron::saveToXML(TiXmlElement &p_XML) const
 
 void Neuron::loadFromXML(const TiXmlElement &p_XML)
 {
-	
 	Str sNeuronType = p_XML.Attribute(m_XMLNeuronType.c_str());
 	setNeuronTypeString(sNeuronType);
 

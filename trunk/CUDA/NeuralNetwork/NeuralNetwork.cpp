@@ -23,7 +23,7 @@ bool NeuralNetwork::saveToFile(const Str &p_sFileName) const
 	TiXmlDocument doc;
 	doc.InsertEndChild(TiXmlDeclaration( "1.0", "", "" ));
 	TiXmlElement neuralNetworkElement( m_XMLNeuralNetworkElement.c_str() );
-	neuralNetworkElement.SetAttribute(m_XMLNeuralNetworkType.c_str(),getNeuralNetworkTypeString());
+	neuralNetworkElement.SetAttribute(m_XMLNeuralNetworkType.c_str(),getNeuralNetworkTypeString().c_str());
 
 	// Use a specific method to retrieve Neural Network data
 	saveToXML(neuralNetworkElement);

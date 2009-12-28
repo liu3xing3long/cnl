@@ -1,7 +1,7 @@
 #pragma once
 
 #define logText(a,b) Logging::logTextFileLine(a,b,__FILE__,__FUNCTION__,__LINE__)
-#define logTextParams(a,b,...) Logging::logTextFileLine(a,TiXmlString(b,__VA_ARGS__),__FILE__,__FUNCTION__,__LINE__)
+#define logTextParams(a,b,...) Logging::logTextFileLine(a,TiXmlString(b,__VA_ARGS__).c_str(),__FILE__,__FUNCTION__,__LINE__)
 
 // JRTODO
 #define logAssert(a) if((int)(a) == 0) logText(Logging::LT_ERROR,Str("Assert failed: "+Str(#a)).c_str());
