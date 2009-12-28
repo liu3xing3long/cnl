@@ -85,6 +85,20 @@ class TiXmlString
 		memcpy(start(), copy.data(), length());
 	}
 
+	/*// Romanowski added
+	TiXmlString (const char * str) : rep_(0)
+	{
+		if(str == NULL)
+		{
+			rep_ = &nullrep_;
+			return;
+		}
+
+		int len = strlen(str);
+		init(len);
+		memcpy(start(), str, len);
+	}*/
+
 	// TiXmlString constructor, based on a string
 	/*TIXML_EXPLICIT */ TiXmlString (const char * formatStr, ...) : rep_(0)
 	{
@@ -249,7 +263,7 @@ class TiXmlString
 			const char *sPointerEnd = strchr(sPointer,cSeparator);
 			if(sPointerEnd != NULL)
 			{
-				vecToReturn.push_back(TiXmlString(sPointer,(int)(sPointerEnd - sPointer)));
+				vecToReturn.push_back(substring(sPointer-data(),(int)(sPointerEnd - sPointer)));
 			}
 			else
 			{

@@ -53,7 +53,7 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 	time ( &rawTime );
 	tm *pTimeStruct = localtime(&rawTime);
 
-	sLogging.format("%d.%02d.%02d %02d:%02d:%02d    %s%20s%40s%5d    %s\n",
+	sLogging.format("%d.%02d.%02d %02d:%02d:%02d    %s%25s%50s%5d    %s\n",
 		pTimeStruct->tm_year+1900,pTimeStruct->tm_mon+1,pTimeStruct->tm_mday,
 		pTimeStruct->tm_hour,pTimeStruct->tm_min,pTimeStruct->tm_sec,
 		sLoggingType.c_str(),

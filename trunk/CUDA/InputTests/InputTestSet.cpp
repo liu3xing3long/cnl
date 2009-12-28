@@ -199,6 +199,9 @@ bool InputTestSet::loadElementsFromCSVFile(char p_cSeparator, Str p_sFileName, F
 	{
 		iLineNumber++;
 		int iLineLen = strlen(sLoadedLine);
+		if(sLoadedLine[iLineLen-1] == '\n')
+			sLoadedLine[--iLineLen] = '\0';
+
 		if(iLineLen < 3)
 			continue;
 		if(iLineLen >= iStringLen-2)
@@ -405,7 +408,7 @@ bool InputTestSet::generateInputColumnsVectorForCSVFile(const vector<int> &p_vec
 		logTextParams(Logging::LT_ERROR,"There are no input columns...");
 		return false;
 	}
-	return false;
+	return true;
 }
 
 bool InputTestSet::checkBasicValidityInCSVFile(const vector< vector<Str> > &p_vecElements)
@@ -565,6 +568,8 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 
 bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,char p_cSeparator,const vector<int> &p_vecOutputColumns,const vector<int> &p_vecUnusedColumns)
 {
+	logTextParams(Logging::LT_INFORMATION,"Started loading CSV file %s",p_sFileName.c_str());
+
 	if(p_vecOutputColumns.size() == 0)
 	{
 		logTextParams(Logging::LT_ERROR,"No output elements specified in p_vecOutputColumns");
@@ -615,7 +620,8 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 	// We retrieve min/max and values data 
 	// Also, we check if there are columns with only one possible value (if yes, it is an error)
 	vector< pair<double,double> > vecMinMaxData; // min and max values for numeric data
-	vecMinMaxData.resize(uColumnsNumber);
+	vecMinMaxData.assign(uColumnsNumber,pair<double,double> 
+		(numeric_limits<double>::quiet_NaN(),numeric_limits<double>::quiet_NaN()));
 	vector< vector<Str> > vecPossibleValuesData; // all possible values for literal data
 	vecPossibleValuesData.resize(uColumnsNumber);
 	if(!getColumnRangesFromCSVFile(vecElements, vecIsLiteral, vecMinMaxData,vecPossibleValuesData))
