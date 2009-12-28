@@ -285,6 +285,16 @@ void doExecuteNetworksAndSaveLoad()
 	pToLoad->saveToFile("NetworkStruct2.xml");
 	testSetToLoad.saveToFile("TestSet2.xml");
 }
+
+void checkIfCSVReasingIsOK()
+{
+	InputTestSet testSetCSV;
+	vector<int> vecOutputColumns;
+	vecOutputColumns.push_back(12);
+	vector<int> vecUnusedColumns;
+	testSetCSV.loadFromCSVFile("forestfires.csv",true,',',vecOutputColumns,vecUnusedColumns);
+	testSetCSV.saveToFile("TestSetFromCSV");
+}
  
 int main()
 {
@@ -293,9 +303,11 @@ int main()
 
 	//doExecuteNetworksAndSaveLoad();
 
-	makeTraining();
+	//makeTraining();
 
 	//checkIfGPUTrainingIsOK();
+
+	checkIfCSVReasingIsOK();
 
 	return 0;
 }
