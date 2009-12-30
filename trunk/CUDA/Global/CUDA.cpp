@@ -27,6 +27,7 @@
 // JRTODO - zrob asserty
 // JRTODO - zakladamy, ze plik XML jest poprawny. Najwiecej sprawdzania jest przy wczytywaniu danych z pliku CSV. W pracy MGR opisz, jakie zrobiles sprawdzania CSV
 // JRTODO - ustal, czsy w deklaracjach klas sa najpierw zmienne, czy metody (i czy najpierw konstruktor/destruktor, czy inne. czy public, czy private)
+// JRTODO - metody pomocnicze maja byc static
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
@@ -108,10 +109,8 @@ void checkIfGPUTrainingIsOK()
 	MLP dummyNetGPU (dummyNet);
 
 	// 100 tests, 2 input variables, 1 output variables
-	InputTestSet dummyTestSet(iTestsInTraining,iInputs,iOutputs);
-	dummyTestSet.randomizeTests(NULL);
-
-	dummyTestSet.setOutputFunction(vecMinMax,testingFunction,NULL);
+	InputTestSet dummyTestSet(iTestsInTraining,iInputs,iOutputs,vecMinMax,testingFunction,NULL);
+	//dummyTestSet.randomizeTests(NULL);
  
 	//dummyNet.executeNetwork(dummyTestSet);
 	//dummyNetGPU.executeNetworkGPU(dummyTestSet);
@@ -166,8 +165,7 @@ void makeTraining()
 
 	for(int d=0;d<numTriedTrainings;++d)
 	{
-		testSetsInTraining[d] = new InputTestSet(iNumTests,iInputs,iOutputs);
-		testSetsInTraining[d]->setOutputFunction(vecMinMax,testingFunction,NULL);
+		testSetsInTraining[d] = new InputTestSet(iNumTests,iInputs,iOutputs,vecMinMax,testingFunction,NULL);
 	}
 
 	for(int a=0;a<numElementsInArrays1;++a)
@@ -245,10 +243,8 @@ void doExecuteNetworksAndSaveLoad()
 	dummyNet.randomizeWeights(0.01,NULL);
 
 	// 100 tests, 2 input variables, 1 output variables
-	InputTestSet dummyTestSet(iNumTests,iInputs,iOutputs);
-	dummyTestSet.randomizeTests(NULL);
-
-	dummyTestSet.setOutputFunction(vecMinMax,testingFunction,NULL);
+	InputTestSet dummyTestSet(iNumTests,iInputs,iOutputs,vecMinMax,testingFunction,NULL);
+	//dummyTestSet.randomizeTests(NULL);
 
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
 	const int iTimesTried = 1;
@@ -286,14 +282,27 @@ void doExecuteNetworksAndSaveLoad()
 	testSetToLoad.saveToFile("TestSet2.xml");
 }
 
-void checkIfCSVReasingIsOK()
+void checkIfCSVReadingIsOK()
 {
 	InputTestSet testSetCSV;
 	vector<int> vecOutputColumns;
 	vecOutputColumns.push_back(12);
 	vector<int> vecUnusedColumns;
 	testSetCSV.loadFromCSVFile("forestfires.csv",true,',',vecOutputColumns,vecUnusedColumns);
+
+	MLP dummyNet;
+	dummyNet.setInputNeuronCount(testSetCSV.getInputCount());
+	dummyNet.addNewLayer(20,Neuron::NT_SIGMOID);
+	dummyNet.addNewLayer(testSetCSV.getOutputCount(),Neuron::NT_LINEAR);
+	dummyNet.randomizeWeights(0.01,NULL);
+	dummyNet.trainNetwork(testSetCSV,100000,0.01,1,NULL);
+	dummyNet.executeNetwork(testSetCSV);
+	dummyNet.executeNetworkGPU(testSetCSV);
+
+
 	testSetCSV.saveToFile("TestSetFromCSV.xml");
+	testSetCSV.loadFromFile("TestSetFromCSV.xml");
+	testSetCSV.saveToFile("TestSetFromCSV2.xml");
 }
  
 int main()
@@ -307,7 +316,7 @@ int main()
 
 	//checkIfGPUTrainingIsOK();
 
-	checkIfCSVReasingIsOK();
+	checkIfCSVReadingIsOK();
 
 	return 0;
 }

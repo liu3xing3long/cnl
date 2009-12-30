@@ -28,7 +28,7 @@ private:
 	void loadFromXML(const TiXmlElement &p_XML);
 
 	void cleanObject();
-	//void normalizeTests();
+	void normalizeTests();
 
 	static bool loadElementsFromCSVFile(char p_cSeparator, Str p_sFileName, FILE *p_pLoadFile, vector< vector<Str> > &p_vecElements);
 	static void retriveColumnNamesFromCSVFile(vector< vector<Str> > &p_vecElements, vector<Str> &p_vecColumnNames);
@@ -60,11 +60,12 @@ public:
 	bool getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErrors,vector<double> &p_vecMaxProportionalErrors, DifferenceStatisticsType p_eDifferenceType) const;
 
 	void randomizeTests(MTRand *p_pRandomGenerator);
-	void setOutputFunction(const vector< pair<double,double> > &p_vecMinMax, void (*p_fTestingFunction)(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters),MTRand *p_pRandomGenerator);
-
 	InputTestSet();
 	InputTestSet(const InputTestSet &p_TestSet);
-	InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsigned p_uNumberOutputs);
+	InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsigned p_uNumberOutputs
+		,const vector< pair<double,double> > &p_vecMinMax, void (*p_fTestingFunction)(const vector<double> &p_vecInputParameters
+		,vector<double> &p_vecOutputParameters),MTRand *p_pRandomGenerator);
+
 
 	~InputTestSet();
 };

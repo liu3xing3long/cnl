@@ -14,7 +14,7 @@
 #include <limits.h>
 #include <algorithm>
 #include <limits>
-//#include <math.h>
+#include <math.h>
 
 // On Visual Studio 2008, M_PI constant is not defined even when math.h is included
 #define M_PI       3.14159265358979323846

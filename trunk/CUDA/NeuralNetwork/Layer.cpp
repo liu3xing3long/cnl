@@ -34,7 +34,7 @@ Layer::Layer(unsigned p_uNumberNeurons,unsigned p_uNumberWeights,Neuron::NeuronT
 
 Layer::~Layer()
 {
-	// JRTODO deallocate md_pLayerMemory
+	
 }
 
 Layer *Layer::getLayerBefore()

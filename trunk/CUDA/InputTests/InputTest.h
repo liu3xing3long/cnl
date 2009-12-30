@@ -26,5 +26,6 @@ class InputTest
 
 	void saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValues,TiXmlElement &p_XML,Str p_sNameToSave,bool p_bOutputAttribute) const;
 	void saveToXML(TiXmlElement &p_XML) const;
+	static void loadDoubleTestVectorFromXML(vector<double> &p_vecDoubleValues,const TiXmlElement &p_XML,Str p_sNameToLoad);
 	void loadFromXML(const TiXmlElement &p_XML);
 };

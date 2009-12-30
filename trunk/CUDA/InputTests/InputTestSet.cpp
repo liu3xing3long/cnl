@@ -53,6 +53,12 @@ bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErro
 		const vector<double> &vecToCompare1 = (p_eDifferenceType == DST_GPU_AND_CPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecCorrectOutputs);
 		const vector<double> &vecToCompare2 = (p_eDifferenceType == DST_CORRECT_AND_GPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecNetworkOutputs);
 
+		if(vecToCompare1.size() == 0 || vecToCompare2.size() == 0)
+		{
+			logTextParams(Logging::LT_INFORMATION, "Results vector is empty for test %d",uTestIndex);
+			return false;
+		}
+
 		for(unsigned uOutputIndex=0;uOutputIndex<uOutputsSize;++uOutputIndex)
 		{
 			double dAbsoluteError = fabs(vecToCompare1[uOutputIndex] - vecToCompare2[uOutputIndex]);
@@ -68,21 +74,11 @@ bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErro
 
 void InputTestSet::randomizeTests(MTRand *p_pRandomGenerator)
 {
+	// JRTODO - is this method needed?
 	for(unsigned uTestIndex=0;uTestIndex<m_vecTests.size();++uTestIndex)
 	{
 		m_vecTests[uTestIndex].randomizeTest(p_pRandomGenerator);
 	}
-}
-
-void InputTestSet::setOutputFunction(const vector< pair<double,double> > &p_vecMinMax, void (*p_fTestingFunction)(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters),MTRand *p_pRandomGenerator)
-{
-	for(unsigned uTestIndex=0;uTestIndex<m_vecTests.size();++uTestIndex)
-	{
-		m_vecTests[uTestIndex].setOutputFunction(p_vecMinMax,p_fTestingFunction,p_pRandomGenerator);
-	}
-
-	// JRTODO - update this
-	//normalizeTests();
 }
 
 bool InputTestSet::saveToFile(Str p_sFileName) const
@@ -154,9 +150,6 @@ bool InputTestSet::loadFromFile(Str p_sFileName)
 
 	fclose(pLoadFile);
 
-	// JRTODO - update this
-	//normalizeTests();
-
 	return true;
 }
 
@@ -187,6 +180,9 @@ void InputTestSet::loadFromXML(const TiXmlElement &p_XML)
 		m_vecTests.push_back(newTest);
 		pXMLTest = pXMLTest->NextSiblingElement(m_XMLTest.c_str());
 	}
+
+	// we have to normalize test input/output
+	normalizeTests();
 }
 
 bool InputTestSet::loadElementsFromCSVFile(char p_cSeparator, Str p_sFileName, FILE *p_pLoadFile, vector< vector<Str> > &p_vecElements)
@@ -433,7 +429,6 @@ bool InputTestSet::checkBasicValidityInCSVFile(const vector< vector<Str> > &p_ve
 	return true;
 }
 
-// JRTODO - ta i inne metody pomocnicze maja byc static
 void InputTestSet::printDataAboutColumns(const vector<int> &p_vecColumnIndexes,Str p_sColumnType,const vector<bool> &p_vecIsLiteral,const vector< pair<double,double> > &p_vecMinMaxData
 										 ,const vector< vector<Str> > &p_vecPossibleValuesData,const vector<Str> &p_vecColumnNames)
 {
@@ -572,7 +567,7 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 
 	if(p_vecOutputColumns.size() == 0)
 	{
-		logTextParams(Logging::LT_ERROR,"No output elements specified in p_vecOutputColumns");
+		logText(Logging::LT_ERROR,"No output elements specified in p_vecOutputColumns");
 		return false;
 	}
 
@@ -646,17 +641,20 @@ InputTestSet::InputTestSet(const InputTestSet &p_TestSet)
 	m_sSourceDataFileName = p_TestSet.m_sSourceDataFileName;
 }
 
-InputTestSet::InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsigned p_uNumberOutputs)
+InputTestSet::InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsigned p_uNumberOutputs
+		,const vector< pair<double,double> > &p_vecMinMax, void (*p_fTestingFunction)(const vector<double> &p_vecInputParameters
+		,vector<double> &p_vecOutputParameters),MTRand *p_pRandomGenerator)
 {
 	for(unsigned uTestIndex=0;uTestIndex<p_uNumberTests;++uTestIndex)
 	{
 		m_vecTests.push_back(InputTest(this,p_uNumberInputs,p_uNumberOutputs));
+		m_vecTests[uTestIndex].setOutputFunction(p_vecMinMax,p_fTestingFunction,p_pRandomGenerator);
 	}
 
-	// JRTODO - set values correctly
-	// m_vecInColumnNames and m_vecOutColumnNames should have a correct length (even though they are empty)
-	//m_vecInColumnNames.resize(p_uNumberInputs);
-	//m_vecOutColumnNames.resize(p_uNumberOutputs);
+	// we have to create 
+
+	// JRTODO - update this
+	//normalizeTests();
 }
 
 InputTestSet::InputTestSet()
@@ -674,49 +672,52 @@ void InputTestSet::cleanObject()
 	m_sSourceDataFileName = "";
 }
 
-/*
+
 void InputTestSet::normalizeTests()
 {
+	// we find min and max values in non-literal attributes, set it in m_vecAttributeMappings, and normalize inputs and outputs
 	unsigned uTestCount = getTestCount();
 	
-	m_vecMinMaxInData.clear();
-	unsigned uInputCount = getInputCount();
-	for(unsigned uInputIndex=0;uInputIndex<uInputCount;++uInputIndex)
+	unsigned uAttributeCount = m_vecAttributeMappings.size();
+	for(unsigned uAttributeIndex=0;uAttributeIndex<uAttributeCount;++uAttributeIndex)
 	{
-		double dMin = m_vecTests[0].m_vecInputs[uInputIndex];
-		double dMax = m_vecTests[0].m_vecInputs[uInputIndex];
+		AttributeMapping &attributeNow = m_vecAttributeMappings[uAttributeIndex];
+		if(attributeNow.isLiteralAttribute())
+			continue;
+
+		bool bIsOutputAttribute = attributeNow.isOutputAttribute();
+		int iAttributeInVector = attributeNow.getFirstAttributeInStructure();
+
+		vector<double> &vecUsedFirstTest = (bIsOutputAttribute ? m_vecTests[0].m_vecCorrectOutputs : m_vecTests[0].m_vecInputs);
+		double dMin = vecUsedFirstTest[iAttributeInVector];
+		double dMax = vecUsedFirstTest[iAttributeInVector];
 		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
 		{
-			dMin = min(dMin,m_vecTests[uTestIndex].m_vecInputs[uInputIndex]);
-			dMax = max(dMax,m_vecTests[uTestIndex].m_vecInputs[uInputIndex]);
+			vector<double> &vecUsed = (bIsOutputAttribute ? m_vecTests[uTestIndex].m_vecCorrectOutputs : m_vecTests[uTestIndex].m_vecInputs);
+			dMin = min(dMin,vecUsed[iAttributeInVector]);
+			dMax = max(dMax,vecUsed[iAttributeInVector]);
 		}
 
-		m_vecMinMaxInData.push_back(pair<double,double> (dMin,dMax));
+		// we update m_dMin and m_dMax in attributeNow.
+		// When this method is called from loadFromXML(), then these values are already set (we check, if these values are the same)
+		attributeNow.setPossibleRange(dMin,dMax);
 
+		// we update input/output values
 		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
 		{
-			m_vecTests[uTestIndex].m_vecInputs[uInputIndex] = (m_vecTests[uTestIndex].m_vecInputs[uInputIndex] - dMin) / (dMax-dMin) * 2.0 - 1;
-		}
-	}
-
-	m_vecMinMaxOutData.clear();
-	unsigned uOutputCount = getOutputCount();
-	for(unsigned uOutputIndex=0;uOutputIndex<uOutputCount;++uOutputIndex)
-	{
-		double dMin = m_vecTests[0].m_vecCorrectOutputs[uOutputIndex];
-		double dMax = m_vecTests[0].m_vecCorrectOutputs[uOutputIndex];
-		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
-		{
-			dMin = min(dMin,m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex]);
-			dMax = max(dMax,m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex]);
-		}
-
-		m_vecMinMaxOutData.push_back(pair<double,double> (dMin,dMax));
-
-		for(unsigned uTestIndex=0;uTestIndex<uTestCount;++uTestIndex)
-		{
-			m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex] = (m_vecTests[uTestIndex].m_vecCorrectOutputs[uOutputIndex] - dMin) / (dMax-dMin) * 2.0 - 1;
+			InputTest &testNow = m_vecTests[uTestIndex];
+			if(bIsOutputAttribute)
+			{
+				testNow.m_vecCorrectOutputs[iAttributeInVector] = (testNow.m_vecCorrectOutputs[iAttributeInVector] - dMin) / (dMax-dMin) * (dMaxNeuralNetworkValue-dMinNeuralNetworkValue) + dMinNeuralNetworkValue;
+				if(testNow.m_vecNetworkOutputs.size())
+					testNow.m_vecNetworkOutputs[iAttributeInVector] = (testNow.m_vecNetworkOutputs[iAttributeInVector] - dMin) / (dMax-dMin) * (dMaxNeuralNetworkValue-dMinNeuralNetworkValue) + dMinNeuralNetworkValue;
+				if(testNow.m_vecNetworkOutputsGPU.size())
+					testNow.m_vecNetworkOutputsGPU[iAttributeInVector] = (testNow.m_vecNetworkOutputsGPU[iAttributeInVector] - dMin) / (dMax-dMin) * (dMaxNeuralNetworkValue-dMinNeuralNetworkValue) + dMinNeuralNetworkValue;
+			}
+			else
+			{
+				testNow.m_vecInputs[iAttributeInVector] = (m_vecTests[uTestIndex].m_vecInputs[iAttributeInVector] - dMin) / (dMax-dMin) * (dMaxNeuralNetworkValue-dMinNeuralNetworkValue) + dMinNeuralNetworkValue;
+			}
 		}
 	}
 }
-*/

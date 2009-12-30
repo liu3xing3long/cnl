@@ -55,10 +55,10 @@ void loadDoubleVectorFromXML(vector<double>&p_vecToConvert, const TiXmlElement &
 void setDoubleVectorXMLString(vector<double>&p_vecToConvert, const Str &p_sConnectedValues)
 {
 	p_vecToConvert.clear();
-	char *sDuplicate = strdup(p_sConnectedValues.c_str());
-	char *sPointer = sDuplicate;
+	//char *sDuplicate = strdup(p_sConnectedValues.c_str());
+	const char *sPointer = p_sConnectedValues.c_str(); //sDuplicate;
 
-	while(*sPointer != 0)
+	while(((int)sPointer != 1) && (*sPointer != 0))
 	{
 		double dNewValue;
 		sscanf(sPointer,"%lf",&dNewValue);
