@@ -288,14 +288,14 @@ void checkIfCSVReadingIsOK()
 	vector<int> vecOutputColumns;
 	vecOutputColumns.push_back(12);
 	vector<int> vecUnusedColumns;
-	testSetCSV.loadFromCSVFile("forestfires.csv",true,',',vecOutputColumns,vecUnusedColumns);
+	testSetCSV.loadFromCSVFile("forestfires - Kopia.csv",true,',',vecOutputColumns,vecUnusedColumns);
 
 	MLP dummyNet;
 	dummyNet.setInputNeuronCount(testSetCSV.getInputCount());
 	dummyNet.addNewLayer(20,Neuron::NT_SIGMOID);
 	dummyNet.addNewLayer(testSetCSV.getOutputCount(),Neuron::NT_LINEAR);
 	dummyNet.randomizeWeights(0.01,NULL);
-	dummyNet.trainNetwork(testSetCSV,100000,0.01,1,NULL);
+	//dummyNet.trainNetwork(testSetCSV,100000,0.01,1,NULL);
 	dummyNet.executeNetwork(testSetCSV);
 	dummyNet.executeNetworkGPU(testSetCSV);
 
@@ -312,11 +312,11 @@ int main()
 
 	//doExecuteNetworksAndSaveLoad();
 
-	makeTraining();
+	//makeTraining();
 
 	//checkIfGPUTrainingIsOK();
 
-	//checkIfCSVReadingIsOK();
+	checkIfCSVReadingIsOK();
 
 	return 0;
 }

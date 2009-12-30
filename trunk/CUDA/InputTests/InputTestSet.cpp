@@ -71,7 +71,7 @@ bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErro
 
 	return true;
 }
-
+/*
 void InputTestSet::randomizeTests(MTRand *p_pRandomGenerator)
 {
 	// JRTODO - is this method needed?
@@ -79,7 +79,7 @@ void InputTestSet::randomizeTests(MTRand *p_pRandomGenerator)
 	{
 		m_vecTests[uTestIndex].randomizeTest(p_pRandomGenerator);
 	}
-}
+}*/
 
 bool InputTestSet::saveToFile(Str p_sFileName) const
 {

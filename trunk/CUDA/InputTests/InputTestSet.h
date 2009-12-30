@@ -59,7 +59,7 @@ public:
 
 	bool getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErrors,vector<double> &p_vecMaxProportionalErrors, DifferenceStatisticsType p_eDifferenceType) const;
 
-	void randomizeTests(MTRand *p_pRandomGenerator);
+	//void randomizeTests(MTRand *p_pRandomGenerator);
 	InputTestSet();
 	InputTestSet(const InputTestSet &p_TestSet);
 	InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsigned p_uNumberOutputs
