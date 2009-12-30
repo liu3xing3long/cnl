@@ -651,10 +651,14 @@ InputTestSet::InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsi
 		m_vecTests[uTestIndex].setOutputFunction(p_vecMinMax,p_fTestingFunction,p_pRandomGenerator);
 	}
 
-	// we have to create 
+	// we have to set m_vecAttributeMappings (all attributes are non-literal, just range)
+	for(unsigned uColumnIndex = 0;uColumnIndex < p_uNumberInputs;++uColumnIndex)
+		m_vecAttributeMappings.push_back(AttributeMapping("",false,-1,uColumnIndex));
 
-	// JRTODO - update this
-	//normalizeTests();
+	for(unsigned uColumnIndex = 0;uColumnIndex < p_uNumberOutputs;++uColumnIndex)
+		m_vecAttributeMappings.push_back(AttributeMapping("",true,-1,uColumnIndex));
+
+	normalizeTests();
 }
 
 InputTestSet::InputTestSet()

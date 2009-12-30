@@ -312,11 +312,11 @@ int main()
 
 	//doExecuteNetworksAndSaveLoad();
 
-	//makeTraining();
+	makeTraining();
 
 	//checkIfGPUTrainingIsOK();
 
-	checkIfCSVReadingIsOK();
+	//checkIfCSVReadingIsOK();
 
 	return 0;
 }
