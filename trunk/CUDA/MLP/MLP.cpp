@@ -189,18 +189,16 @@ void MLP::executeNetworkGPU(InputTestSet &p_TestSet/*,bool p_bInTraining*/)
 		{
 			int iDummy;
 			d_pLayerInput = CUDATools::setGPUMemoryForInputLayer(p_TestSet,iDummy);
-			d_pWeights =  CUDATools::setGPUMemoryForWeights(thisLayer);
-			d_pLayerOutput = CUDATools::allocateGPUMemoryForHiddenOrOutputLayer(p_TestSet,thisLayer);
 		}
 		else
 		{
 			CUDATools::freeGPUMemory(d_pLayerInput);
 			d_pLayerInput = d_pLayerOutput;
 			CUDATools::freeGPUMemory(d_pWeights);
-			d_pWeights =  CUDATools::setGPUMemoryForWeights(thisLayer);
-			d_pLayerOutput = CUDATools::allocateGPUMemoryForHiddenOrOutputLayer(p_TestSet,thisLayer);
 		}
 
+		d_pWeights =  CUDATools::setGPUMemoryForWeights(thisLayer);
+		d_pLayerOutput = CUDATools::allocateGPUMemoryForHiddenOrOutputLayer(p_TestSet,thisLayer);
 		CUDATools::executeLayerGPU(d_pLayerInput,d_pWeights,d_pLayerOutput,p_TestSet,thisLayer);
 	}
 

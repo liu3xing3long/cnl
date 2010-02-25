@@ -89,7 +89,7 @@ void checkIfGPUTrainingIsOK()
 	const double dEta = 0.02;
 	const int iTestsInTraining = 1000;
 	const int iHiddenNeuronsInTesting = 45;
-	const int iNumTrainedElements = 160000;
+	const int iNumTrainedElements = 16;
 	const int iBatchSize = 16;
 
 	dummyNet.setInputNeuronCount(iInputs);
@@ -314,9 +314,9 @@ int main()
 
 	//makeTraining();
 
-	//checkIfGPUTrainingIsOK();
+	checkIfGPUTrainingIsOK();
 
-	checkIfCSVReadingIsOK();
+	//checkIfCSVReadingIsOK();
 
 	return 0;
 }
