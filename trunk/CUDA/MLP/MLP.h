@@ -7,7 +7,7 @@ private:
 	vector<Layer> m_vecLayers;
 
 	virtual void executeNetwork(InputTest &p_Test);
-	virtual void executeNetworkGPU(InputTest &p_Test);
+	//virtual void executeNetworkGPU(InputTest &p_Test);
 
 public: 
 	virtual void executeNetwork(InputTestSet &p_TestSet);

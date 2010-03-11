@@ -2,8 +2,8 @@
 
 __constant__ int iTestIndices[iMaxNumberOfTrainedElements];
 
-// JRTODO - dylemat - czy zawsze uzywac iTestIndices przy czytaniu i zapisywaniu, czy tylko na wejsciu pierwszego layera?..
-// JRTODO - zmien mnozenie integerow na specjalna funkcje mnozaca najnizsze 24 bity
+
+
 
 
 

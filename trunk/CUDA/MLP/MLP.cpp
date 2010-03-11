@@ -208,11 +208,12 @@ void MLP::executeNetworkGPU(InputTestSet &p_TestSet/*,bool p_bInTraining*/)
 	CUDATools::freeGPUMemory(d_pLayerOutput);
 }
 
+/*
 void MLP::executeNetworkGPU(InputTest &p_Test)
 {
-	// JRTODO - added to remove a warning
+	// JRTODO - is this method needed?
 	p_Test;
-}
+}*/
 
 void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator)
 {

@@ -5,27 +5,12 @@
 
 #include <omp.h>
 
-// JRTODO - napisz, ze kod bedzie dzialac pod 32bit i 64bit
-// JRTODO - I ze wazne bylo, zeby dzialal tez na innych platformach
-// JRTODO - Na CPU uzywam double do liczb zmiennoprzecinkowych, a na GPU - real_gpu (w zaleznosci od rodzaju GPU).
-// JRTODO - implementacja CPU uzywa double a GPU floata - wiec daje jej to przewage
-// JRTODO - problem z czytaniem/zapisywaniem pamieci niezadeklarowanej. Kiedy jest emu, to dziala OK, kiedy GPU, to pamiec nie jest zapisywana... (chyba to byl blad z synchronizacja)
-// JRTODO - napisz czemu nie mozna w pliku .cu uzywac logowania takiego jak gdzie indziej
-// JRTODO - opisz wybor zewnetrznych bibliotek
-// JRTODO - opisz sposob tworzenia programu, problemy, rozwiazania problemow
-// JRTODO - zmiana executeLayerKernel na uzycie 2 testow na raz - przede wszystkim pomaga przy duzych sieciach. Przy 500 * 500 praktycznie 2 razy szybciej . Przy 20 * 20, 10% wolniej - ale w tym przypadku i tak z 80% czasu to jest ladowanie kernela...
-// JRTODO - ja optymalizowalem wszystko, zeby dzialalo szybko w przypadku duzych sieci, a nie malych (jak sa male to i tak dziala wolno, bo CPU duzo zabiera...)
 // JRTODO - sprawdz, czy wszystkie parametry metod/funkcji sa p_ , a skladniki klas/obiektow sa m_
 // JRTODO - popularne metody powinny byc inline
 // JRTODO - opisz w pracy te wszystkie kroki opisane w JRTODO ktore zrobilem, zeby program byl bardziej spojny
 // JRTODO - ustal, czy stale maja byc robione przez #define czy const xxx
-
-// JRTODO - obsluga wiecej niz 512 neuronow w warstkie, wiecej niz 65535 testow
-// JRTODO - maybe a possibility to change eta during training?
-// JRTODO - skalowanie danych wejsciowych
 // JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
 // JRTODO - zrob asserty
-// JRTODO - zakladamy, ze plik XML jest poprawny. Najwiecej sprawdzania jest przy wczytywaniu danych z pliku CSV. W pracy MGR opisz, jakie zrobiles sprawdzania CSV
 // JRTODO - ustal, czsy w deklaracjach klas sa najpierw zmienne, czy metody (i czy najpierw konstruktor/destruktor, czy inne. czy public, czy private)
 // JRTODO - metody pomocnicze maja byc static
 
@@ -192,7 +177,7 @@ void makeTraining()
 					InputTestSet trainTestSet(*testSetsInTraining[d]);
 
 					// We train the network using CPU
-					trainNet.trainNetwork(trainTestSet,iTrainedElementsArray[a],dEtaArray[b],iTestsInTrainingArray[c],&generatorInThread); // JRTODO - maybe a possibility to change eta during training?
+					trainNet.trainNetwork(trainTestSet,iTrainedElementsArray[a],dEtaArray[b],iTestsInTrainingArray[c],&generatorInThread); 
 
 					// execute trained network and check difference between correct output
 					trainNet.executeNetwork(trainTestSet);
