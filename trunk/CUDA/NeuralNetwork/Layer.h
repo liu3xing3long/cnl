@@ -3,8 +3,8 @@
 class NeuralNetwork;
 class Layer
 {
-	friend CUDATools;
-	friend MLP;
+	friend class CUDATools;
+	friend class MLP;
 
 	vector<Neuron> m_vecNeurons;
 

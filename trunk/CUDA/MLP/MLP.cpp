@@ -16,7 +16,7 @@ void MLP::executeNetwork(InputTestSet &p_TestSet)
 void MLP::executeNetwork(InputTest &p_Test)
 {
 	// execute network on all layers for this test
-	vector<double> vecLayerInput(p_Test.m_vecInputs);
+	vector<double> vecLayerInput(p_Test.getInputs());
 	vector<double> vecLayerOutput;
 	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
 	{
@@ -59,7 +59,7 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			// We assign error values in the last layer
 			for(unsigned uOutputElement=0;uOutputElement<p_TestSet.getOutputCount();++uOutputElement)
 			{
-				double dError = test.m_vecNetworkOutputs[uOutputElement] - test.m_vecCorrectOutputs[uOutputElement];
+				double dError = test.getNetworkOutput(uOutputElement) - test.getCorrectOutput(uOutputElement);
 				logTextParamsDebug("Test in batch nr %d , Output %d : Network = %f , Correct  = %f , Error = %f",iTestInBatchIndex,uOutputElement,test.m_vecNetworkOutputs[uOutputElement],test.m_vecCorrectOutputs[uOutputElement],dError);
 				//vecDifferences.push_back(dError);
 				m_vecLayers[m_vecLayers.size()-1].m_vecNeurons[uOutputElement].m_vecLastError.push_back(dError);
@@ -126,7 +126,7 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 				}*/
 
 				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
-					vecOutputsLayerBefore.push_back(vecTests[uTestIndex]->m_vecInputs);
+					vecOutputsLayerBefore.push_back(vecTests[uTestIndex]->getInputs());
 			}
 			else
 			{

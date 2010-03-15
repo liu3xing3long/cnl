@@ -4,9 +4,9 @@ class Layer;
 
 class Neuron
 {
-	friend CUDATools;
-	friend MLP;
-	friend Layer;
+	friend class CUDATools;
+	friend class MLP;
+	friend class Layer;
 
 public:
 	enum NeuronType 

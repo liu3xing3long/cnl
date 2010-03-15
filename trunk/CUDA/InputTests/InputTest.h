@@ -4,7 +4,7 @@ class InputTestSet;
 
 class InputTest
 {
-	friend class MLP;
+	//friend class MLP;
 	friend class InputTestSet;
 	friend class CUDATools;
 
@@ -19,8 +19,6 @@ class InputTest
 
 	InputTest(InputTestSet *p_pParentTestSet, unsigned p_uNumberInputs,unsigned p_uNumberOutputs);
 
-	void setOutputs(const vector<double> &p_vecLayerOutput);
-
 	void randomizeTest(MTRand *p_pRandomGenerator);
 	void setOutputFunction(const vector< pair<double,double> > &p_vecMinMax, void (*p_fTestingFunction)(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters),MTRand *p_pRandomGenerator);
 
@@ -28,4 +26,10 @@ class InputTest
 	void saveToXML(TiXmlElement &p_XML) const;
 	static void loadDoubleTestVectorFromXML(vector<double> &p_vecDoubleValues,const TiXmlElement &p_XML,Str p_sNameToLoad);
 	void loadFromXML(const TiXmlElement &p_XML);
+
+public:
+	void setOutputs(const vector<double> &p_vecLayerOutput);
+	const vector<double>& getInputs() const;
+	double getNetworkOutput(unsigned int p_uiIndex) const;
+	double getCorrectOutput(unsigned int p_uiIndex) const;
 };

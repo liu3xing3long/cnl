@@ -12,11 +12,6 @@ InputTest::InputTest(InputTestSet *p_pParentTestSet, unsigned p_uNumberInputs,un
 	m_vecCorrectOutputs.assign(p_uNumberOutputs,0);
 }
 
-void InputTest::setOutputs(const vector<double> &p_vecLayerOutput)
-{
-	m_vecNetworkOutputs.assign(p_vecLayerOutput.begin(),p_vecLayerOutput.end());
-}
-
 void InputTest::randomizeTest(MTRand *p_pRandomGenerator)
 {
 	for(unsigned uInputIndex=0;uInputIndex<m_vecInputs.size();++uInputIndex)
@@ -162,4 +157,24 @@ void InputTest::loadFromXML(const TiXmlElement &p_XML)
 	loadDoubleTestVectorFromXML(m_vecNetworkOutputs,p_XML,m_XMLNetworkOutputs);
 	// we load Network Outputs GPU
 	loadDoubleTestVectorFromXML(m_vecNetworkOutputsGPU,p_XML,m_XMLNetworkOutputsGPU);
+}
+
+void InputTest::setOutputs(const vector<double> &p_vecLayerOutput)
+{
+	m_vecNetworkOutputs.assign(p_vecLayerOutput.begin(),p_vecLayerOutput.end());
+}
+
+const vector<double>& InputTest::getInputs() const
+{
+	return m_vecInputs;
+}
+
+double InputTest::getNetworkOutput(unsigned int p_uiIndex) const
+{
+	return m_vecNetworkOutputs[p_uiIndex];
+}
+
+double InputTest::getCorrectOutput(unsigned int p_uiIndex) const
+{
+	return m_vecCorrectOutputs[p_uiIndex];
 }
