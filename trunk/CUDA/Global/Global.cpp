@@ -29,9 +29,9 @@ Str getDoubleVectorXMLString(const vector<double>&p_vecToConvert,vector< pair<do
 	for(size_t uIndex=0;uIndex<uSize;++uIndex)
 	{
 		if(p_vecMinMaxInData != NULL && p_vecMinMaxInData->size() != 0)
-			sprintf(sPointer,"%lf",((p_vecToConvert[uIndex]+1.0)/2)*(p_vecMinMaxInData->at(uIndex).second-p_vecMinMaxInData->at(uIndex).first) - p_vecMinMaxInData->at(uIndex).first);
+			sprintf(sPointer,"%g",((p_vecToConvert[uIndex]+1.0)/2)*(p_vecMinMaxInData->at(uIndex).second-p_vecMinMaxInData->at(uIndex).first) - p_vecMinMaxInData->at(uIndex).first);
 		else
-			sprintf(sPointer,"%lf",p_vecToConvert[uIndex]);
+			sprintf(sPointer,"%g",p_vecToConvert[uIndex]);
 
 		sPointer += strlen(sPointer);
 		*sPointer = cDivider;
@@ -61,7 +61,7 @@ void setDoubleVectorXMLString(vector<double>&p_vecToConvert, const Str &p_sConne
 	while(((int)sPointer != 1) && (*sPointer != 0))
 	{
 		double dNewValue;
-		sscanf(sPointer,"%lf",&dNewValue);
+		sscanf(sPointer,"%g",&dNewValue);
 		p_vecToConvert.push_back(dNewValue);
 		sPointer = strchr(sPointer,cDivider)+1;
 	}

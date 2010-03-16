@@ -381,7 +381,7 @@ bool InputTestSet::getColumnRangesFromCSVFile(const vector< vector<Str> > &p_vec
 
 			if(dMin == dMax)
 			{
-				logTextParams(Logging::LT_ERROR,"Number column %d has only one value %lf",uColumnIndex,dMin);
+				logTextParams(Logging::LT_ERROR,"Number column %d has only one value %g",uColumnIndex,dMin);
 				return false;
 			}
 		}
@@ -455,7 +455,7 @@ void InputTestSet::printDataAboutColumns(const vector<int> &p_vecColumnIndexes,S
 			}
 			else
 			{
-				sLogText.format("%sMinimum %lf , Maximum %lf",sLogText.c_str(),p_vecMinMaxData[uColumnIndexInInput].first,p_vecMinMaxData[uColumnIndexInInput].second);
+				sLogText.format("%s Minimum %g , Maximum %g",sLogText.c_str(),p_vecMinMaxData[uColumnIndexInInput].first,p_vecMinMaxData[uColumnIndexInInput].second);
 			}
 
 			logTextParams(Logging::LT_INFORMATION,sLogText.c_str());
@@ -631,6 +631,7 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 		return false;
 
 	//normalizeTests();
+	m_sSourceDataFileName = p_sFileName;
 	return true;
 }
 

@@ -269,25 +269,42 @@ void doExecuteNetworksAndSaveLoad()
 
 void checkIfCSVReadingIsOK()
 {
-	InputTestSet testSetCSV;
-	vector<int> vecOutputColumns;
-	vecOutputColumns.push_back(12);
-	vector<int> vecUnusedColumns;
-	testSetCSV.loadFromCSVFile("forestfires - Kopia.csv",true,',',vecOutputColumns,vecUnusedColumns);
+	InputTestSet testSetCSV;		// Nowy zestaw testów
+	vector<int> vecOutputColumns;	// Tworzenie listy numerów kolumn wyjœciowych (wynikowych)
+	vecOutputColumns.push_back(12);	// Jedyna wyjœciowa kolumna - indeks 12
+	vector<int> vecUnusedColumns;	// Lista numerów kolumn nieu¿ywanych - pusta
+	testSetCSV.loadFromCSVFile		// £adowanie listy testów
+		("forestfires2.csv"			// Plik wejœciowy z testami w formacjie CSV
+		,true						// Pierwszy wiersz zawiera nazwy kolumn
+		,','						// Okreœlenie znaku oddzielaj¹cego elementy - przecinek
+		,vecOutputColumns			// Podanie listy kolumn wyjœciowych
+		,vecUnusedColumns);			// Podanie listy kolumn nieu¿ywanych
 
-	MLP dummyNet;
-	dummyNet.setInputNeuronCount(testSetCSV.getInputCount());
-	dummyNet.addNewLayer(20,Neuron::NT_SIGMOID);
-	dummyNet.addNewLayer(testSetCSV.getOutputCount(),Neuron::NT_LINEAR);
-	dummyNet.randomizeWeights(0.01,NULL);
-	//dummyNet.trainNetwork(testSetCSV,100000,0.01,1,NULL);
-	dummyNet.executeNetwork(testSetCSV);
-	dummyNet.executeNetworkGPU(testSetCSV);
+	MLP dummyNet;								// Nowa sieæ MLP
+	dummyNet.setInputNeuronCount				// Ustawienie iloœci neuronów wejœciowych
+		(testSetCSV.getInputCount());
+	dummyNet.addNewLayer						// Dodawanie warstwie ukrytej
+		(6										// Iloœæ neuronów
+		,Neuron::NT_SIGMOID);					// Funkcja aktywancji w warstwie ukrytej
+	dummyNet.addNewLayer						// Ustawienie iloœci neuronów wyjœciowych ...
+		(testSetCSV.getOutputCount()			// ... - tyle ile wyjœæ w zestawie testów
+		,Neuron::NT_LINEAR);					// Wyjœcie sieci - linearne
+	dummyNet.randomizeWeights(0.01,NULL);		// dobranie losowych wartoœci wag
+	dummyNet.trainNetwork						// Uczenie sieci przez CPU
+		(testSetCSV								// Uczenie wczeœniej za³adowanym zestawem testów
+		,6000									// Iloœæ sekwencji uczenia sieci
+		,0.01									// eta - czynnik uczenia
+		,1										// Iloœæ testów uczona na raz
+		,NULL);									// Generator liczb pseudolosowych - niepotrzebny
+
+	dummyNet.executeNetwork(testSetCSV);		// Uruchomienie sieci na wszystkich testach przez CPU
+	dummyNet.executeNetworkGPU(testSetCSV);		// Uruchomienie sieci na wszystkich testach przez GPU
 
 
-	testSetCSV.saveToFile("TestSetFromCSV.xml");
-	testSetCSV.loadFromFile("TestSetFromCSV.xml");
-	testSetCSV.saveToFile("TestSetFromCSV2.xml");
+	testSetCSV.saveToFile("TestSetFromCSV.xml");// Zapisywanie zestawu testów jako XML
+	dummyNet.saveToFile("NetworkStruct.xml");	// Zapisywanie sieci MLP jako XML
+	//testSetCSV.loadFromFile("TestSetFromCSV.xml");
+	//testSetCSV.saveToFile("TestSetFromCSV2.xml");
 }
  
 int main()
@@ -299,9 +316,9 @@ int main()
 
 	//makeTraining();
 
-	checkIfGPUTrainingIsOK();
+	//checkIfGPUTrainingIsOK();
 
-	//checkIfCSVReadingIsOK();
+	checkIfCSVReadingIsOK();
 
 	return 0;
 }

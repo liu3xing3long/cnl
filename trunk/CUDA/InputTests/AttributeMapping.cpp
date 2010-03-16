@@ -53,8 +53,8 @@ void AttributeMapping::saveToXML(TiXmlElement &p_XML) const
 	}
 	else
 	{
-		p_XML.SetAttribute(m_XMLMinValue.c_str(),Str("%lf",m_dMin).c_str());
-		p_XML.SetAttribute(m_XMLMaxValue.c_str(),Str("%lf",m_dMax).c_str());
+		p_XML.SetAttribute(m_XMLMinValue.c_str(),Str("%g",m_dMin).c_str());
+		p_XML.SetAttribute(m_XMLMaxValue.c_str(),Str("%g",m_dMax).c_str());
 	}
 }
 
@@ -92,7 +92,7 @@ void AttributeMapping::setLiteralPossibleValues(const vector<Str> &p_vecPosibleV
 void AttributeMapping::setPossibleRange(double p_dMin,double p_dMax)
 {
 	if((!_isnan(m_dMin) && p_dMin != m_dMin) || (!_isnan(m_dMax) && p_dMax != m_dMax))
-		logTextParams(Logging::LT_ERROR,"Different min/max values. Before %lf/%lf , after %lf/%lf",m_dMin,m_dMax,p_dMin,p_dMax);
+		logTextParams(Logging::LT_ERROR,"Different min/max values. Before %g/%g , after %g/%g",m_dMin,m_dMax,p_dMin,p_dMax);
 
 	m_dMin = p_dMin;
 	m_dMax = p_dMax;
