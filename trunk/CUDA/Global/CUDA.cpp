@@ -14,7 +14,7 @@
 // JRTODO - ustal, czsy w deklaracjach klas sa najpierw zmienne, czy metody (i czy najpierw konstruktor/destruktor, czy inne. czy public, czy private)
 // JRTODO - metody pomocnicze maja byc static
 
-// JRTODO - zestawy testow sa na http://mlr.cs.umass.edu/ml/
+// JRTODO - zestawy testow sa na http://mlr.cs.umass.edu/ml/ 
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
