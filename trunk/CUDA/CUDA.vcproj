@@ -933,6 +933,38 @@
 				RelativePath=".\Resources\Wykres_JakoscUczenia.xlsx"
 				>
 			</File>
+			<Filter
+				Name="Test_data"
+				>
+				<File
+					RelativePath=".\Resources\Test_data\forestfires.csv"
+					>
+				</File>
+				<File
+					RelativePath=".\Resources\Test_data\forestfires.names"
+					>
+				</File>
+				<File
+					RelativePath=".\Resources\Test_data\iris.data"
+					>
+				</File>
+				<File
+					RelativePath=".\Resources\Test_data\iris.names"
+					>
+				</File>
+				<File
+					RelativePath=".\Resources\Test_data\Test_data_info.txt"
+					>
+				</File>
+				<File
+					RelativePath=".\Resources\Test_data\wdbc.data"
+					>
+				</File>
+				<File
+					RelativePath=".\Resources\Test_data\wdbc.names"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

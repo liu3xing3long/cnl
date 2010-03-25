@@ -1,0 +1,5 @@
+Zestawy plików œci¹gniête z http://mlr.cs.umass.edu/ml/ 
+
+forestfires.csv, forestfires.names - Forest Fires
+iris.data, iris.names - Iris Plants Database
+wdbc.data, wdbc.names - Wisconsin Diagnostic Breast Cancer (WDBC)
