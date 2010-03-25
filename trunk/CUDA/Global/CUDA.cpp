@@ -14,6 +14,8 @@
 // JRTODO - ustal, czsy w deklaracjach klas sa najpierw zmienne, czy metody (i czy najpierw konstruktor/destruktor, czy inne. czy public, czy private)
 // JRTODO - metody pomocnicze maja byc static
 
+// JRTODO - zestawy testow sa na http://mlr.cs.umass.edu/ml/
+
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
 	// 2 inputs, 1 output
@@ -284,7 +286,7 @@ void checkIfCSVReadingIsOK()
 	dummyNet.setInputNeuronCount				// Ustawienie iloœci neuronów wejœciowych
 		(testSetCSV.getInputCount());
 	dummyNet.addNewLayer						// Dodawanie warstwie ukrytej
-		(6										// Iloœæ neuronów
+		(3										// Iloœæ neuronów
 		,Neuron::NT_SIGMOID);					// Funkcja aktywancji w warstwie ukrytej
 	dummyNet.addNewLayer						// Ustawienie iloœci neuronów wyjœciowych ...
 		(testSetCSV.getOutputCount()			// ... - tyle ile wyjœæ w zestawie testów
