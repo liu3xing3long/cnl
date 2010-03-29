@@ -7,3 +7,7 @@ Str getDoubleVectorXMLString(const vector<double>&p_vecToConvert,vector< pair<do
 
 void loadDoubleVectorFromXML(vector<double>&p_vecToConvert, const TiXmlElement &p_XML, Str p_sNameToLoad);
 void setDoubleVectorXMLString(vector<double>&p_vecToConvert, const Str &p_sConnectedValues);
+
+Str makeDoubleVectorString(vector< vector<double> > *p_vecResultsErrors,unsigned p_uOutputIndex);
+void printVectorDifferenceInfoFromVectors(const vector<double> &p_vecMaxAbsoluteErrors,const vector<double> &p_vecMeanAbsoluteErrors,InputTestSet::DifferenceStatisticsType p_eDifferenceType
+										  ,vector< vector<double> > *p_vecResultsMaxAbsoluteErrors = NULL,vector< vector<double> > *p_vecResultsMeanAbsoluteErrors = NULL);

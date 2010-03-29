@@ -61,8 +61,39 @@ void setDoubleVectorXMLString(vector<double>&p_vecToConvert, const Str &p_sConne
 	while(((int)sPointer != 1) && (*sPointer != 0))
 	{
 		double dNewValue;
-		sscanf(sPointer,"%g",&dNewValue);
+		sscanf(sPointer,"%lf",&dNewValue);
 		p_vecToConvert.push_back(dNewValue);
 		sPointer = strchr(sPointer,cDivider)+1;
+	}
+}
+
+Str makeDoubleVectorString(vector< vector<double> > *p_vecResultsErrors,unsigned p_uOutputIndex)
+{
+	if(p_vecResultsErrors == NULL)
+		return "";
+
+	Str sResult("\t( %f",p_vecResultsErrors->at(0).at(p_uOutputIndex));
+	for(unsigned a=1;a<p_vecResultsErrors->size();++a)
+	{
+		sResult.format("%s , %f",sResult.c_str(),p_vecResultsErrors->at(a).at(p_uOutputIndex));
+	}
+
+	sResult += " )";
+	return sResult;
+}
+
+void printVectorDifferenceInfoFromVectors(const vector<double> &p_vecMaxAbsoluteErrors,const vector<double> &p_vecMeanAbsoluteErrors,InputTestSet::DifferenceStatisticsType p_eDifferenceType
+										  ,vector< vector<double> > *p_vecResultsMaxAbsoluteErrors,vector< vector<double> > *p_vecResultsMeanAbsoluteErrors)
+{
+	logTextParams(Logging::LT_INFORMATION,"Differences between %s and %s"
+		, (p_eDifferenceType == InputTestSet::DST_GPU_AND_CPU ? "GPU" : "Correct")
+		, (p_eDifferenceType == InputTestSet::DST_CORRECT_AND_GPU ? "GPU" : "CPU"));
+	for(unsigned uOutputIndex=0;uOutputIndex<p_vecMaxAbsoluteErrors.size();++uOutputIndex)
+	{
+		Str sMax = makeDoubleVectorString(p_vecResultsMaxAbsoluteErrors,uOutputIndex);
+		Str sMean = makeDoubleVectorString(p_vecResultsMeanAbsoluteErrors,uOutputIndex);
+
+		logTextParams(Logging::LT_INFORMATION,"Output %d/%d:\tMAX:\t%f%s\tMEAN:\t%f%s",uOutputIndex+1
+			,p_vecMaxAbsoluteErrors.size(),p_vecMaxAbsoluteErrors[uOutputIndex],sMax.c_str(),p_vecMeanAbsoluteErrors[uOutputIndex],sMean.c_str());
 	}
 }

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 
 FILE *Logging::m_pLoggingFile;
+unsigned int g_uiAllowedTypesConsole = 0xFFFFFFFF;	// all logging types allowed
+unsigned int g_uiAllowedTypesFile = 0xFFFFFFFF;		// all logging types allowed
 
 void Logging::makeSureLoggingFileExists()
 {
@@ -19,17 +21,12 @@ void Logging::makeSureLoggingFileExists()
 
 void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLoggingText,const char *p_sFileName,const char *p_sFunctionName,long p_lLineNumber)
 {
+	// we check if this logging type is logged either by file or console
+	if(!((g_uiAllowedTypesConsole & (unsigned int)p_eLoggingType) 
+		|| (g_uiAllowedTypesFile & (unsigned int)p_eLoggingType)))
+		return;
+
 	makeSureLoggingFileExists();
-
-#ifndef PRINT_MEMORY
-	if(p_eLoggingType == LT_MEMORY)
-		return;
-#endif
-
-#ifndef PRINT_DEBUG
-	if(p_eLoggingType == LT_DEBUG)
-		return;
-#endif
 
 	static Str sLogging;
 	Str sLoggingType;
@@ -60,7 +57,18 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 		sFileName.c_str(),p_sFunctionName,p_lLineNumber,
 		p_sLoggingText);
 
-	fputs(sLogging.c_str(),m_pLoggingFile);	
-	printf("%s",sLogging.c_str());
-	fflush(m_pLoggingFile);
+	if(g_uiAllowedTypesFile & (unsigned int)p_eLoggingType)
+	{
+		fputs(sLogging.c_str(),m_pLoggingFile);
+		fflush(m_pLoggingFile);
+	}
+
+	if(g_uiAllowedTypesConsole & (unsigned int)p_eLoggingType)
+		printf("%s",sLogging.c_str());
+}
+
+void Logging::setAllowedLoggingTypes(unsigned int p_uiNewAllowedTypesConsole, unsigned int p_uiNewAllowedTypesFile)
+{
+	g_uiAllowedTypesConsole = p_uiNewAllowedTypesConsole;
+	g_uiAllowedTypesFile = p_uiNewAllowedTypesFile;
 }

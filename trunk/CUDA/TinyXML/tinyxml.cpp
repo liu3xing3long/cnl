@@ -35,7 +35,7 @@ distribution.
 
 
 bool TiXmlBase::condenseWhiteSpace = true;
-
+ 
 // Microsoft compiler security
 FILE* TiXmlFOpen( const char* filename, const char* mode )
 { // JRTODO - sopen

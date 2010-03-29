@@ -108,13 +108,13 @@ void Layer::updateErrorValues()
 			double dError = 0.0;
 			for(unsigned iNeuronIndexAfter=0;iNeuronIndexAfter<iNeuronsInLayerAfter;++iNeuronIndexAfter)
 			{
-				logTextParamsDebug("Test index %d , Neuron index %d , iNeuronIndexAfter %d : Weight %f , AfterLayerLastError %f , MULT %f"
+				logTextParams(Logging::LT_DEBUG,"Test index %d , Neuron index %d , iNeuronIndexAfter %d : Weight %f , AfterLayerLastError %f , MULT %f"
 					,a,iNeuronIndex,iNeuronIndexAfter,vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecWeights[iNeuronIndex],vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecLastError[a]
 					,(vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecWeights[iNeuronIndex] * vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecLastError[a]));
 				dError += vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecWeights[iNeuronIndex] * vecNeuronsLayerAfter[iNeuronIndexAfter].m_vecLastError[a];
 			}
 
-			logTextParamsDebug("Test index %d , Neuron index %d : Error %f",a,iNeuronIndex,dError);
+			logTextParams(Logging::LT_DEBUG,"Test index %d , Neuron index %d : Error %f",a,iNeuronIndex,dError);
 			m_vecNeurons[iNeuronIndex].m_vecLastError.push_back(dError);
 		}
 	}
@@ -124,7 +124,7 @@ void Layer::updateWeights(const vector< vector<double> > &p_vecOutputsLayerBefor
 {
 	for(int iNeuronIndex=0;iNeuronIndex<getNeuronCount();++iNeuronIndex)
 	{
-		logTextParamsDebug("updateWeights for neuron %d",iNeuronIndex);
+		logTextParams(Logging::LT_DEBUG,"updateWeights for neuron %d",iNeuronIndex);
 		m_vecNeurons[iNeuronIndex].updateWeights(p_vecOutputsLayerBefore, p_dEta);
 	}
 }

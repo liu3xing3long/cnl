@@ -58,6 +58,7 @@ public:
 	InputTest& getTest(int p_iIndex);
 
 	bool getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErrors,vector<double> &p_vecMaxProportionalErrors, DifferenceStatisticsType p_eDifferenceType) const;
+	void printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsType p_eDifferenceType) const;
 
 	//void randomizeTests(MTRand *p_pRandomGenerator);
 	InputTestSet();

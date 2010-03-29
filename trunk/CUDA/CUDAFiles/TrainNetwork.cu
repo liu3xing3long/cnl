@@ -305,7 +305,7 @@ __global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError
 
 		real_gpu dChangeThisTest = s_ThisLayerError[2*uTestIndex] * s_DerivativeOfLastOutput[2*uTestIndex] * dLayerBeforeOutput * p_dEta;
 		real_gpu dChangeThisTest2 = s_ThisLayerError[2*uTestIndex+1] * s_DerivativeOfLastOutput[2*uTestIndex+1] * dLayerBeforeOutput * p_dEta;
-		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , Weight %d : dError %f , dDerivativeOfLastOutput %f , dLayerBeforeOutput %f , dChangeThisTest %f\n",uTestIndex,blockIdx.x,threadIdx.x,dError,dDerivativeOfLastOutput,dLayerBeforeOutput,dChangeThisTest);
+		PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d , Weight %d : dLayerBeforeOutput %f , dChangeThisTest %f\n",uTestIndex,blockIdx.x,threadIdx.x,dLayerBeforeOutput,dChangeThisTest);
 		dChange += dChangeThisTest;
 		dChange2 += dChangeThisTest2;
 

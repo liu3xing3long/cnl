@@ -18,52 +18,14 @@
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
-	// 2 inputs, 1 output
+	// 2 inputs, 2 outputs
 	double dResult = cos(p_vecInputParameters[0] * p_vecInputParameters[1]) * cos (2 * p_vecInputParameters[0]);
 	p_vecOutputParameters[0] = dResult;
-}
-
-Str makeDoubleVectorString(vector< vector<double> > *p_vecResultsErrors,unsigned p_uOutputIndex)
-{
-	if(p_vecResultsErrors == NULL)
-		return "";
-
-	Str sResult("\t( %f",p_vecResultsErrors->at(0).at(p_uOutputIndex));
-	for(unsigned a=1;a<p_vecResultsErrors->size();++a)
-	{
-		sResult.format("%s , %f",sResult.c_str(),p_vecResultsErrors->at(a).at(p_uOutputIndex));
-	}
-
-	sResult += " )";
-	return sResult;
-}
-
-void printVectorDifferenceInfoFromVectors(const vector<double> &p_vecMaxAbsoluteErrors,const vector<double> &p_vecMeanAbsoluteErrors,InputTestSet::DifferenceStatisticsType p_eDifferenceType
-										  ,vector< vector<double> > *p_vecResultsMaxAbsoluteErrors = NULL,vector< vector<double> > *p_vecResultsMeanAbsoluteErrors = NULL)
-{
-	logTextParams(Logging::LT_INFORMATION,"Differences between %s and %s"
-		, (p_eDifferenceType == InputTestSet::DST_GPU_AND_CPU ? "GPU" : "Correct")
-		, (p_eDifferenceType == InputTestSet::DST_CORRECT_AND_GPU ? "GPU" : "CPU"));
-	for(unsigned uOutputIndex=0;uOutputIndex<p_vecMaxAbsoluteErrors.size();++uOutputIndex)
-	{
-		Str sMax = makeDoubleVectorString(p_vecResultsMaxAbsoluteErrors,uOutputIndex);
-		Str sMean = makeDoubleVectorString(p_vecResultsMeanAbsoluteErrors,uOutputIndex);
-
-		logTextParams(Logging::LT_INFORMATION,"Output %d/%d:\tMAX:\t%f%s\tMEAN:\t%f%s",uOutputIndex+1
-			,p_vecMaxAbsoluteErrors.size(),p_vecMaxAbsoluteErrors[uOutputIndex],sMax.c_str(),p_vecMeanAbsoluteErrors[uOutputIndex],sMean.c_str());
-	}
-}
-
-void printVectorDifferenceInfo(const InputTestSet &p_testSet,InputTestSet::DifferenceStatisticsType p_eDifferenceType)
-{
-	vector<double> vecMaxAbsoluteErrors;
-	vector<double> vecMeanAbsoluteErrors;
-	p_testSet.getDifferencesStatistics(vecMaxAbsoluteErrors,vecMeanAbsoluteErrors,p_eDifferenceType);
-	printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrors,vecMeanAbsoluteErrors,p_eDifferenceType);
+	p_vecOutputParameters[1] = -dResult;
 }
 
 const int iInputs = 2;
-const int iOutputs = 1;
+const int iOutputs = 2;
 
 vector< pair<double,double> > vecMinMax;
 
@@ -76,8 +38,8 @@ void checkIfGPUTrainingIsOK()
 	const double dEta = 0.02;
 	const int iTestsInTraining = 1000;
 	const int iHiddenNeuronsInTesting = 45;
-	const int iNumTrainedElements = 16;
-	const int iBatchSize = 16;
+	const int iNumTrainedElements = 25000;
+	const int iBatchSize = 8;
 
 	dummyNet.setInputNeuronCount(iInputs);
 
@@ -99,7 +61,9 @@ void checkIfGPUTrainingIsOK()
 	InputTestSet dummyTestSet(iTestsInTraining,iInputs,iOutputs,vecMinMax,testingFunction,NULL);
 	//dummyTestSet.randomizeTests(NULL);
  
-	//dummyNet.executeNetwork(dummyTestSet);
+	logText(Logging::LT_INFORMATION,"Differences before training");
+	dummyNet.executeNetwork(dummyTestSet);
+	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_CPU);
 	//dummyNetGPU.executeNetworkGPU(dummyTestSet);
 
 	// Execute dummyNet on testSet (on both CPU and GPU). Output vectors in testSet are filled
@@ -115,12 +79,12 @@ void checkIfGPUTrainingIsOK()
 
 	dummyNet.executeNetwork(dummyTestSet);
 	dummyNetGPU.executeNetworkGPU(dummyTestSet);
-	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_GPU_AND_CPU);
-	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_CORRECT_AND_CPU);
-	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_CORRECT_AND_GPU);
+	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_GPU_AND_CPU);
+	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_CPU);
+	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_GPU);
 }
 
-void makeTraining()
+void makeTrainingCPU()
 {
 	/*const int numElementsInArrays1 = 3;
 	const int numElementsInArrays2 = 4;
@@ -131,7 +95,7 @@ void makeTraining()
 	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 160000 };
+	const int iTrainedElementsArray[numElementsInArrays1] = { 1600 };
 	const double dEtaArray[numElementsInArrays2] = { 0.03 };
 	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 };
 
@@ -210,7 +174,7 @@ void makeTraining()
 	}
 }
 
-void doExecuteNetworksAndSaveLoad()
+void doExecuteNetworksCPUAndGPUAndSaveLoad()
 {
 	// New MLP network
 	MLP dummyNet;
@@ -252,11 +216,11 @@ void doExecuteNetworksAndSaveLoad()
 	logText(Logging::LT_INFORMATION,"Finished execution GPU");
 
 	// We retrieve and print differences between CPU and GPU results for each output (these should be small).
-	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_GPU_AND_CPU);
+	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_GPU_AND_CPU);
 
 	// check differences before training network
-	printVectorDifferenceInfo(dummyTestSet,InputTestSet::DST_CORRECT_AND_CPU);
-
+	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_CPU);
+ 
 	dummyNet.saveToFile("NetworkStruct.xml");
 	dummyTestSet.saveToFile("TestSet.xml");
 
@@ -311,16 +275,24 @@ void checkIfCSVReadingIsOK()
  
 int main()
 {
+	// We set, which logging types are allowed
+	unsigned int uiAllowedLogging = Logging::LT_INFORMATION | Logging::LT_WARNING | Logging::LT_ERROR;
+	Logging::setAllowedLoggingTypes(
+		uiAllowedLogging | Logging::LT_MEMORY		// console output
+		, uiAllowedLogging);											// file output
+
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // First input variable
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // Second input variable
 
-	//doExecuteNetworksAndSaveLoad();
+	logText(Logging::LT_INFORMATION,"Application Started");
 
-	//makeTraining();
+	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	//checkIfGPUTrainingIsOK();
+	//makeTrainingCPU();
 
-	checkIfCSVReadingIsOK();
+	checkIfGPUTrainingIsOK();
+
+	//checkIfCSVReadingIsOK();
 
 	return 0;
 }

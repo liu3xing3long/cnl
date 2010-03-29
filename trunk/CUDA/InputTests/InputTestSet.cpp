@@ -71,6 +71,15 @@ bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErro
 
 	return true;
 }
+
+void InputTestSet::printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsType p_eDifferenceType) const
+{
+	vector<double> vecMaxAbsoluteErrors;
+	vector<double> vecMeanAbsoluteErrors;
+	getDifferencesStatistics(vecMaxAbsoluteErrors,vecMeanAbsoluteErrors,p_eDifferenceType);
+	printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrors,vecMeanAbsoluteErrors,p_eDifferenceType);
+}
+
 /*
 void InputTestSet::randomizeTests(MTRand *p_pRandomGenerator)
 {

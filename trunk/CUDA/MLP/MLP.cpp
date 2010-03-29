@@ -42,13 +42,13 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 		// Clean everything
 		cleanTemporaryData();
 
-		logTextParamsDebug("iTrainedElement = %d",iTrainedElement);
+		logTextParams(Logging::LT_DEBUG,"iTrainedElement = %d",iTrainedElement);
 
 		for(int iTestInBatchIndex=0;iTestInBatchIndex<p_iNumTestsInBatch;++iTestInBatchIndex)
 		{
 			int iTestIndex = (int) (getRandom01(p_pRandomGenerator) * p_TestSet.getTestCount()); // iTrainedElement % p_TestSet.getTestCount()
 
-			logTextParamsDebug("Test in batch nr %d = %d",iTestInBatchIndex,iTestIndex);
+			logTextParams(Logging::LT_DEBUG,"Test in batch nr %d = %d",iTestInBatchIndex,iTestIndex);
 
 			InputTest &test = p_TestSet.getTest(iTestIndex);
 			vecTests.push_back(&test);
@@ -60,7 +60,8 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			for(unsigned uOutputElement=0;uOutputElement<p_TestSet.getOutputCount();++uOutputElement)
 			{
 				double dError = test.getNetworkOutput(uOutputElement) - test.getCorrectOutput(uOutputElement);
-				logTextParamsDebug("Test in batch nr %d , Output %d : Network = %f , Correct  = %f , Error = %f",iTestInBatchIndex,uOutputElement,test.m_vecNetworkOutputs[uOutputElement],test.m_vecCorrectOutputs[uOutputElement],dError);
+				logTextParams(Logging::LT_DEBUG,"Test in batch nr %d , Output %d : Network = %f , Correct  = %f , Error = %f"
+					,iTestInBatchIndex,uOutputElement,test.getNetworkOutput(uOutputElement),test.getCorrectOutput(uOutputElement),dError);
 				//vecDifferences.push_back(dError);
 				m_vecLayers[m_vecLayers.size()-1].m_vecNeurons[uOutputElement].m_vecLastError.push_back(dError);
 			}
@@ -105,7 +106,7 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 		//vector<double> vecDifferencesBeforeLayer;
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
 		{
-			logTextParamsDebug("Errors in layer %d",iLayerIndex);
+			logTextParams(Logging::LT_DEBUG,"Errors in layer %d",iLayerIndex);
 			m_vecLayers[iLayerIndex].updateErrorValues();
 		}
 
@@ -152,13 +153,13 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 				}
 			}
 
-			logTextParamsDebug("Errors in layer %d , elements in vecOutputsLayerBefore: %d",uLayerIndex,vecOutputsLayerBefore.size());
+			logTextParams(Logging::LT_DEBUG,"Errors in layer %d , elements in vecOutputsLayerBefore: %d",uLayerIndex,vecOutputsLayerBefore.size());
 			for(unsigned a=0;a<vecOutputsLayerBefore.size();++a)
 			{
-				logTextParamsDebug("vecOutputsLayerBefore [%d], size %d",a,vecOutputsLayerBefore[a].size());
+				logTextParams(Logging::LT_DEBUG,"vecOutputsLayerBefore [%d], size %d",a,vecOutputsLayerBefore[a].size());
 				for(unsigned b=0;b<vecOutputsLayerBefore[a].size();++b)
 				{
-					logTextParamsDebug("vecOutputsLayerBefore [%d] [%d] = %f",a,b,vecOutputsLayerBefore[a][b]);
+					logTextParams(Logging::LT_DEBUG,"vecOutputsLayerBefore [%d] [%d] = %f",a,b,vecOutputsLayerBefore[a][b]);
 				}
 			}
 
@@ -240,8 +241,8 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 			vecTrainedElements.push_back(iTestIndex);
 		}
 
-		logTextParamsDebug("GPU: iTrainedElement = %d",iTrainedElement);
-		logTextParamsDebug("GPU: Test in batch nr 0 = %d",vecTrainedElements[0]);
+		logTextParams(Logging::LT_DEBUG,"GPU: iTrainedElement = %d",iTrainedElement);
+		logTextParams(Logging::LT_DEBUG,"GPU: Test in batch nr 0 = %d",vecTrainedElements[0]);
 
 		// 1. We execute the test on the network
 		for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
@@ -268,7 +269,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		// calculate error in other layers
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
 		{
-			logTextParamsDebug("GPU: Errors in layer %d",iLayerIndex);
+			logTextParams(Logging::LT_DEBUG,"GPU: Errors in layer %d",iLayerIndex);
 			CUDATools::calculateErrorInNotLastLayer(m_vecLayers[iLayerIndex],(int)vecTrainedElements.size());
 		}
 
@@ -291,7 +292,7 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 				p_iNumOutputsLayerBefore = layerBefore.getNeuronCount();
 			}
 
-			logTextParamsDebug("GPU: Updating weights in layer %d",uLayerIndex);
+			logTextParams(Logging::LT_DEBUG,"GPU: Updating weights in layer %d",uLayerIndex);
 			
 			CUDATools::updateWeightsInTraining( m_vecLayers[uLayerIndex],d_pOutputsLayerBefore,p_iNumOutputsLayerBefore,p_dEta,(int)vecTrainedElements.size(),bLayerBeforeOutputsHaveSpecificIndexes);
 		}

@@ -29,7 +29,6 @@ public:
 
 protected:
 	
-
 	NeuralNetwork(NeuralNetworkType p_eNetworkType);
 
 private:
@@ -40,8 +39,6 @@ private:
 	Str getNeuralNetworkTypeString() const;
 
 	static NeuralNetwork *getNetworkFromNetworkType(Str p_sNetworkType);
-
-
 
 	//static const Str m_XMLNeuralNetworkElementName;
 };
