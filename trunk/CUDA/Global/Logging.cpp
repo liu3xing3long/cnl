@@ -46,16 +46,27 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 	else if((iFound = sFileName.rfind('/')) != -1)
 		sFileName = sFileName.substring(iFound+1);
 
-	time_t rawTime;
-	time ( &rawTime );
-	tm *pTimeStruct = localtime(&rawTime);
+#ifdef _MSC_VER		// Identifies Microsoft compilers
+	SYSTEMTIME now;
+	GetSystemTime(&now);
 
-	sLogging.format("%d.%02d.%02d %02d:%02d:%02d    %s%25s%50s%5d    %s\n",
-		pTimeStruct->tm_year+1900,pTimeStruct->tm_mon+1,pTimeStruct->tm_mday,
-		pTimeStruct->tm_hour,pTimeStruct->tm_min,pTimeStruct->tm_sec,
-		sLoggingType.c_str(),
-		sFileName.c_str(),p_sFunctionName,p_lLineNumber,
-		p_sLoggingText);
+	sLogging.format("%d.%02d.%02d %02d:%02d:%02d:%03d    %s%25s%50s%5d    %s\n",
+		now.wYear+1900,now.wMonth+1,now.wDay,
+		now.wHour,now.wMinute,now.wSecond,now.wMilliseconds,
+		sLoggingType.c_str(),sFileName.c_str(),p_sFunctionName,
+		p_lLineNumber,p_sLoggingText);
+#else
+	timeval now1;
+	gettimeofday(&now1, NULL);
+	time_t now = now1.tv_sec;
+	localtime(&now);
+
+	sLogging.format("%d.%02d.%02d %02d:%02d:%02d:%03d    %s%25s%50s%5d    %s\n",
+		now.tm_year+1900,now.tm_mon+1,now.tm_mday,
+		now.tm_hour,now.tm_min,now.tm_sec,now1.tv_usec,
+		sLoggingType.c_str(),sFileName.c_str(),p_sFunctionName,
+		p_lLineNumber,p_sLoggingText);
+#endif
 
 	if(g_uiAllowedTypesFile & (unsigned int)p_eLoggingType)
 	{

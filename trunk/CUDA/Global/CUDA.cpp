@@ -278,7 +278,7 @@ int main()
 	// We set, which logging types are allowed
 	unsigned int uiAllowedLogging = Logging::LT_INFORMATION | Logging::LT_WARNING | Logging::LT_ERROR;
 	Logging::setAllowedLoggingTypes(
-		uiAllowedLogging | Logging::LT_MEMORY		// console output
+		uiAllowedLogging | Logging::LT_MEMORY | Logging::LT_DEBUG		// console output
 		, uiAllowedLogging);											// file output
 
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // First input variable

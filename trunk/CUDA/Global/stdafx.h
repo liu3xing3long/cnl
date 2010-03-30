@@ -6,6 +6,12 @@
 #pragma once
 
 // Standard headers
+#ifdef _MSC_VER       // Identifies Microsoft compilers
+	#include <windows.h>
+#else
+	#include <sys/time.h>
+#endif
+
 #include <iostream>
 #include <tchar.h>
 #include <vector>
