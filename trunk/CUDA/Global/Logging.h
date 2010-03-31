@@ -37,8 +37,6 @@ public:
 
 	static void setAllowedLoggingTypes(unsigned int p_uiNewAllowedTypesConsole, unsigned int p_uiNewAllowedTypesFile);
 
-	//static void logTextParamsFileLine(LoggingType p_eLoggingType, const char *p_sLoggingText,const char *p_sFileName,const char *p_sFunctionName,long p_lLineNumber,...);
-
 	class Timer
 	{
 	#ifdef _WIN32
