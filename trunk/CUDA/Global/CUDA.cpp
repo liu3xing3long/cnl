@@ -259,12 +259,45 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 void makeTrainingToGenerateStatistics()
 {
 	const int iTestsSetSize = 3;
-	const int iNumTests = 1000;
-
 	vector<InputTestSet> vecTestSets;
-	for(int iTestIndex=0;iTestIndex<iTestsSetSize;++iTestIndex)
+	vector<int> vecOutputColumns;
+	vector<int> vecUnusedColumns;
+
+	int iTestSetType = 1;
+
+	if(iTestSetType == 1)
 	{
-		vecTestSets.push_back(InputTestSet(iNumTests,iInputs,iOutputs,vecMinMax,testingFunction,NULL));
+		const int iNumTests = 1000;
+		for(int iTestIndex=0;iTestIndex<iTestsSetSize;++iTestIndex)
+		{
+			vecTestSets.push_back(InputTestSet(iNumTests,iInputs,iOutputs,vecMinMax,testingFunction,NULL));
+		}
+	}
+	else
+	{
+		InputTestSet testSetCSV;
+		switch(iTestSetType)
+		{
+			case 2:
+				vecOutputColumns.push_back(12);
+				testSetCSV.loadFromCSVFile("Resources\\Test_data\\forestfires.csv",true,',',vecOutputColumns,vecUnusedColumns);		
+				break;
+			case 3:
+				vecOutputColumns.push_back(4);
+				testSetCSV.loadFromCSVFile("Resources\\Test_data\\iris.data",true,',',vecOutputColumns,vecUnusedColumns);		
+				break;
+			case 4:
+				vecUnusedColumns.push_back(0);
+				vecOutputColumns.push_back(1);
+				testSetCSV.loadFromCSVFile("Resources\\Test_data\\wdbc.csv",true,',',vecOutputColumns,vecUnusedColumns);		
+				break;
+		}
+
+		// We add iTestsSetSize same test sets
+		for(int iTestIndex=0;iTestIndex<iTestsSetSize;++iTestIndex)
+		{
+			vecTestSets.push_back(testSetCSV);
+		}
 	}
 
 	makeTrainingWithManyPossibilities(vecTestSets,true,true);
