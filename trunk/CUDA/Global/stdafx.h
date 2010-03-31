@@ -10,6 +10,7 @@
 	#include <windows.h>
 #else
 	#include <sys/time.h>
+	#include <ctime>
 #endif
 
 #include <iostream>

@@ -39,7 +39,53 @@ public:
 
 	//static void logTextParamsFileLine(LoggingType p_eLoggingType, const char *p_sLoggingText,const char *p_sFileName,const char *p_sFunctionName,long p_lLineNumber,...);
 
-	
+	class Timer
+	{
+	#ifdef _WIN32
+		unsigned long m_ulStart;
+	#else
+		timespec m_Start;
+		timespec m_Stop;
+	#endif
+	unsigned long m_ulTime;
+
+	public:
+		void Start()
+		{
+		#ifdef _WIN32
+			m_ulStart = GetTickCount ();
+		#else
+			do
+			{
+				clock_gettime(CLOCK_REALTIME, &m_Start);
+			}
+			while (m_Start.tv_nsec < 0 || m_Start.tv_nsec >= 1000000000L);
+		#endif
+		}
+
+		unsigned long Stop()
+		{
+		#ifdef _WIN32
+			m_ulTime = GetTickCount() - m_ulStart;
+			return m_ulTime;
+		#else
+			do
+			{
+				clock_gettime(CLOCK_REALTIME, &stop);
+			}
+			while (m_Stop.tv_nsec < 0 || m_Stop.tv_nsec >= 1000000000L);
+
+			m_ulTime = (m_Stop.tv_sec - m_Start.tv_sec)*1000 + (m_Stop.tv_nsec - m_Start.tv_nsec) / 1000000L;
+			return m_ulTime;
+		#endif
+		}
+
+		unsigned long GetTime()
+		{
+			return m_ulTime;
+		}
+	};
+
 private:
 	static FILE *m_pLoggingFile;
 };
