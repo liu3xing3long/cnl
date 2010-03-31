@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-#include <omp.h>
+//#include <omp.h>
 
 // JRTODO - sprawdz, czy wszystkie parametry metod/funkcji sa p_ , a skladniki klas/obiektow sa m_
 // JRTODO - popularne metody powinny byc inline
@@ -84,26 +84,31 @@ void checkIfGPUTrainingIsOK()
 	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_GPU);
 }
 
-void makeTrainingCPU()
+void makeTraining(bool p_bTrainingCPU, bool p_bTrainingGPU)
 {
-	/*const int numElementsInArrays1 = 3;
-	const int numElementsInArrays2 = 4;
-	const int numElementsInArrays3 = 3;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 4000,8000,16000 };c
-	const double dEtaArray[numElementsInArrays2] = { 0.01, 0.02, 0.04, 0.08 };
-	const int iTestsInTrainingArray[numElementsInArrays3] = { 1, 2, 4 };*/
-	const int numElementsInArrays1 = 1;
+	if(!p_bTrainingCPU && !p_bTrainingCPU)
+	{
+		logText(Logging::LT_ERROR,"At least one training kind has to be set");
+		return;
+	}
+
+	const int numElementsInArrayTrainedElements = 3;
+	const int numElementsInArrayEta = 4;
+	const int numElementsInArrayTestsInTraining = 4;
+	const int numElementsInArrayHiddenNeurons = 3;
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 40000,80000,160000 };
+	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.02, 0.04, 0.08 };
+	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1, 2, 4, 8 };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 16,32,64 };
+/*	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
 	const int iTrainedElementsArray[numElementsInArrays1] = { 1600 };
 	const double dEtaArray[numElementsInArrays2] = { 0.03 };
-	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 };
+	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 }; */
 
 	const int numTriedTrainings = 3;
 	const int iNumTests = 1000;
-	const int iHiddenNeurons = 45;
-
-	InputTestSet::DifferenceStatisticsType eDifferenceType = InputTestSet::DST_CORRECT_AND_CPU;
 
 	InputTestSet **testSetsInTraining = new InputTestSet*[numTriedTrainings];
 
@@ -119,56 +124,139 @@ void makeTrainingCPU()
 		testSetsInTraining[d] = new InputTestSet(iNumTests,iInputs,iOutputs,vecMinMax,testingFunction,NULL);
 	}
 
-	for(int a=0;a<numElementsInArrays1;++a)
+	for(int a=0;a<numElementsInArrayTrainedElements;++a)
 	{
 		//#pragma omp parallel for
-		for(int b=0;b<numElementsInArrays2;++b)
+		for(int b=0;b<numElementsInArrayEta;++b)
 		{
 			// Each thread has its own random number generator
-			MTRand generatorInThread(int(getRandom01(NULL) * 100000000));
-			for(int c=0;c<numElementsInArrays3;++c)
+			MTRand generatorInThreadCPU(int(getRandom01(NULL) * 100000000));
+			MTRand generatorInThreadGPU(int(getRandom01(NULL) * 100000000));
+			for(int c=0;c<numElementsInArrayTestsInTraining;++c)
 			{
-				vector<double> vecMaxAbsoluteErrors,vecMaxAbsoluteErrorsSum;
-				vector<double> vecMeanAbsoluteErrors,vecMeanAbsoluteErrorsSum;
-				vector< vector<double> > vecResultsMaxAbsoluteErrors,vecResultsMeanAbsoluteErrors;
-
-				for(int d=0;d<numTriedTrainings;++d)
+				for(int d=0;d<numElementsInArrayHiddenNeurons;++d)
 				{
-					MLP trainNet;
-					trainNet.setInputNeuronCount(iInputs);
-					trainNet.addNewLayer(iHiddenNeurons,Neuron::NT_SIGMOID);
-					trainNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
-					trainNet.randomizeWeights(0.001,&generatorInThread);	
+					vector<double> vecMaxAbsoluteErrorsCPU,vecMaxAbsoluteErrorsSumCPU;
+					vector<double> vecMeanAbsoluteErrorsCPU,vecMeanAbsoluteErrorsSumCPU;
+					vector< vector<double> > vecResultsMaxAbsoluteErrorsCPU,vecResultsMeanAbsoluteErrorsCPU;
+					
+					vector<double> vecMaxAbsoluteErrorsGPU,vecMaxAbsoluteErrorsSumGPU;
+					vector<double> vecMeanAbsoluteErrorsGPU,vecMeanAbsoluteErrorsSumGPU;
+					vector< vector<double> > vecResultsMaxAbsoluteErrorsGPU,vecResultsMeanAbsoluteErrorsGPU;
 
-					InputTestSet trainTestSet(*testSetsInTraining[d]);
+					vector<double> vecMaxAbsoluteErrorsGPUCPU,vecMaxAbsoluteErrorsSumGPUCPU;
+					vector<double> vecMeanAbsoluteErrorsGPUCPU,vecMeanAbsoluteErrorsSumGPUCPU;
+					vector< vector<double> > vecResultsMaxAbsoluteErrorsGPUCPU,vecResultsMeanAbsoluteErrorsGPUCPU;
 
-					// We train the network using CPU
-					trainNet.trainNetwork(trainTestSet,iTrainedElementsArray[a],dEtaArray[b],iTestsInTrainingArray[c],&generatorInThread); 
+					Logging::Timer timer;
+					unsigned int uiMilisecondsGPU = 0,uiMilisecondsCPU = 0;
+					logTextParams(Logging::LT_INFORMATION,"Trained elements:\t%d\tEta:\t%f\tTests in array:\t%d\tHidden neurons:\t%d",iTrainedElementsArray[a],dEtaArray[b],iTestsInTrainingArray[c],iHiddenNeuronsArray[d]);
 
-					// execute trained network and check difference between correct output
-					trainNet.executeNetwork(trainTestSet);
-
-					trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrors,vecMeanAbsoluteErrors,eDifferenceType);
-
-					for(unsigned e=0;e<vecMaxAbsoluteErrors.size();++e)
+					for(int e=0;e<numTriedTrainings;++e)
 					{
-						if(vecMaxAbsoluteErrorsSum.size())
-						{
-							vecMaxAbsoluteErrorsSum[e] += vecMaxAbsoluteErrors[e]/numTriedTrainings;
-							vecMeanAbsoluteErrorsSum[e] += vecMeanAbsoluteErrors[e]/numTriedTrainings;
-						}
-						else
-						{
-							vecMaxAbsoluteErrorsSum.push_back(vecMaxAbsoluteErrors[e]/numTriedTrainings);
-							vecMeanAbsoluteErrorsSum.push_back(vecMeanAbsoluteErrors[e]/numTriedTrainings);
-						}
-						vecResultsMaxAbsoluteErrors.push_back(vecMaxAbsoluteErrors);
-						vecResultsMeanAbsoluteErrors.push_back(vecMeanAbsoluteErrors);
-					}
-				}		
+						InputTestSet trainTestSet(*testSetsInTraining[e]);
 
-				logTextParams(Logging::LT_INFORMATION,"Trained elements:\t%d\tEta:\t%f\tTests in array:\t%d",iTrainedElementsArray[a],dEtaArray[b],iTestsInTrainingArray[c]);
-				printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrorsSum,vecMeanAbsoluteErrorsSum,eDifferenceType,&vecResultsMaxAbsoluteErrors,&vecResultsMeanAbsoluteErrors);
+						if(p_bTrainingCPU)
+						{
+							MLP trainNet;
+							trainNet.setInputNeuronCount(iInputs);
+							trainNet.addNewLayer(iHiddenNeuronsArray[d],Neuron::NT_SIGMOID);
+							trainNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
+							trainNet.randomizeWeights(0.001,&generatorInThreadCPU);	
+
+							// We train the network using CPU
+							timer.start();
+							trainNet.trainNetwork(trainTestSet,iTrainedElementsArray[a],dEtaArray[b],iTestsInTrainingArray[c],&generatorInThreadCPU);
+							uiMilisecondsCPU += timer.stop();
+
+							// execute trained network and check difference between correct output
+							trainNet.executeNetwork(trainTestSet);
+
+							trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrorsCPU,vecMeanAbsoluteErrorsCPU,InputTestSet::DST_CORRECT_AND_CPU);
+
+							for(unsigned e=0;e<vecMaxAbsoluteErrorsCPU.size();++e)
+							{
+								if(vecMaxAbsoluteErrorsSumCPU.size())
+								{
+									vecMaxAbsoluteErrorsSumCPU[e] += vecMaxAbsoluteErrorsCPU[e]/numTriedTrainings;
+									vecMeanAbsoluteErrorsSumCPU[e] += vecMeanAbsoluteErrorsCPU[e]/numTriedTrainings;
+								}
+								else
+								{
+									vecMaxAbsoluteErrorsSumCPU.push_back(vecMaxAbsoluteErrorsCPU[e]/numTriedTrainings);
+									vecMeanAbsoluteErrorsSumCPU.push_back(vecMeanAbsoluteErrorsCPU[e]/numTriedTrainings);
+								}
+								vecResultsMaxAbsoluteErrorsCPU.push_back(vecMaxAbsoluteErrorsCPU);
+								vecResultsMeanAbsoluteErrorsCPU.push_back(vecMeanAbsoluteErrorsCPU);
+							}
+						}
+
+						if(p_bTrainingGPU)
+						{
+							MLP trainNet;
+							trainNet.setInputNeuronCount(iInputs);
+							trainNet.addNewLayer(iHiddenNeuronsArray[d],Neuron::NT_SIGMOID);
+							trainNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
+							trainNet.randomizeWeights(0.001,&generatorInThreadGPU);	
+
+							// We train the network using GPU
+							timer.start();
+							trainNet.trainNetworkGPU(trainTestSet,iTrainedElementsArray[a],dEtaArray[b],iTestsInTrainingArray[c],&generatorInThreadGPU);
+							uiMilisecondsGPU += timer.stop();
+
+							// execute trained network and check difference between correct output
+							trainNet.executeNetworkGPU(trainTestSet);
+
+							trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrorsGPU,vecMeanAbsoluteErrorsGPU,InputTestSet::DST_CORRECT_AND_GPU);
+
+							for(unsigned e=0;e<vecMaxAbsoluteErrorsGPU.size();++e)
+							{
+								if(vecMaxAbsoluteErrorsSumGPU.size())
+								{
+									vecMaxAbsoluteErrorsSumGPU[e] += vecMaxAbsoluteErrorsGPU[e]/numTriedTrainings;
+									vecMeanAbsoluteErrorsSumGPU[e] += vecMeanAbsoluteErrorsGPU[e]/numTriedTrainings;
+								}
+								else
+								{
+									vecMaxAbsoluteErrorsSumGPU.push_back(vecMaxAbsoluteErrorsGPU[e]/numTriedTrainings);
+									vecMeanAbsoluteErrorsSumGPU.push_back(vecMeanAbsoluteErrorsGPU[e]/numTriedTrainings);
+								}
+								vecResultsMaxAbsoluteErrorsGPU.push_back(vecMaxAbsoluteErrorsGPU);
+								vecResultsMeanAbsoluteErrorsGPU.push_back(vecMeanAbsoluteErrorsGPU);
+							}
+						}
+
+						if(p_bTrainingCPU && p_bTrainingGPU)
+						{
+							trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrorsGPUCPU,vecMeanAbsoluteErrorsGPUCPU,InputTestSet::DST_GPU_AND_CPU);
+
+							for(unsigned e=0;e<vecMaxAbsoluteErrorsGPUCPU.size();++e)
+							{
+								if(vecMaxAbsoluteErrorsSumGPUCPU.size())
+								{
+									vecMaxAbsoluteErrorsSumGPUCPU[e] += vecMaxAbsoluteErrorsGPUCPU[e]/numTriedTrainings;
+									vecMeanAbsoluteErrorsSumGPUCPU[e] += vecMeanAbsoluteErrorsGPUCPU[e]/numTriedTrainings;
+								}
+								else
+								{
+									vecMaxAbsoluteErrorsSumGPUCPU.push_back(vecMaxAbsoluteErrorsGPUCPU[e]/numTriedTrainings);
+									vecMeanAbsoluteErrorsSumGPUCPU.push_back(vecMeanAbsoluteErrorsGPUCPU[e]/numTriedTrainings);
+								}
+								vecResultsMaxAbsoluteErrorsGPUCPU.push_back(vecMaxAbsoluteErrorsGPUCPU);
+								vecResultsMeanAbsoluteErrorsGPUCPU.push_back(vecMeanAbsoluteErrorsGPUCPU);
+							}
+						}
+					}
+
+					if(p_bTrainingCPU)
+						printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrorsSumCPU,vecMeanAbsoluteErrorsSumCPU,InputTestSet::DST_CORRECT_AND_CPU,&vecResultsMaxAbsoluteErrorsCPU,&vecResultsMeanAbsoluteErrorsCPU);
+
+					if(p_bTrainingGPU)
+						printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrorsSumGPU,vecMeanAbsoluteErrorsSumGPU,InputTestSet::DST_CORRECT_AND_GPU,&vecResultsMaxAbsoluteErrorsGPU,&vecResultsMeanAbsoluteErrorsGPU);
+
+					if(p_bTrainingCPU && p_bTrainingGPU)
+						printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrorsSumGPUCPU,vecMeanAbsoluteErrorsSumGPUCPU,InputTestSet::DST_GPU_AND_CPU,&vecResultsMaxAbsoluteErrorsGPUCPU,&vecResultsMeanAbsoluteErrorsGPUCPU);
+				}
 			}
 		}
 	}

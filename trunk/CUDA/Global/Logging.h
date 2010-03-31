@@ -48,10 +48,10 @@ public:
 	unsigned long m_ulTime;
 
 	public:
-		void Start()
+		void start()
 		{
 		#ifdef _WIN32
-			m_ulStart = GetTickCount ();
+			m_ulStart = timeGetTime ();
 		#else
 			do
 			{
@@ -61,10 +61,10 @@ public:
 		#endif
 		}
 
-		unsigned long Stop()
+		unsigned long stop()
 		{
 		#ifdef _WIN32
-			m_ulTime = GetTickCount() - m_ulStart;
+			m_ulTime = timeGetTime() - m_ulStart;
 			return m_ulTime;
 		#else
 			do
@@ -78,7 +78,7 @@ public:
 		#endif
 		}
 
-		unsigned long GetTime()
+		unsigned long getTime()
 		{
 			return m_ulTime;
 		}

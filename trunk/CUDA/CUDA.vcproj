@@ -79,7 +79,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib"
+				AdditionalDependencies="cudart.lib winmm.lib"
 				OutputFile="$(OutDir)/CUDA.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(CUDA_LIB_PATH)"
@@ -168,7 +168,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib"
+				AdditionalDependencies="cudart.lib winmm.lib"
 				OutputFile="$(OutDir)/CUDA.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(CUDA_LIB_PATH)"
@@ -260,7 +260,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib"
+				AdditionalDependencies="cudart.lib winmm.lib"
 				OutputFile="$(OutDir)/CUDA.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(CUDA_LIB_PATH)"
@@ -348,7 +348,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="cudart.lib"
+				AdditionalDependencies="cudart.lib winmm.lib"
 				OutputFile="$(OutDir)/CUDA.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(CUDA_LIB_PATH)"
