@@ -90,21 +90,22 @@ inline void updateErrorsInVectors(const vector<double> &p_vecMaxErrors,vector<do
 								  ,const vector<double> &p_vecMeanErrors,vector<double> &p_vecMeanErrorsSum
 								  ,vector< vector<double> > &p_vecResultsMaxErrors,vector< vector<double> > &p_vecResultsMeanErrors,int p_iTestsSetSize)
 {
+	// If it is the first added data to p_vecMaxErrorsSum and p_vecMeanErrorsSum, then first fill it with zeros
+	bool bFill = !p_vecMaxErrorsSum.size();
 	for(unsigned iOutputIndex=0;iOutputIndex<p_vecMaxErrors.size();++iOutputIndex)
 	{
-		if(p_vecMaxErrorsSum.size())
+		if(bFill)
 		{
-			p_vecMaxErrorsSum[iOutputIndex] += p_vecMaxErrors[iOutputIndex]/p_iTestsSetSize;
-			p_vecMeanErrorsSum[iOutputIndex] += p_vecMeanErrors[iOutputIndex]/p_iTestsSetSize;
+			p_vecMaxErrorsSum.push_back(0.0);
+			p_vecMeanErrorsSum.push_back(0.0);
 		}
-		else
-		{
-			p_vecMaxErrorsSum.push_back(p_vecMaxErrors[iOutputIndex]/p_iTestsSetSize);
-			p_vecMeanErrorsSum.push_back(p_vecMeanErrors[iOutputIndex]/p_iTestsSetSize);
-		}
-		p_vecResultsMaxErrors.push_back(p_vecMaxErrors);
-		p_vecResultsMeanErrors.push_back(p_vecMeanErrors);
+
+		p_vecMaxErrorsSum[iOutputIndex] += p_vecMaxErrors[iOutputIndex]/p_iTestsSetSize;
+		p_vecMeanErrorsSum[iOutputIndex] += p_vecMeanErrors[iOutputIndex]/p_iTestsSetSize;
 	}
+
+	p_vecResultsMaxErrors.push_back(p_vecMaxErrors);
+	p_vecResultsMeanErrors.push_back(p_vecMeanErrors);
 }
 
 void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets, bool p_bTrainingCPU, bool p_bTrainingGPU)
@@ -120,11 +121,11 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 	const int numElementsInArrayTestsInTraining = 4;
 	const int numElementsInArrayHiddenNeurons = 3;
 	const int numElementsInArrayMaxAbsWeights = 2;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 40000,80000,160000 };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 100,80000,160000 };
 	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.02, 0.04, 0.08 };
 	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1, 2, 4, 8 };
 	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 16,32,64 };
-	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.001, 0.005 };
+	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.01, 0.05 };
 /*	const int numElementsInArrays1 = 1;
 	const int numElementsInArrays2 = 1;
 	const int numElementsInArrays3 = 1;
@@ -159,7 +160,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 			{
 				for(int iHiddenNeuronsIndex=0;iHiddenNeuronsIndex<numElementsInArrayHiddenNeurons;++iHiddenNeuronsIndex)
 				{
-					for(int iMaxAbsWeightsIndex=0;iMaxAbsWeightsIndex<numElementsInArrayHiddenNeurons;++iMaxAbsWeightsIndex)
+					for(int iMaxAbsWeightsIndex=0;iMaxAbsWeightsIndex<numElementsInArrayMaxAbsWeights;++iMaxAbsWeightsIndex)
 					{
 						vector<double> vecMaxAbsoluteErrorsCPU,vecMaxAbsoluteErrorsSumCPU;
 						vector<double> vecMeanAbsoluteErrorsCPU,vecMeanAbsoluteErrorsSumCPU;
@@ -231,6 +232,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 									,vecResultsMaxAbsoluteErrorsGPU,vecResultsMeanAbsoluteErrorsGPU,iTestsSetSize);
 							}
 
+							// if both CPU and GPU were tested, then we also print differences between them
 							if(p_bTrainingCPU && p_bTrainingGPU)
 							{
 								trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrorsGPUCPU,vecMeanAbsoluteErrorsGPUCPU,InputTestSet::DST_GPU_AND_CPU);
@@ -407,7 +409,7 @@ int main()
 	// We set, which logging types are allowed
 	unsigned int uiAllowedLogging = Logging::LT_INFORMATION | Logging::LT_WARNING | Logging::LT_ERROR;
 	Logging::setAllowedLoggingTypes(
-		uiAllowedLogging | Logging::LT_MEMORY | Logging::LT_DEBUG		// console output
+		uiAllowedLogging /*| Logging::LT_MEMORY | Logging::LT_DEBUG*/		// console output
 		, uiAllowedLogging);											// file output
 
 	vecMinMax.push_back(pair<double,double> (0,M_PI)); // First input variable
@@ -417,9 +419,9 @@ int main()
 
 	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	//makeTrainingCPU();
+	makeTrainingToGenerateStatistics();
 
-	checkIfGPUTrainingIsOK();
+	//checkIfGPUTrainingIsOK();
 
 	//checkIfCSVReadingIsOK();
 
