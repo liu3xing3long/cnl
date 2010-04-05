@@ -279,12 +279,12 @@ void makeTrainingToGenerateStatistics()
 				break;
 			case 3:
 				vecOutputColumns.push_back(4);
-				testSetCSV.loadFromCSVFile("Resources\\Test_data\\iris.data",true,',',vecOutputColumns,vecUnusedColumns);		
+				testSetCSV.loadFromCSVFile("Resources\\Test_data\\iris.data",false,',',vecOutputColumns,vecUnusedColumns);		
 				break;
 			case 4:
 				vecUnusedColumns.push_back(0);
 				vecOutputColumns.push_back(1);
-				testSetCSV.loadFromCSVFile("Resources\\Test_data\\wdbc.csv",true,',',vecOutputColumns,vecUnusedColumns);		
+				testSetCSV.loadFromCSVFile("Resources\\Test_data\\wdbc.csv",false,',',vecOutputColumns,vecUnusedColumns);		
 				break;
 		}
 

@@ -83,7 +83,7 @@ Str makeDoubleVectorString(const vector<double>& p_vecDifferences)
 			sResult.format("%s , %f",sResult.c_str(),p_vecDifferences[a]);
 		}
 
-		sResult = Str("%f",dSum / p_vecDifferences.size()) + sResult;
+		sResult = Str("%f ",dSum / p_vecDifferences.size()) + sResult + " )";
 	}
 	else
 	{
@@ -109,12 +109,12 @@ void printVectorDifferenceInfoFromVectors(const vector<InputTestSet::AttributeLo
 		if(loggingData.m_bLiteralAttribute)
 		{
 			logTextParams(Logging::LT_INFORMATION,"%sPercent different results:\t%s",sToLog.c_str()
-				,makeDoubleVectorString(loggingData.m_vecLiteralErrors));
+				,makeDoubleVectorString(loggingData.m_vecLiteralErrors).c_str());
 		}
 		else
 		{
 			logTextParams(Logging::LT_INFORMATION,"%sMAX:\t%s\tMEAN:\t%s",sToLog.c_str()
-				,makeDoubleVectorString(loggingData.m_vecMaxErrors),makeDoubleVectorString(loggingData.m_vecMeanErrors));
+				,makeDoubleVectorString(loggingData.m_vecMaxErrors).c_str(),makeDoubleVectorString(loggingData.m_vecMeanErrors).c_str());
 		}
 	}
 }

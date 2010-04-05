@@ -47,6 +47,7 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 
 	size_t uNumTests = m_vecTests.size();
 	bool bEmptyVector = (p_vecDifferencesData.size() == 0);
+	int uOutputAttributeIndex = -1;
 
 	for(unsigned uAttributeIndex = 0;uAttributeIndex < m_vecAttributeMappings.size();++uAttributeIndex)
 	{
@@ -54,6 +55,7 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 		if(!attributeMappingData.isOutputAttribute())
 			continue; // we don't want input attributes
 
+		++uOutputAttributeIndex;
 		int iFirstAttributeInStructure = attributeMappingData.getFirstAttributeInStructure();
 
 		unsigned int iLiteralErrors = 0;
@@ -124,7 +126,7 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 			p_vecDifferencesData.push_back(newLoggingData);
 		}
 
-		AttributeLoggingData &loggingData = p_vecDifferencesData[uAttributeIndex];
+		AttributeLoggingData &loggingData = p_vecDifferencesData[uOutputAttributeIndex];
 
 		if(attributeMappingData.isLiteralAttribute())
 		{
