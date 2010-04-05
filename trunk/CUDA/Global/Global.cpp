@@ -67,33 +67,54 @@ void setDoubleVectorXMLString(vector<double>&p_vecToConvert, const Str &p_sConne
 	}
 }
 
-Str makeDoubleVectorString(vector< vector<double> > *p_vecResultsErrors,unsigned p_uOutputIndex)
+Str makeDoubleVectorString(const vector<double>& p_vecDifferences)
 {
-	if(p_vecResultsErrors == NULL)
-		return "";
+	logAssert(p_vecDifferences.size());
 
-	Str sResult("\t( %f",p_vecResultsErrors->at(0).at(p_uOutputIndex));
-	for(unsigned a=1;a<p_vecResultsErrors->size();++a)
+	Str sResult;
+
+	if(p_vecDifferences.size() > 1)
 	{
-		sResult.format("%s , %f",sResult.c_str(),p_vecResultsErrors->at(a).at(p_uOutputIndex));
+		double dSum = p_vecDifferences[0];
+		sResult = Str("\t( %f",p_vecDifferences[0]);
+		for(unsigned a=1;a<p_vecDifferences.size();++a)
+		{
+			dSum += p_vecDifferences[a];
+			sResult.format("%s , %f",sResult.c_str(),p_vecDifferences[a]);
+		}
+
+		sResult = Str("%f",dSum / p_vecDifferences.size()) + sResult;
+	}
+	else
+	{
+		sResult.format("%f",p_vecDifferences[0]);
 	}
 
-	sResult += " )";
 	return sResult;
 }
 
-void printVectorDifferenceInfoFromVectors(const vector< vector<InputTestSet::AttributeLoggingData> >  &p_vecDifferencesData, InputTestSet::DifferenceStatisticsType p_eDifferenceType)
+void printVectorDifferenceInfoFromVectors(const vector<InputTestSet::AttributeLoggingData> &p_vecDifferencesData, InputTestSet::DifferenceStatisticsType p_eDifferenceType)
 {
-	logTextParams(Logging::LT_INFORMATION,"Differences between %s and %s"
+	logTextParams(Logging::LT_INFORMATION,"Differences between %s and %s , %d tests"
 		, (p_eDifferenceType == InputTestSet::DST_GPU_AND_CPU ? "GPU" : "Correct")
-		, (p_eDifferenceType == InputTestSet::DST_CORRECT_AND_GPU ? "GPU" : "CPU"));
+		, (p_eDifferenceType == InputTestSet::DST_CORRECT_AND_GPU ? "GPU" : "CPU"), p_vecDifferencesData[0].m_uiNumTests);
 	for(unsigned uOutputIndex=0;uOutputIndex<p_vecDifferencesData.size();++uOutputIndex)
 	{
-		InputTestSet::AttributeLoggingData
-		Str sMax = makeDoubleVectorString(p_vecResultsMaxAbsoluteErrors,uOutputIndex);
-		Str sMean = makeDoubleVectorString(p_vecResultsMeanAbsoluteErrors,uOutputIndex);
+		const InputTestSet::AttributeLoggingData &loggingData = p_vecDifferencesData[uOutputIndex];
 
-		logTextParams(Logging::LT_INFORMATION,"Output %d/%d:\tMAX:\t%f%s\tMEAN:\t%f%s",uOutputIndex+1
-			,p_vecMaxAbsoluteErrors.size(),p_vecMaxAbsoluteErrors[uOutputIndex],sMax.c_str(),p_vecMeanAbsoluteErrors[uOutputIndex],sMean.c_str());
+		Str sToLog("Output %d/%d (%s), %s:\t",uOutputIndex+1,p_vecDifferencesData.size()
+			,((loggingData.m_sColumnName != "") ? loggingData.m_sColumnName.c_str() : "unnamed")
+			,((loggingData.m_bLiteralAttribute) ? "Literal" : "Continuous"));
+
+		if(loggingData.m_bLiteralAttribute)
+		{
+			logTextParams(Logging::LT_INFORMATION,"%sPercent different results:\t%s",sToLog.c_str()
+				,makeDoubleVectorString(loggingData.m_vecLiteralErrors));
+		}
+		else
+		{
+			logTextParams(Logging::LT_INFORMATION,"%sMAX:\t%s\tMEAN:\t%s",sToLog.c_str()
+				,makeDoubleVectorString(loggingData.m_vecMaxErrors),makeDoubleVectorString(loggingData.m_vecMeanErrors));
+		}
 	}
 }

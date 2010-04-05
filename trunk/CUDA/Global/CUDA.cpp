@@ -163,13 +163,10 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 					for(int iMaxAbsWeightsIndex=0;iMaxAbsWeightsIndex<numElementsInArrayMaxAbsWeights;++iMaxAbsWeightsIndex)
 					{ 
 						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataCPU;
-						vector< vector<InputTestSet::AttributeLoggingData> > vecResultsDifferencesDataCPU;
 
 						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataGPU;
-						vector< vector<InputTestSet::AttributeLoggingData> > vecResultsDifferencesDataGPU;
 
 						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataCPUGPU;
-						vector< vector<InputTestSet::AttributeLoggingData> > vecResultsDifferencesDataCPUGPU;
 /*						vector<double> vecMaxAbsoluteErrorsCPU,vecMaxAbsoluteErrorsSumCPU;
 						vector<double> vecMeanAbsoluteErrorsCPU,vecMeanAbsoluteErrorsSumCPU;
 						vector< vector<double> > vecResultsMaxAbsoluteErrorsCPU,vecResultsMeanAbsoluteErrorsCPU;
@@ -211,7 +208,6 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 								trainNet.executeNetwork(trainTestSet);
 
 								trainTestSet.getDifferencesStatistics(InputTestSet::DST_CORRECT_AND_CPU,vecDifferencesDataCPU);
-								vecResultsDifferencesDataCPU.push_back(vecDifferencesDataCPU);
 							}
 
 							if(p_bTrainingGPU)
@@ -231,25 +227,23 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 								trainNet.executeNetworkGPU(trainTestSet);
 
 								trainTestSet.getDifferencesStatistics(InputTestSet::DST_CORRECT_AND_GPU,vecDifferencesDataGPU);
-								vecResultsDifferencesDataGPU.push_back(vecDifferencesDataGPU);
 							}
 
 							// if both CPU and GPU were tested, then we also print differences between them
 							if(p_bTrainingCPU && p_bTrainingGPU)
 							{
 								trainTestSet.getDifferencesStatistics(InputTestSet::DST_GPU_AND_CPU,vecDifferencesDataCPUGPU);
-								vecResultsDifferencesDataCPUGPU.push_back(vecDifferencesDataCPUGPU);
 							}
 						}
 
 						if(p_bTrainingCPU)
-							printVectorDifferenceInfoFromVectors(vecResultsDifferencesDataCPU,InputTestSet::DST_CORRECT_AND_CPU);
+							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPU,InputTestSet::DST_CORRECT_AND_CPU);
 
 						if(p_bTrainingGPU)
-							printVectorDifferenceInfoFromVectors(vecResultsDifferencesDataGPU,InputTestSet::DST_CORRECT_AND_GPU);
+							printVectorDifferenceInfoFromVectors(vecDifferencesDataGPU,InputTestSet::DST_CORRECT_AND_GPU);
 
 						if(p_bTrainingCPU && p_bTrainingGPU)
-							printVectorDifferenceInfoFromVectors(vecResultsDifferencesDataCPUGPU,InputTestSet::DST_GPU_AND_CPU);
+							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPUGPU,InputTestSet::DST_GPU_AND_CPU);
 					}
 				}
 			}

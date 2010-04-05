@@ -13,12 +13,12 @@ public:
 
 	struct AttributeLoggingData
 	{
-		std::string m_sColumnName;
+		Str m_sColumnName;
 		bool m_bLiteralAttribute;
 		unsigned int m_uiNumTests;		// for literal attribute
-		vector<doubl> m_dMeanError;	// for non-literal attribute
-		vector<double> m_dMaxError;		// for non-literal attribute
-		vector<unsigned int> m_uiLiteralErrors;	// for literal attribute
+		vector<double> m_vecMeanErrors;	// for non-literal attribute
+		vector<double> m_vecMaxErrors;		// for non-literal attribute
+		vector<double> m_vecLiteralErrors;	// for literal attribute
 	};
 
 private:

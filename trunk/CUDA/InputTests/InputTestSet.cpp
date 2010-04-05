@@ -46,6 +46,7 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 	}
 
 	size_t uNumTests = m_vecTests.size();
+	bool bEmptyVector = (p_vecDifferencesData.size() == 0);
 
 	for(unsigned uAttributeIndex = 0;uAttributeIndex < m_vecAttributeMappings.size();++uAttributeIndex)
 	{
@@ -65,6 +66,9 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 			const InputTest &testNow = m_vecTests[uTestIndex];
 			const vector<double> &vecToCompare1 = (p_eDifferenceType == DST_GPU_AND_CPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecCorrectOutputs);
 			const vector<double> &vecToCompare2 = (p_eDifferenceType == DST_CORRECT_AND_GPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecNetworkOutputs);
+
+			logAssert(vecToCompare1.size() && vecToCompare2.size());
+
 			double dValueFirst = vecToCompare1[iFirstAttributeInStructure];
 			double dValueSecond = vecToCompare2[iFirstAttributeInStructure];
 
@@ -81,8 +85,8 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 				}
 				else
 				{
-					double dMaxFoundValueFirst = dFirstValue;
-					double dMaxFoundValueSecond = dSecondValue;
+					double dMaxFoundValueFirst = dValueFirst;
+					double dMaxFoundValueSecond = dValueSecond;
 					int iMaxFoundValueIndexFirst = 0;
 					int iMaxFoundValueIndexSecond = 0;
 					for(unsigned uPossibleAttributeIndex = 1;uPossibleAttributeIndex < uAttributeValuesCount;++uPossibleAttributeIndex)
@@ -105,37 +109,42 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 			}
 			else
 			{
-				double dAbsoluteError = fabs(dFirstValue - dSecondValue);
-				dMaxError = max(dMaxError,p_vecMaxAbsoluteErrors[uOutputIndex]);
+				double dAbsoluteError = fabs(dValueFirst - dValueSecond);
+				dMaxError = max(dMaxError,dAbsoluteError);
 				dMeanError += dAbsoluteError;
 			}
 		}
 
-		AttributeLoggingData newLoggingData;
-		newLoggingData.m_bLiteralAttribute = attributeMappingData.m_bLiteralAttribute;
-		newLoggingData.m_sColumnName = attributeMappingData.m_sColumnName;
-		newLoggingData.m_uiNumTests = m_vecTests.size();
+		if(bEmptyVector)
+		{
+			AttributeLoggingData newLoggingData;
+			newLoggingData.m_bLiteralAttribute = attributeMappingData.isLiteralAttribute();
+			newLoggingData.m_sColumnName = attributeMappingData.getColumnName();
+			newLoggingData.m_uiNumTests = m_vecTests.size();
+			p_vecDifferencesData.push_back(newLoggingData);
+		}
+
+		AttributeLoggingData &loggingData = p_vecDifferencesData[uAttributeIndex];
 
 		if(attributeMappingData.isLiteralAttribute())
 		{
-			newLoggingData.m_uiLiteralErrors = iLiteralErrors;
+			loggingData.m_vecLiteralErrors.push_back(((double)iLiteralErrors) / m_vecTests.size());
 		}
 		else
 		{
-			newLoggingData.m_dMaxError = dMaxError;
-			newLoggingData.m_dMeanError = dMeanError / m_vecTests.size();
+			loggingData.m_vecMaxErrors.push_back(dMaxError);
+			loggingData.m_vecMeanErrors.push_back(dMeanError / m_vecTests.size());
 		}
-
-		p_vecErrorData.push_back(newLoggingData);
 	}
+
+	return true;
 }
 
 void InputTestSet::printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsType p_eDifferenceType) const
 {
-	vector<double> vecMaxAbsoluteErrors;
-	vector<double> vecMeanAbsoluteErrors;
-	getDifferencesStatistics(vecMaxAbsoluteErrors,vecMeanAbsoluteErrors,p_eDifferenceType);
-	printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrors,vecMeanAbsoluteErrors,p_eDifferenceType);
+	vector<AttributeLoggingData> vecDifferencesData;
+	getDifferencesStatistics(p_eDifferenceType,vecDifferencesData);
+	printVectorDifferenceInfoFromVectors(vecDifferencesData,p_eDifferenceType);
 }
 
 /*
