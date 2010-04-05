@@ -9,5 +9,4 @@ void loadDoubleVectorFromXML(vector<double>&p_vecToConvert, const TiXmlElement &
 void setDoubleVectorXMLString(vector<double>&p_vecToConvert, const Str &p_sConnectedValues);
 
 Str makeDoubleVectorString(vector< vector<double> > *p_vecResultsErrors,unsigned p_uOutputIndex);
-void printVectorDifferenceInfoFromVectors(const vector<double> &p_vecMaxAbsoluteErrors,const vector<double> &p_vecMeanAbsoluteErrors,InputTestSet::DifferenceStatisticsType p_eDifferenceType
-										  ,vector< vector<double> > *p_vecResultsMaxAbsoluteErrors = NULL,vector< vector<double> > *p_vecResultsMeanAbsoluteErrors = NULL);
+void printVectorDifferenceInfoFromVectors(const vector< vector<InputTestSet::AttributeLoggingData> >  &p_vecDifferencesData, InputTestSet::DifferenceStatisticsType p_eDifferenceType);

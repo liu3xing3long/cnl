@@ -82,14 +82,14 @@ Str makeDoubleVectorString(vector< vector<double> > *p_vecResultsErrors,unsigned
 	return sResult;
 }
 
-void printVectorDifferenceInfoFromVectors(const vector<double> &p_vecMaxAbsoluteErrors,const vector<double> &p_vecMeanAbsoluteErrors,InputTestSet::DifferenceStatisticsType p_eDifferenceType
-										  ,vector< vector<double> > *p_vecResultsMaxAbsoluteErrors,vector< vector<double> > *p_vecResultsMeanAbsoluteErrors)
+void printVectorDifferenceInfoFromVectors(const vector< vector<InputTestSet::AttributeLoggingData> >  &p_vecDifferencesData, InputTestSet::DifferenceStatisticsType p_eDifferenceType)
 {
 	logTextParams(Logging::LT_INFORMATION,"Differences between %s and %s"
 		, (p_eDifferenceType == InputTestSet::DST_GPU_AND_CPU ? "GPU" : "Correct")
 		, (p_eDifferenceType == InputTestSet::DST_CORRECT_AND_GPU ? "GPU" : "CPU"));
-	for(unsigned uOutputIndex=0;uOutputIndex<p_vecMaxAbsoluteErrors.size();++uOutputIndex)
+	for(unsigned uOutputIndex=0;uOutputIndex<p_vecDifferencesData.size();++uOutputIndex)
 	{
+		InputTestSet::AttributeLoggingData
 		Str sMax = makeDoubleVectorString(p_vecResultsMaxAbsoluteErrors,uOutputIndex);
 		Str sMean = makeDoubleVectorString(p_vecResultsMeanAbsoluteErrors,uOutputIndex);
 

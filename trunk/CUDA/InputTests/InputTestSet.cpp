@@ -22,6 +22,11 @@ InputTest& InputTestSet::getTest(int p_iIndex)
 	return m_vecTests[p_iIndex];
 }
 
+const vector<AttributeMapping>& InputTestSet::getAttributeMappings() const
+{
+	return m_vecAttributeMappings;
+}
+
 unsigned InputTestSet::getInputCount() const
 {
 	return(unsigned)  m_vecTests[0].m_vecInputs.size();
@@ -32,44 +37,97 @@ unsigned InputTestSet::getOutputCount() const
 	return (unsigned) m_vecTests[0].m_vecCorrectOutputs.size();
 }
 
-bool InputTestSet::getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErrors,vector<double> &p_vecMeanAbsoluteErrors, DifferenceStatisticsType p_eDifferenceType) const
+bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferenceType, vector<AttributeLoggingData> &p_vecDifferencesData) const
 {
-	// JRTODO - jesli nie ma albo wynikow GPU, albo CPU, to zwroc false
 	if(m_vecTests.size() == 0)
 	{
 		logText(Logging::LT_INFORMATION, "There are no tests to check CPU/GPU statistics");
 		return false;
 	}
 
-	size_t uOutputsSize = getOutputCount();
-	p_vecMaxAbsoluteErrors.assign(uOutputsSize,0);
-	p_vecMeanAbsoluteErrors.assign(uOutputsSize,0);
-
 	size_t uNumTests = m_vecTests.size();
 
-	for(unsigned uTestIndex=0;uTestIndex<uNumTests;++uTestIndex)
+	for(unsigned uAttributeIndex = 0;uAttributeIndex < m_vecAttributeMappings.size();++uAttributeIndex)
 	{
-		const InputTest &testNow = m_vecTests[uTestIndex];
-		const vector<double> &vecToCompare1 = (p_eDifferenceType == DST_GPU_AND_CPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecCorrectOutputs);
-		const vector<double> &vecToCompare2 = (p_eDifferenceType == DST_CORRECT_AND_GPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecNetworkOutputs);
+		const AttributeMapping &attributeMappingData = m_vecAttributeMappings[uAttributeIndex];
+		if(!attributeMappingData.isOutputAttribute())
+			continue; // we don't want input attributes
 
-		if(vecToCompare1.size() == 0 || vecToCompare2.size() == 0)
+		int iFirstAttributeInStructure = attributeMappingData.getFirstAttributeInStructure();
+
+		unsigned int iLiteralErrors = 0;
+		double dMeanError = 0.0;
+		double dMaxError = 0.0;
+		unsigned uAttributeValuesCount = attributeMappingData.getAttributeValuesCount();
+
+		for(unsigned uTestIndex=0;uTestIndex<uNumTests;++uTestIndex)
 		{
-			logTextParams(Logging::LT_INFORMATION, "Results vector is empty for test %d",uTestIndex);
-			return false;
+			const InputTest &testNow = m_vecTests[uTestIndex];
+			const vector<double> &vecToCompare1 = (p_eDifferenceType == DST_GPU_AND_CPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecCorrectOutputs);
+			const vector<double> &vecToCompare2 = (p_eDifferenceType == DST_CORRECT_AND_GPU ? testNow.m_vecNetworkOutputsGPU : testNow.m_vecNetworkOutputs);
+			double dValueFirst = vecToCompare1[iFirstAttributeInStructure];
+			double dValueSecond = vecToCompare2[iFirstAttributeInStructure];
+
+			if(attributeMappingData.isLiteralAttribute())
+			{
+				if(uAttributeValuesCount == 2)
+				{
+					for(unsigned uTestIndex=0;uTestIndex<uNumTests;++uTestIndex)
+					{
+						int iIndexFirst = ( (dValueFirst >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
+						int iIndexSecond = ( (dValueSecond >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
+						iLiteralErrors += (iIndexFirst != iIndexSecond);
+					}
+				}
+				else
+				{
+					double dMaxFoundValueFirst = dFirstValue;
+					double dMaxFoundValueSecond = dSecondValue;
+					int iMaxFoundValueIndexFirst = 0;
+					int iMaxFoundValueIndexSecond = 0;
+					for(unsigned uPossibleAttributeIndex = 1;uPossibleAttributeIndex < uAttributeValuesCount;++uPossibleAttributeIndex)
+					{
+						double dThisIndexValueFirst = vecToCompare1[iFirstAttributeInStructure + uPossibleAttributeIndex];
+						double dThisIndexValueSecond = vecToCompare2[iFirstAttributeInStructure + uPossibleAttributeIndex];
+						if(dThisIndexValueFirst > dMaxFoundValueFirst)
+						{
+							dMaxFoundValueFirst = dThisIndexValueFirst;
+							iMaxFoundValueIndexFirst = uPossibleAttributeIndex;
+						}
+						if(dThisIndexValueSecond > dMaxFoundValueSecond)
+						{
+							dMaxFoundValueSecond = dThisIndexValueSecond;
+							iMaxFoundValueIndexSecond = uPossibleAttributeIndex;
+						}
+					}
+					iLiteralErrors += (iMaxFoundValueIndexFirst != iMaxFoundValueIndexSecond);
+				}
+			}
+			else
+			{
+				double dAbsoluteError = fabs(dFirstValue - dSecondValue);
+				dMaxError = max(dMaxError,p_vecMaxAbsoluteErrors[uOutputIndex]);
+				dMeanError += dAbsoluteError;
+			}
 		}
 
-		for(unsigned uOutputIndex=0;uOutputIndex<uOutputsSize;++uOutputIndex)
+		AttributeLoggingData newLoggingData;
+		newLoggingData.m_bLiteralAttribute = attributeMappingData.m_bLiteralAttribute;
+		newLoggingData.m_sColumnName = attributeMappingData.m_sColumnName;
+		newLoggingData.m_uiNumTests = m_vecTests.size();
+
+		if(attributeMappingData.isLiteralAttribute())
 		{
-			double dAbsoluteError = fabs(vecToCompare1[uOutputIndex] - vecToCompare2[uOutputIndex]);
-			p_vecMaxAbsoluteErrors[uOutputIndex] = max(dAbsoluteError,p_vecMaxAbsoluteErrors[uOutputIndex]);
-			p_vecMeanAbsoluteErrors[uOutputIndex] += dAbsoluteError / uNumTests;
-			// JRTODO - proportional error
-			//double dProportionalError = fabs(testNow.m_vecNetworkOutputsGPU[uOutputIndex] - vecToCompare[uOutputIndex]);
+			newLoggingData.m_uiLiteralErrors = iLiteralErrors;
 		}
+		else
+		{
+			newLoggingData.m_dMaxError = dMaxError;
+			newLoggingData.m_dMeanError = dMeanError / m_vecTests.size();
+		}
+
+		p_vecErrorData.push_back(newLoggingData);
 	}
-
-	return true;
 }
 
 void InputTestSet::printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsType p_eDifferenceType) const

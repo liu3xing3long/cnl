@@ -2,7 +2,6 @@
 
 class InputTestSet
 {
-	friend class InputTest;
 public:
 
 	enum DifferenceStatisticsType
@@ -12,18 +11,21 @@ public:
 		DST_GPU_AND_CPU
 	};
 
+	struct AttributeLoggingData
+	{
+		std::string m_sColumnName;
+		bool m_bLiteralAttribute;
+		unsigned int m_uiNumTests;		// for literal attribute
+		vector<doubl> m_dMeanError;	// for non-literal attribute
+		vector<double> m_dMaxError;		// for non-literal attribute
+		vector<unsigned int> m_uiLiteralErrors;	// for literal attribute
+	};
+
 private:
 	vector<InputTest> m_vecTests;
 	vector<AttributeMapping> m_vecAttributeMappings;
 	Str m_sSourceDataFileName;
 
-	/*
-	vector<Str> m_vecInColumnNames;
-	vector<Str> m_vecOutColumnNames;
-
-	vector< pair<double,double> > m_vecMinMaxInData; // Min and max values
-	vector< pair<double,double> > m_vecMinMaxOutData;
-*/
 	void saveToXML(TiXmlElement &p_XML) const;
 	void loadFromXML(const TiXmlElement &p_XML);
 
@@ -57,7 +59,9 @@ public:
 	const InputTest& getTest(int p_iIndex) const;
 	InputTest& getTest(int p_iIndex);
 
-	bool getDifferencesStatistics(vector<double> &p_vecMaxAbsoluteErrors,vector<double> &p_vecMaxProportionalErrors, DifferenceStatisticsType p_eDifferenceType) const;
+	const vector<AttributeMapping>& getAttributeMappings() const;
+
+	bool getDifferencesStatistics(DifferenceStatisticsType p_eDifferenceType, vector<AttributeLoggingData> &p_vecDifferencesData) const;
 	void printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsType p_eDifferenceType) const;
 
 	//void randomizeTests(MTRand *p_pRandomGenerator);

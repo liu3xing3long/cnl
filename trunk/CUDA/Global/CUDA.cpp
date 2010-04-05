@@ -84,7 +84,7 @@ void checkIfGPUTrainingIsOK()
 	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_CPU);
 	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_GPU);
 }
-
+/*
 // Helping function
 inline void updateErrorsInVectors(const vector<double> &p_vecMaxErrors,vector<double> &p_vecMaxErrorsSum
 								  ,const vector<double> &p_vecMeanErrors,vector<double> &p_vecMeanErrorsSum
@@ -107,7 +107,7 @@ inline void updateErrorsInVectors(const vector<double> &p_vecMaxErrors,vector<do
 	p_vecResultsMaxErrors.push_back(p_vecMaxErrors);
 	p_vecResultsMeanErrors.push_back(p_vecMeanErrors);
 }
-
+*/
 void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets, bool p_bTrainingCPU, bool p_bTrainingGPU)
 {
 	if((!p_bTrainingCPU && !p_bTrainingCPU) || p_vecTestSets.size() == 0)
@@ -161,8 +161,16 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 				for(int iHiddenNeuronsIndex=0;iHiddenNeuronsIndex<numElementsInArrayHiddenNeurons;++iHiddenNeuronsIndex)
 				{
 					for(int iMaxAbsWeightsIndex=0;iMaxAbsWeightsIndex<numElementsInArrayMaxAbsWeights;++iMaxAbsWeightsIndex)
-					{
-						vector<double> vecMaxAbsoluteErrorsCPU,vecMaxAbsoluteErrorsSumCPU;
+					{ 
+						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataCPU;
+						vector< vector<InputTestSet::AttributeLoggingData> > vecResultsDifferencesDataCPU;
+
+						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataGPU;
+						vector< vector<InputTestSet::AttributeLoggingData> > vecResultsDifferencesDataGPU;
+
+						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataCPUGPU;
+						vector< vector<InputTestSet::AttributeLoggingData> > vecResultsDifferencesDataCPUGPU;
+/*						vector<double> vecMaxAbsoluteErrorsCPU,vecMaxAbsoluteErrorsSumCPU;
 						vector<double> vecMeanAbsoluteErrorsCPU,vecMeanAbsoluteErrorsSumCPU;
 						vector< vector<double> > vecResultsMaxAbsoluteErrorsCPU,vecResultsMeanAbsoluteErrorsCPU;
 						
@@ -172,7 +180,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 						vector<double> vecMaxAbsoluteErrorsGPUCPU,vecMaxAbsoluteErrorsSumGPUCPU;
 						vector<double> vecMeanAbsoluteErrorsGPUCPU,vecMeanAbsoluteErrorsSumGPUCPU;
-						vector< vector<double> > vecResultsMaxAbsoluteErrorsGPUCPU,vecResultsMeanAbsoluteErrorsGPUCPU;
+						vector< vector<double> > vecResultsMaxAbsoluteErrorsGPUCPU,vecResultsMeanAbsoluteErrorsGPUCPU;*/
 
 						MTRand generatorInThreadCPU(iSeed);
 						MTRand generatorInThreadGPU(iSeed);
@@ -202,11 +210,8 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 								// execute trained network and check difference between correct output
 								trainNet.executeNetwork(trainTestSet);
 
-								trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrorsCPU,vecMeanAbsoluteErrorsCPU,InputTestSet::DST_CORRECT_AND_CPU);
-
-								updateErrorsInVectors(vecMaxAbsoluteErrorsCPU,vecMaxAbsoluteErrorsSumCPU
-									,vecMeanAbsoluteErrorsCPU,vecMeanAbsoluteErrorsSumCPU
-									,vecResultsMaxAbsoluteErrorsCPU,vecResultsMeanAbsoluteErrorsCPU,iTestsSetSize);
+								trainTestSet.getDifferencesStatistics(InputTestSet::DST_CORRECT_AND_CPU,vecDifferencesDataCPU);
+								vecResultsDifferencesDataCPU.push_back(vecDifferencesDataCPU);
 							}
 
 							if(p_bTrainingGPU)
@@ -225,32 +230,26 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 								// execute trained network and check difference between correct output
 								trainNet.executeNetworkGPU(trainTestSet);
 
-								trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrorsGPU,vecMeanAbsoluteErrorsGPU,InputTestSet::DST_CORRECT_AND_GPU);
-
-								updateErrorsInVectors(vecMaxAbsoluteErrorsGPU,vecMaxAbsoluteErrorsSumGPU
-									,vecMeanAbsoluteErrorsGPU,vecMeanAbsoluteErrorsSumGPU
-									,vecResultsMaxAbsoluteErrorsGPU,vecResultsMeanAbsoluteErrorsGPU,iTestsSetSize);
+								trainTestSet.getDifferencesStatistics(InputTestSet::DST_CORRECT_AND_GPU,vecDifferencesDataGPU);
+								vecResultsDifferencesDataGPU.push_back(vecDifferencesDataGPU);
 							}
 
 							// if both CPU and GPU were tested, then we also print differences between them
 							if(p_bTrainingCPU && p_bTrainingGPU)
 							{
-								trainTestSet.getDifferencesStatistics(vecMaxAbsoluteErrorsGPUCPU,vecMeanAbsoluteErrorsGPUCPU,InputTestSet::DST_GPU_AND_CPU);
-
-								updateErrorsInVectors(vecMaxAbsoluteErrorsGPUCPU,vecMaxAbsoluteErrorsSumGPUCPU
-									,vecMeanAbsoluteErrorsGPUCPU,vecMeanAbsoluteErrorsSumGPUCPU
-									,vecResultsMaxAbsoluteErrorsGPUCPU,vecResultsMeanAbsoluteErrorsGPUCPU,iTestsSetSize);
+								trainTestSet.getDifferencesStatistics(InputTestSet::DST_GPU_AND_CPU,vecDifferencesDataCPUGPU);
+								vecResultsDifferencesDataCPUGPU.push_back(vecDifferencesDataCPUGPU);
 							}
 						}
 
 						if(p_bTrainingCPU)
-							printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrorsSumCPU,vecMeanAbsoluteErrorsSumCPU,InputTestSet::DST_CORRECT_AND_CPU,&vecResultsMaxAbsoluteErrorsCPU,&vecResultsMeanAbsoluteErrorsCPU);
+							printVectorDifferenceInfoFromVectors(vecResultsDifferencesDataCPU,InputTestSet::DST_CORRECT_AND_CPU);
 
 						if(p_bTrainingGPU)
-							printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrorsSumGPU,vecMeanAbsoluteErrorsSumGPU,InputTestSet::DST_CORRECT_AND_GPU,&vecResultsMaxAbsoluteErrorsGPU,&vecResultsMeanAbsoluteErrorsGPU);
+							printVectorDifferenceInfoFromVectors(vecResultsDifferencesDataGPU,InputTestSet::DST_CORRECT_AND_GPU);
 
 						if(p_bTrainingCPU && p_bTrainingGPU)
-							printVectorDifferenceInfoFromVectors(vecMaxAbsoluteErrorsSumGPUCPU,vecMeanAbsoluteErrorsSumGPUCPU,InputTestSet::DST_GPU_AND_CPU,&vecResultsMaxAbsoluteErrorsGPUCPU,&vecResultsMeanAbsoluteErrorsGPUCPU);
+							printVectorDifferenceInfoFromVectors(vecResultsDifferencesDataCPUGPU,InputTestSet::DST_GPU_AND_CPU);
 					}
 				}
 			}
@@ -265,7 +264,7 @@ void makeTrainingToGenerateStatistics()
 	vector<int> vecOutputColumns;
 	vector<int> vecUnusedColumns;
 
-	int iTestSetType = 1;
+	int iTestSetType = 3;
 
 	if(iTestSetType == 1)
 	{
@@ -302,7 +301,7 @@ void makeTrainingToGenerateStatistics()
 		}
 	}
 
-	makeTrainingWithManyPossibilities(vecTestSets,true,true);
+	makeTrainingWithManyPossibilities(vecTestSets,true,false);
 }
 
 void doExecuteNetworksCPUAndGPUAndSaveLoad()

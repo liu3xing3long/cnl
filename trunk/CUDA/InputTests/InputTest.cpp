@@ -35,7 +35,7 @@ void InputTest::saveDoubleTestVectorToXML(const vector<double> &p_vecDoubleValue
 
 	if(p_vecDoubleValues.size() > 0)
 	{
-		const vector<AttributeMapping> &vecAttributeMappings = m_pParentTestSet->m_vecAttributeMappings;
+		const vector<AttributeMapping> &vecAttributeMappings = m_pParentTestSet->getAttributeMappings();
 		unsigned uAttributesMappingSize = vecAttributeMappings.size();
 		for(unsigned uAttributeIndex = 0;uAttributeIndex < uAttributesMappingSize;++uAttributeIndex)
 		{
