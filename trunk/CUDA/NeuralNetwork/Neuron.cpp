@@ -3,15 +3,15 @@
 const Str m_XMLNeuronType("NeuronType");
 const Str m_XMLNeuronWeights("Weights");
 
-Neuron::Neuron(Layer *p_pLayer)
-: m_pLayer(p_pLayer)
-, m_eNeuronType(Neuron::NT_OFF)
+Neuron::Neuron(Layer * /*p_pLayer*/)
+: /*m_pLayer(p_pLayer)
+, */m_eNeuronType(Neuron::NT_OFF)
 {
 }
 
-Neuron::Neuron(Layer *p_pLayer, unsigned p_uNumberWeights, NeuronType p_eNeuronType)
-: m_pLayer(p_pLayer)
-, m_eNeuronType(p_eNeuronType)
+Neuron::Neuron(Layer * /*p_pLayer*/, unsigned p_uNumberWeights, NeuronType p_eNeuronType)
+: /*m_pLayer(p_pLayer)
+, */m_eNeuronType(p_eNeuronType)
 {
 	// All weights + bias
 	m_vecWeights.resize(p_uNumberWeights + 1);

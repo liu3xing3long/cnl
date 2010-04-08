@@ -22,7 +22,7 @@ public:
 
 private:
 
-	Layer *m_pLayer;
+	//Layer *m_pLayer;
 
 	// The last element is bias
 	vector<double> m_vecWeights;

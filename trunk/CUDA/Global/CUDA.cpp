@@ -167,17 +167,6 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataGPU;
 
 						vector<InputTestSet::AttributeLoggingData> vecDifferencesDataCPUGPU;
-/*						vector<double> vecMaxAbsoluteErrorsCPU,vecMaxAbsoluteErrorsSumCPU;
-						vector<double> vecMeanAbsoluteErrorsCPU,vecMeanAbsoluteErrorsSumCPU;
-						vector< vector<double> > vecResultsMaxAbsoluteErrorsCPU,vecResultsMeanAbsoluteErrorsCPU;
-						
-						vector<double> vecMaxAbsoluteErrorsGPU,vecMaxAbsoluteErrorsSumGPU;
-						vector<double> vecMeanAbsoluteErrorsGPU,vecMeanAbsoluteErrorsSumGPU;
-						vector< vector<double> > vecResultsMaxAbsoluteErrorsGPU,vecResultsMeanAbsoluteErrorsGPU;
-
-						vector<double> vecMaxAbsoluteErrorsGPUCPU,vecMaxAbsoluteErrorsSumGPUCPU;
-						vector<double> vecMeanAbsoluteErrorsGPUCPU,vecMeanAbsoluteErrorsSumGPUCPU;
-						vector< vector<double> > vecResultsMaxAbsoluteErrorsGPUCPU,vecResultsMeanAbsoluteErrorsGPUCPU;*/
 
 						MTRand generatorInThreadCPU(iSeed);
 						MTRand generatorInThreadGPU(iSeed);
