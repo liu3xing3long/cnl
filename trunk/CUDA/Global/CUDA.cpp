@@ -292,18 +292,18 @@ void doExecuteNetworksCPUAndGPUAndSaveLoad()
 	// New MLP network
 	MLP dummyNet;
 
-	const int iNumTests = 1000;
-	const int iHiddenNeurons = 45;
+	const int iNumTests = 2000;
+	const int iHiddenNeurons = 32;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.setInputNeuronCount(iInputs);
 	dummyNet.addNewLayer(iHiddenNeurons,Neuron::NT_SIGMOID);
-	//dummyNet.addNewLayer(Layer(iHiddenNeurons,iHiddenNeurons,Neuron::NT_SIGMOID));
+	dummyNet.addNewLayer(iHiddenNeurons,Neuron::NT_SIGMOID);
 
 	// Output layer - 5 neurons, linear neurons
 	dummyNet.addNewLayer(iOutputs,Neuron::NT_LINEAR);
 
-	// we randomize weights in a all layers
+	// we randomize weights in all layers
 	dummyNet.randomizeWeights(0.01,NULL);
 
 	// 100 tests, 2 input variables, 1 output variables
@@ -314,19 +314,26 @@ void doExecuteNetworksCPUAndGPUAndSaveLoad()
 	const int iTimesTried = 1;
 
 	logText(Logging::LT_INFORMATION,"Started execution CPU");
+
+	Logging::Timer timer;
+	timer.start();
 	for(int a=0;a<iTimesTried;++a)
 	{
 		dummyNet.executeNetwork(dummyTestSet);
 	}
+	int result = timer.stop();
 
-	logText(Logging::LT_INFORMATION,"Started execution GPU");
+	logTextParams(Logging::LT_INFORMATION,"Finished execution CPU. Time: %u ms. Started execution GPU",result);
 
+	timer.start();
+	unsigned int uiFullTime = 0,uiKernelTime = 0;
 	for(int a=0;a<iTimesTried;++a)
 	{
-		dummyNet.executeNetworkGPU(dummyTestSet);
+		dummyNet.executeNetworkGPU(dummyTestSet,&uiFullTime,&uiKernelTime);
 	}
+	result = timer.stop();
 
-	logText(Logging::LT_INFORMATION,"Finished execution GPU");
+	logTextParams(Logging::LT_INFORMATION,"Finished execution GPU. Time: %u ms, %u , %u",result,uiFullTime,uiKernelTime);
 
 	// We retrieve and print differences between CPU and GPU results for each output (these should be small).
 	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_GPU_AND_CPU);
@@ -399,9 +406,9 @@ int main()
 
 	logText(Logging::LT_INFORMATION,"Application Started");
 
-	//doExecuteNetworksCPUAndGPUAndSaveLoad();
+	doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	makeTrainingToGenerateStatistics();
+	//makeTrainingToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 

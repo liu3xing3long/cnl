@@ -13,7 +13,7 @@ public:
 	virtual void executeNetwork(InputTestSet &p_TestSet);
 	
 	virtual void trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator);
-	virtual void executeNetworkGPU(InputTestSet &p_TestSet);
+	virtual void executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMilliseconds = NULL,unsigned int *p_uiKernelMilliseconds = NULL);
 	
 	virtual void trainNetworkGPU(InputTestSet &p_TestSet, int p_iTrainedElements, double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator);
 

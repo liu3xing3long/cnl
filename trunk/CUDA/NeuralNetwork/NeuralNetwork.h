@@ -11,7 +11,7 @@ public:
 
 	virtual void executeNetwork(InputTestSet &p_TestSet) = 0;
 	virtual void trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator) = 0;
-	virtual void executeNetworkGPU(InputTestSet &p_TestSet) = 0;
+	virtual void executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMilliseconds = NULL,unsigned int *p_uiKernelMilliseconds = NULL) = 0;
 	virtual void trainNetworkGPU(InputTestSet &p_TestSet, int p_iTrainedElements, double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator) = 0;
 
 	virtual void randomizeWeights(double p_dAbsMax,MTRand *p_pRandomGenerator) = 0;

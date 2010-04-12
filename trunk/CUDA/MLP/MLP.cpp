@@ -173,8 +173,11 @@ void MLP::executeNetworkGPU(InputTestSet &p_TestSet)
 	executeNetworkGPU(p_TestSet,false);
 }.*/
 
-void MLP::executeNetworkGPU(InputTestSet &p_TestSet/*,bool p_bInTraining*/)
+void MLP::executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMilliseconds,unsigned int *p_uiKernelMilliseconds)
 {
+	Logging::Timer timerFull, timerKernel;
+	timerFull.start();
+	unsigned int uiKernelMilliseconds = 0;
 	// execute network on all layers for this test
 	real_gpu *d_pLayerInput = NULL;
 	real_gpu *d_pWeights = NULL;
@@ -200,13 +203,21 @@ void MLP::executeNetworkGPU(InputTestSet &p_TestSet/*,bool p_bInTraining*/)
 
 		d_pWeights =  CUDATools::setGPUMemoryForWeights(thisLayer);
 		d_pLayerOutput = CUDATools::allocateGPUMemoryForHiddenOrOutputLayer(p_TestSet,thisLayer);
+
+		timerKernel.start();
 		CUDATools::executeLayerGPU(d_pLayerInput,d_pWeights,d_pLayerOutput,p_TestSet,thisLayer);
+		uiKernelMilliseconds += timerKernel.stop();
 	}
 
 	CUDATools::retrieveOutputsGPU(d_pLayerOutput,p_TestSet);
 	CUDATools::freeGPUMemory(d_pLayerInput);
 	CUDATools::freeGPUMemory(d_pWeights);
 	CUDATools::freeGPUMemory(d_pLayerOutput);
+
+	if(p_uiFullMilliseconds != NULL)
+		*p_uiFullMilliseconds = timerFull.stop();
+	if(p_uiKernelMilliseconds != NULL)
+		*p_uiKernelMilliseconds = uiKernelMilliseconds;
 }
 
 /*

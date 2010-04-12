@@ -21,6 +21,9 @@
 extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput
 								 ,int p_iTestCount,int p_iOutputNeuronCount,int p_iNumInputNeurons, Neuron::NeuronType p_eNeuronType,const int *p_pVecTestIndices);
 
+extern "C" void executeLayerCUDA_OLD(const real_gpu *dp_pLayerInput,const real_gpu *dp_pWeights,real_gpu *dp_pLayerOutput,real_gpu *dp_pDerivativeOfLastOutput
+									 ,int p_iTestCount,int p_iOutputNeuronCount,int p_iNumInputNeurons,Neuron::NeuronType p_eNeuronType);
+
 extern "C" void calculateErrorInLastLayerCUDA(const real_gpu *dp_pCorrectOutput,const real_gpu *dp_pNetworkOutput,real_gpu *dp_pErrors,int p_iOutputNeuronCount,int p_iNumTestsInBatch,int p_iSpaceBetweenTestsInOutput);
 
 extern "C" void calculateErrorInNotLastLayerCUDA(const real_gpu *dp_pNextLayerWeights,const real_gpu *dp_pNextLayerError,real_gpu *dp_pThisLayerError,int p_iThisLayerNeuronCount,int p_iNextLayerNeuronCount,int p_iNumTestsInBatch);
@@ -174,6 +177,7 @@ void CUDATools::executeLayerGPU(const real_gpu *dp_pLayerInput,const real_gpu *d
 {
 	//int iNumNeurons = p_TestSet.getOutputCount()+1; // and bias
 	executeLayerCUDA(dp_pLayerInput,dp_pWeights,dp_pLayerOutput,NULL,p_TestSet.getTestCount(),p_Layer.getNeuronCount(),p_Layer.getWeightCount(),p_Layer.getNeuronType(),NULL);
+	cudaThreadSynchronize();
 }
 
 void CUDATools::executeLayerGPUForTraining(const real_gpu *dp_pLayerInput,const Layer &p_Layer,const vector<int> &p_vecTrainedElements,bool p_bSetIndices)
