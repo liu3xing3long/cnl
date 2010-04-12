@@ -177,7 +177,7 @@ void CUDATools::executeLayerGPU(const real_gpu *dp_pLayerInput,const real_gpu *d
 {
 	//int iNumNeurons = p_TestSet.getOutputCount()+1; // and bias
 	executeLayerCUDA(dp_pLayerInput,dp_pWeights,dp_pLayerOutput,NULL,p_TestSet.getTestCount(),p_Layer.getNeuronCount(),p_Layer.getWeightCount(),p_Layer.getNeuronType(),NULL);
-	cudaThreadSynchronize();
+	//cudaThreadSynchronize();
 }
 
 void CUDATools::executeLayerGPUForTraining(const real_gpu *dp_pLayerInput,const Layer &p_Layer,const vector<int> &p_vecTrainedElements,bool p_bSetIndices)
