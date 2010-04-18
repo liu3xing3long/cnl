@@ -180,7 +180,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 						logTextParams(Logging::LT_INFORMATION,"Trained elements:\t%d\tEta:\t%f\tTests in array:\t%d\tHidden neurons:\t%d\tMax Abs Weights:\t%f"
 							,iTrainedElementsArray[iTrainedElementsIndex],dEtaArray[iEtaIndex],iTestsInTrainingArray[iTestsInTrainingIndex],iHiddenNeuronsArray[iHiddenNeuronsIndex],dMaxAbsWeightsArray[iMaxAbsWeightsIndex]);
 
-						for(int iTestSetIndex=0;iTestSetIndex<iTestsSetSize;++iTestSetIndex)
+						for(size_t iTestSetIndex=0;iTestSetIndex<iTestsSetSize;++iTestSetIndex)
 						{
 							InputTestSet trainTestSet(p_vecTestSets[iTestSetIndex]);
 
