@@ -18,8 +18,6 @@
 // JRTODO - zestawy testow sa na http://mlr.cs.umass.edu/ml/ 
 
 
-
-//Problem z performance CUDA 3.0
 //w czasie kompilacji .cu jest generowanych bardzo duzo plikow
 
 
