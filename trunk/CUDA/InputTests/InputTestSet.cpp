@@ -272,7 +272,7 @@ bool InputTestSet::loadElementsFromCSVFile(char p_cSeparator, Str p_sFileName, F
 	while(fgets(sLoadedLine,iStringLen,p_pLoadFile))
 	{
 		iLineNumber++;
-		int iLineLen = strlen(sLoadedLine);
+		size_t iLineLen = strlen(sLoadedLine);
 		if(sLoadedLine[iLineLen-1] == '\n')
 			sLoadedLine[--iLineLen] = '\0';
 
@@ -298,7 +298,7 @@ bool InputTestSet::loadElementsFromCSVFile(char p_cSeparator, Str p_sFileName, F
 
 void InputTestSet::retriveColumnNamesFromCSVFile(vector< vector<Str> > &p_vecElements, vector<Str> &p_vecColumnNames)
 {
-	unsigned uColumnsNumber = p_vecElements[0].size();
+	size_t uColumnsNumber = p_vecElements[0].size();
 	for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
 	{
 		Str sElement = p_vecElements[0][uColumnIndex];
@@ -329,8 +329,8 @@ void InputTestSet::retriveColumnNamesFromCSVFile(vector< vector<Str> > &p_vecEle
 void InputTestSet::removeIncorrectCSVElements(bool p_bContainsColumnNames, vector< vector<Str> > &p_vecElements)
 {
 	int iErasedElements = 0;
-	unsigned uVecSize = p_vecElements.size();
-	unsigned uColumnsNumber = p_vecElements[0].size();
+	size_t uVecSize = p_vecElements.size();
+	size_t uColumnsNumber = p_vecElements[0].size();
 	for(unsigned uLineIndex = 0;uLineIndex < uVecSize;++uLineIndex)
 	{
 		bool bToErase = false;
@@ -358,8 +358,8 @@ void InputTestSet::removeIncorrectCSVElements(bool p_bContainsColumnNames, vecto
 
 bool InputTestSet::checkKindsOfColumnsInCSVFile(vector< vector<Str> > &p_vecElements, vector<bool> &p_vecIsLiteral)
 {
-	unsigned uVecSize = p_vecElements.size();
-	unsigned uColumnsNumber = p_vecElements[0].size();
+	size_t uVecSize = p_vecElements.size();
+	size_t uColumnsNumber = p_vecElements[0].size();
 	for(unsigned uLineIndex = 0;uLineIndex < uVecSize;++uLineIndex)
 	{
 		for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
@@ -379,7 +379,7 @@ bool InputTestSet::checkKindsOfColumnsInCSVFile(vector< vector<Str> > &p_vecElem
 				bIsLiteral = true;
 			}
 
-			unsigned uElemSize = sElement.size();
+			size_t uElemSize = sElement.size();
 			for(unsigned uCharIndex = 0;uCharIndex < uElemSize;++uCharIndex)
 			{
 				if(!(sElement[uCharIndex] >= '0' && sElement[uCharIndex] <= '9') && sElement[uCharIndex] != '.')
@@ -395,7 +395,7 @@ bool InputTestSet::checkKindsOfColumnsInCSVFile(vector< vector<Str> > &p_vecElem
 	return true;
 }
 
-bool InputTestSet::checkColumnIndexCorrectnessInCSVFile(const vector<int> &p_vecOutputColumns,const vector<int> &p_vecUnusedColumns,unsigned p_uColumnsNumber)
+bool InputTestSet::checkColumnIndexCorrectnessInCSVFile(const vector<int> &p_vecOutputColumns,const vector<int> &p_vecUnusedColumns,size_t p_uColumnsNumber)
 {
 	for(unsigned uColumnIndex = 0;uColumnIndex < p_vecOutputColumns.size();++uColumnIndex)
 	{
@@ -424,8 +424,8 @@ bool InputTestSet::checkColumnIndexCorrectnessInCSVFile(const vector<int> &p_vec
 
 bool InputTestSet::getColumnRangesFromCSVFile(const vector< vector<Str> > &p_vecElements, const vector<bool> &p_vecIsLiteral, vector< pair<double,double> > &p_vecMinMaxData, vector< vector<Str> > &p_vecPossibleValuesData)
 {
-	unsigned uVecSize = p_vecElements.size();
-	unsigned uColumnsNumber = p_vecElements[0].size();
+	size_t uVecSize = p_vecElements.size();
+	size_t uColumnsNumber = p_vecElements[0].size();
 	for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
 	{
 		if(p_vecIsLiteral[uColumnIndex])
@@ -466,7 +466,7 @@ bool InputTestSet::getColumnRangesFromCSVFile(const vector< vector<Str> > &p_vec
 	}
 	return true;
 }
-bool InputTestSet::generateInputColumnsVectorForCSVFile(const vector<int> &p_vecOutputColumns, const vector<int> &p_vecUnusedColumns, unsigned uColumnsNumber, vector<int> &p_vecInputColumns)
+bool InputTestSet::generateInputColumnsVectorForCSVFile(const vector<int> &p_vecOutputColumns, const vector<int> &p_vecUnusedColumns, size_t uColumnsNumber, vector<int> &p_vecInputColumns)
 {
 	for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
 	{
@@ -487,14 +487,14 @@ bool InputTestSet::generateInputColumnsVectorForCSVFile(const vector<int> &p_vec
 
 bool InputTestSet::checkBasicValidityInCSVFile(const vector< vector<Str> > &p_vecElements)
 {
-	unsigned uVecSize = p_vecElements.size();
+	size_t uVecSize = p_vecElements.size();
 	if(uVecSize < 2)
 	{
 		logTextParams(Logging::LT_ERROR,"Too small number of lines: %d",uVecSize);
 		return false;
 	}
 
-	unsigned uColumnsNumber = p_vecElements[0].size();
+	size_t uColumnsNumber = p_vecElements[0].size();
 	// All lines need to have the same number of elements
 	for(unsigned uLineIndex = 1;uLineIndex < uVecSize;++uLineIndex)
 	{
@@ -551,7 +551,7 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 {
 	m_vecAttributeMappings.clear();
 	m_vecTests.clear();
-	unsigned uVecSize = p_vecElements.size();
+	size_t uVecSize = p_vecElements.size();
 	for(unsigned uTestIndex=0;uTestIndex<uVecSize;++uTestIndex)
 	{
 		m_vecTests.push_back(InputTest(this,0,0));
@@ -562,14 +562,14 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 	{
 		const vector<int> &vecNow = *pVectorsColumnIndices[iVectorIndex];
 		bool bIsOutputVector = (iVectorIndex == 1);
-		int iElementInStructure = 0;
+		size_t iElementInStructure = 0;
 		for(unsigned uColumnIndex = 0;uColumnIndex < vecNow.size();++uColumnIndex)
 		{
 			int iColumnIndexInVecElements = vecNow[uColumnIndex];
 			Str sColumnName = ((p_vecColumnNames.size() != 0) ? p_vecColumnNames[iColumnIndexInVecElements] : "");
 			
 			// We add an element to m_vecAttributeMappings
-			m_vecAttributeMappings.push_back(AttributeMapping(sColumnName,bIsOutputVector,iColumnIndexInVecElements,iElementInStructure));
+			m_vecAttributeMappings.push_back(AttributeMapping(sColumnName,bIsOutputVector,iColumnIndexInVecElements,(int)iElementInStructure));
 			AttributeMapping &lastAttributeMapping = m_vecAttributeMappings[m_vecAttributeMappings.size()-1];
 			if(p_vecIsLiteral[iColumnIndexInVecElements])
 			{
@@ -578,7 +578,7 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 
 				// if there are only 2 possible values, we make only one input/output. 
 				// If more, we have the ame number of inputs/outputs as the number of possible values
-				unsigned uPossibleValues = vecPosibleValues.size();
+				size_t uPossibleValues = vecPosibleValues.size();
 				if(uPossibleValues == 2)
 				{
 					Str sFirstValue = vecPosibleValues[0];
@@ -609,7 +609,7 @@ bool InputTestSet::generateAttributeMappingsAndTestsForCSVFile(const vector<int>
 						vector<Str>::const_iterator iter = find(vecPosibleValues.begin(),vecPosibleValues.end(),sValueInVector);
 						if(iter != vecPosibleValues.end())
 						{
-							unsigned uFoundIndex = iter - vecPosibleValues.begin();
+							size_t uFoundIndex = iter - vecPosibleValues.begin();
 							for(unsigned uAddedElement=0;uAddedElement<uPossibleValues;++uAddedElement)
 								vecToAdd.push_back((uAddedElement == uFoundIndex) ? dMaxNeuralNetworkValue : dMinNeuralNetworkValue);
 						}
@@ -661,7 +661,7 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 
 	fclose(pLoadFile);
 
-	unsigned uColumnsNumber = vecElements[0].size();
+	size_t uColumnsNumber = vecElements[0].size();
 
 	// If we have column names, we retrieve them
 	vector<Str> vecColumnNames;
@@ -761,7 +761,7 @@ void InputTestSet::normalizeTests()
 	// we find min and max values in non-literal attributes, set it in m_vecAttributeMappings, and normalize inputs and outputs
 	unsigned uTestCount = getTestCount();
 	
-	unsigned uAttributeCount = m_vecAttributeMappings.size();
+	size_t uAttributeCount = m_vecAttributeMappings.size();
 	for(unsigned uAttributeIndex=0;uAttributeIndex<uAttributeCount;++uAttributeIndex)
 	{
 		AttributeMapping &attributeNow = m_vecAttributeMappings[uAttributeIndex];

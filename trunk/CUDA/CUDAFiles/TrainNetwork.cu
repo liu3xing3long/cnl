@@ -32,8 +32,8 @@ __global__ void executeLayerKernel_OLD(const real_gpu *dp_pLayerInput,const real
 			break;	// Do nothing
 		case Neuron::NT_SIGMOID: 
 			real_gpu dExp = exp(-dResult);
-			dResult = 1.0 / (1.0 + dExp);
-			dDerivativeOfLastOutput = dExp / pow(1.0 + dExp,2);
+			dResult = 1.0f / (1.0f + dExp);
+			dDerivativeOfLastOutput = dExp / pow(1.0f + dExp,2);
 			break;	
 	}
 	

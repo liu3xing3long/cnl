@@ -15,7 +15,7 @@ public:
 	{
 		Str m_sColumnName;
 		bool m_bLiteralAttribute;
-		unsigned int m_uiNumTests;		// for literal attribute
+		size_t m_uiNumTests;		// for literal attribute
 		vector<double> m_vecMeanErrors;	// for non-literal attribute
 		vector<double> m_vecMaxErrors;		// for non-literal attribute
 		vector<double> m_vecLiteralErrors;	// for literal attribute
@@ -36,9 +36,9 @@ private:
 	static void retriveColumnNamesFromCSVFile(vector< vector<Str> > &p_vecElements, vector<Str> &p_vecColumnNames);
 	static void removeIncorrectCSVElements(bool p_bContainsColumnNames, vector< vector<Str> > &p_vecElements);
 	static bool checkKindsOfColumnsInCSVFile(vector< vector<Str> > &p_vecElements, vector<bool> &p_vecIsLiteral);
-	static bool checkColumnIndexCorrectnessInCSVFile(const vector<int> &p_vecOutputColumns,const vector<int> &p_vecUnusedColumns,unsigned p_uColumnsNumber);
+	static bool checkColumnIndexCorrectnessInCSVFile(const vector<int> &p_vecOutputColumns,const vector<int> &p_vecUnusedColumns,size_t p_uColumnsNumber);
 	static bool getColumnRangesFromCSVFile(const vector< vector<Str> > &p_vecElements, const vector<bool> &p_vecIsLiteral, vector< pair<double,double> > &p_vecMinMaxData, vector< vector<Str> > &p_vecPossibleValuesData);
-	static bool generateInputColumnsVectorForCSVFile(const vector<int> &p_vecOutputColumns, const vector<int> &p_vecUnusedColumns, unsigned uColumnsNumber, vector<int> &p_vecInputColumns);
+	static bool generateInputColumnsVectorForCSVFile(const vector<int> &p_vecOutputColumns, const vector<int> &p_vecUnusedColumns, size_t uColumnsNumber, vector<int> &p_vecInputColumns);
 	static bool checkBasicValidityInCSVFile(const vector< vector<Str> > &p_vecElements);
 	static void printDataAboutColumns(const vector<int> &p_vecColumnIndexes,Str p_sColumnType,const vector<bool> &p_vecIsLiteral,const vector< pair<double,double> > &p_vecMinMaxData
 											 ,const vector< vector<Str> > &p_vecPossibleValuesData,const vector<Str> &p_vecColumnNames);

@@ -17,6 +17,12 @@
 
 // JRTODO - zestawy testow sa na http://mlr.cs.umass.edu/ml/ 
 
+
+
+//Problem z performance CUDA 3.0
+//w czasie kompilacji .cu jest generowanych bardzo duzo plikow
+
+
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
 {
 	// 2 inputs, 2 outputs
@@ -133,7 +139,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 	const double dEtaArray[numElementsInArrays2] = { 0.03 };
 	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 }; */
 
-	int iTestsSetSize = p_vecTestSets.size();
+	size_t iTestsSetSize = p_vecTestSets.size();
 	//const int iNumTests = 1000;
 
 	//InputTestSet **testSetsInTraining = new InputTestSet*[iTestsSetSize];

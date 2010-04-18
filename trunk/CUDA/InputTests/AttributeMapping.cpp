@@ -111,7 +111,7 @@ bool AttributeMapping::isLiteralAttribute() const
 
 unsigned AttributeMapping::getAttributeValuesCount() const
 {
-	return m_vecAttributeValues.size();
+	return (unsigned) m_vecAttributeValues.size();
 }
 
 Str AttributeMapping::getAttributeValue(unsigned p_uIndex) const
