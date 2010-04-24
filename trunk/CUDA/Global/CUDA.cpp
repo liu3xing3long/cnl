@@ -364,7 +364,7 @@ void checkIfCSVReadingIsOK()
 	vecOutputColumns.push_back(12);	// Jedyna wyjœciowa kolumna - indeks 12
 	vector<int> vecUnusedColumns;	// Lista numerów kolumn nieu¿ywanych - pusta
 	testSetCSV.loadFromCSVFile		// £adowanie listy testów
-		("forestfires2.csv"			// Plik wejœciowy z testami w formacjie CSV
+		("Resources\\Test_data\\forestfires2.csv"	// Plik wejœciowy z testami w formacjie CSV
 		,true						// Pierwszy wiersz zawiera nazwy kolumn
 		,','						// Okreœlenie znaku oddzielaj¹cego elementy - przecinek
 		,vecOutputColumns			// Podanie listy kolumn wyjœciowych
@@ -410,13 +410,13 @@ int main()
 
 	logText(Logging::LT_INFORMATION,"Application Started");
 
-	doExecuteNetworksCPUAndGPUAndSaveLoad();
+	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
 	//makeTrainingToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 
-	//checkIfCSVReadingIsOK();
+	checkIfCSVReadingIsOK();
 
 	return 0;
 }
