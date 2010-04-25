@@ -14,6 +14,7 @@
 // JRTODO - ustal, czsy w deklaracjach klas sa najpierw zmienne, czy metody (i czy najpierw konstruktor/destruktor, czy inne. czy public, czy private)
 // JRTODO - metody pomocnicze maja byc static
 // JRTODO - krotkie, czeste funkcje zrob inline
+// JRTODO - wazne - zrob asserty przy uruchamianiu i trenowaniuu sieci, czy jest dobra wymiarowosc sieci i testow.
 
 // JRTODO - zestawy testow sa na http://mlr.cs.umass.edu/ml/ 
 
