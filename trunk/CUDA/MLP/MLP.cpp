@@ -4,6 +4,10 @@ const Str m_XMLLayer("Layer");
 
 void MLP::executeNetwork(InputTestSet &p_TestSet)
 {
+	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
+	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+
 	// execute network on all tests
 	for(unsigned iTestIndex = 0;iTestIndex < p_TestSet.getTestCount();++iTestIndex)
 	{
@@ -33,6 +37,11 @@ void MLP::executeNetwork(InputTest &p_Test)
 
 void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator)
 {
+	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
+	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+	logAssert(p_dEta > 0.0 && p_dEta < 1.0);
+
 	for(int iTrainedElement=0;iTrainedElement<p_iTrainedElements;++iTrainedElement)
 	{
 		// We get test index to be used in training
@@ -67,41 +76,6 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			}
 		}
 
-		/* JRTODO - this code was used when I tested mean value of all outputs
-		for(unsigned uLayerIndex=0;uLayerIndex<m_vecLayers.size();++uLayerIndex)
-		{
-			for(unsigned uNeuronIndex=0;uNeuronIndex<m_vecLayers[uLayerIndex].m_vecNeurons.size();++uNeuronIndex)
-			{
-				double dSumError = 0.0,dSumDerivativeOfLastOutput=0.0,dSumLastOutputWithOutputFunction = 0.0;
-				if(m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.size())
-				{
-					int dSize = m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.size();
-					for(unsigned a=0;a<dSize;++a)
-						dSumError += m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError[a];
-					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.clear();
-					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastError.push_back(dSumError/dSize);
-				}
-
-				if(m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.size())
-				{
-					int dSize = m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.size();
-					for(unsigned a=0;a<dSize;++a)
-						dSumDerivativeOfLastOutput += m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput[a];
-					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.clear();
-					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecDerivativeOfLastOutput.push_back(dSumDerivativeOfLastOutput/dSize);
-				}
-
-				if(m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.size())
-				{
-					int dSize = m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.size();
-					for(unsigned a=0;a<dSize;++a)
-						dSumLastOutputWithOutputFunction += m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction[a];
-					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.clear();
-					m_vecLayers[uLayerIndex].m_vecNeurons[uNeuronIndex].m_vecLastOutputWithOutputFunction.push_back(dSumLastOutputWithOutputFunction/dSize);
-				}
-			}
-		} */
-
 		// We move backwards through layers - we set neuron errors
 		//vector<double> vecDifferencesBeforeLayer;
 		for(int iLayerIndex=(int)(m_vecLayers.size()-2);iLayerIndex>=0;--iLayerIndex) // it has to be signed int!
@@ -116,31 +90,11 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 			vector< vector<double> > vecOutputsLayerBefore; // outputs from a layer before the current layer
 			if(uLayerIndex == 0)
 			{
-				/* JRTODO - this code was used when I tested mean value of all outputs
-				vecOutputsLayerBefore.push_back(vector<double> () );
-				vecOutputsLayerBefore[0].assign(vecTests[0]->m_vecInputs.size(),0);
-
-				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
-				{
-					for(unsigned uInputIndex=0;uInputIndex<vecTests[0]->m_vecInputs.size();++uInputIndex) 
-						vecOutputsLayerBefore[0][uInputIndex] += vecTests[uTestIndex]->m_vecInputs[uInputIndex]/vecTests.size();
-				}*/
-
 				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
 					vecOutputsLayerBefore.push_back(vecTests[uTestIndex]->getInputs());
 			}
 			else
-			{
-				/* JRTODO - this code was used when I tested mean value of all outputs
-				Layer &layerBefore = m_vecLayers[uLayerIndex-1];
-				vecOutputsLayerBefore.push_back(vector<double> () );
-				vecOutputsLayerBefore[0].assign(layerBefore.getNeuronCount(),0);
-
-				for(unsigned iNeuronIndex=0;iNeuronIndex<layerBefore.getNeuronCount();++iNeuronIndex) 
-					vecOutputsLayerBefore[0][iNeuronIndex] += layerBefore.m_vecNeurons[iNeuronIndex].m_vecLastOutputWithOutputFunction[0];
-					*/
-
-				
+			{				
 				Layer &layerBefore = m_vecLayers[uLayerIndex-1];
 
 				for(unsigned uTestIndex=0;uTestIndex<vecTests.size();++uTestIndex) 
@@ -167,14 +121,13 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 		}
 	}
 }
-/*
-void MLP::executeNetworkGPU(InputTestSet &p_TestSet)
-{
-	executeNetworkGPU(p_TestSet,false);
-}.*/
 
 void MLP::executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMilliseconds,unsigned int *p_uiKernelMilliseconds)
 {
+	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
+	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+
 	Logging::Timer timerFull, timerKernel;
 	timerFull.start();
 	unsigned int uiKernelMilliseconds = 0;
@@ -220,16 +173,13 @@ void MLP::executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMillis
 		*p_uiKernelMilliseconds = uiKernelMilliseconds;
 }
 
-/*
-void MLP::executeNetworkGPU(InputTest &p_Test)
-{
-	// JRTODO - is this method needed?
-	p_Test;
-}*/
-
 void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator)
 {
-	// pomysl - indeksy uczonych elementow moga byc w read-only memory
+	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
+	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+	logAssert(p_dEta > 0.0 && p_dEta < 1.0);
+
 	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)
 	{
 		CUDATools::allocateAndSetGPUMemoryForLayerTraining(m_vecLayers[iLayerIndex],p_iNumTestsInBatch);
