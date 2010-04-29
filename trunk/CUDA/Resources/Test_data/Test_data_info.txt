@@ -1,4 +1,4 @@
-Zestawy plików œci¹gniête z http://mlr.cs.umass.edu/ml/ 
+Zestawy plików sciagniete z http://mlr.cs.umass.edu/ml/ 
 
 forestfires.csv, forestfires.names - Forest Fires
 iris.data, iris.names - Iris Plants Database
