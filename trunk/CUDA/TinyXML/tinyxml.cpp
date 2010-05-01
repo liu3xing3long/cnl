@@ -35,18 +35,41 @@ distribution.
 
 
 bool TiXmlBase::condenseWhiteSpace = true;
+
+Str sGlobalBeginningOfFiles = "?";
+
+Str getGlobalBeginningOfFiles()
+{
+	if(sGlobalBeginningOfFiles == "?")
+	{
+		char sBuff[1000];
+		GetCurrentDirectory(1000,sBuff);
+		printf("%s\n",sBuff);
+		if(strstr(sBuff,"\\Debug") || strstr(sBuff,"\\EmuDebug") 
+			|| strstr(sBuff,"\\Release") || strstr(sBuff,"\\EmuRelease"))
+		{
+			sGlobalBeginningOfFiles = "..\\..\\";
+		}
+		else
+		{
+			sGlobalBeginningOfFiles = "";
+		}
+	}
+	return sGlobalBeginningOfFiles;
+}
  
 // Microsoft compiler security
 FILE* TiXmlFOpen( const char* filename, const char* mode )
-{ // JRTODO - sopen
+{
 	FILE* fp = 0;
 	#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-		errno_t err = fopen_s( &fp, filename, mode );
+	Str sToFindFile = getGlobalBeginningOfFiles() + filename;
+	errno_t err = fopen_s( &fp, sToFindFile.c_str(), mode );
 		if ( !err && fp )
 			return fp;
 		else
 		{
-			logTextParams(Logging::LT_ERROR, "Error opening file %s: %s",filename,strerror(err));
+			logTextParams(Logging::LT_ERROR, "Error opening file %s: %s",sToFindFile.c_str(),strerror(err));
 			return 0;
 		}
 	#else

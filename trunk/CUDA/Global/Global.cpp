@@ -98,7 +98,7 @@ void printVectorDifferenceInfoFromVectors(const vector<InputTestSet::AttributeLo
 	Str sToLogFirst("Differences between %s and %s , %d tests"
 		, (p_eDifferenceType == InputTestSet::DST_GPU_AND_CPU ? "GPU" : "Correct")
 		, (p_eDifferenceType == InputTestSet::DST_CORRECT_AND_GPU ? "GPU" : "CPU"), p_vecDifferencesData[0].m_uiNumTests);
-	if(p_uiMiliseconds != -1)
+	if(p_uiMiliseconds != 0xFFFFFFFF)
 		sToLogFirst += Str(", %d milliseconds",p_uiMiliseconds);
 	logText(Logging::LT_INFORMATION,sToLogFirst.c_str());
 

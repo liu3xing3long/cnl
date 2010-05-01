@@ -97,15 +97,15 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 		return;
 	}
 
-	const int numElementsInArrayTrainedElements = 1;
-	const int numElementsInArrayEta = 1;
+	const int numElementsInArrayTrainedElements = 3;
+	const int numElementsInArrayEta = 4;
 	const int numElementsInArrayTestsInTraining = 1;
 	const int numElementsInArrayHiddenNeurons = 2;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 1000/*,80000,160000*/ };
-	const double dEtaArray[numElementsInArrayEta] = { 0.01, /*0.02, 0.04, 0.08*/ };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 2000,80000,160000 };
+	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.02, 0.04, 0.08 };
 	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 4/*1, 2, 4, 8*/ };
-	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32,64 };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32, 64 };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
 	size_t iTestsSetSize = p_vecTestSets.size();
@@ -186,11 +186,11 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 								// We train the network using GPU
 								timer.start();
-							//	trainNet.trainNetworkGPU(trainTestSet,iTrainedElementsArray[iTrainedElementsIndex],dEtaArray[iEtaIndex],iTestsInTrainingArray[iTestsInTrainingIndex],&generatorInThreadGPU);
+								trainNet.trainNetworkGPU(trainTestSet,iTrainedElementsArray[iTrainedElementsIndex],dEtaArray[iEtaIndex],iTestsInTrainingArray[iTestsInTrainingIndex],&generatorInThreadGPU);
 								uiMilisecondsGPU += timer.stop();
 
 								// execute trained network and check difference between correct output
-							//	trainNet.executeNetworkGPU(trainTestSet);
+								trainNet.executeNetworkGPU(trainTestSet);
 
 								trainTestSet.getDifferencesStatistics(InputTestSet::DST_CORRECT_AND_GPU,vecDifferencesDataGPU);
 							}
@@ -264,7 +264,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 		logTextParams(Logging::LT_INFORMATION,"!!!!!!!!!!!!!!!!!!!!!!!!!! Testing file %s !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",testSetCSV.getSourceDataFileName().c_str());
 	}
 
-	makeTrainingWithManyPossibilities(vecTestSets,true,false);
+	makeTrainingWithManyPossibilities(vecTestSets,true,true);
 }
 
 void makeAllTrainingsToToGenerateStatistics()

@@ -8,6 +8,12 @@
 // Standard headers
 #ifdef _MSC_VER       // Identifies Microsoft compilers
 	#include <windows.h>
+	//#include <sdgstd.h>
+	//#include <io.h>
+	//#include <fcntl.h>
+	//#include <sys/types.h>
+	//#include <sys/stat.h>
+	//#include <share.h>
 #else
 	#include <sys/time.h>
 	#include <ctime>
