@@ -5,8 +5,8 @@ const Str m_XMLLayer("Layer");
 void MLP::executeNetwork(InputTestSet &p_TestSet)
 {
 	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
-	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
-	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+	logAssert(m_vecLayers[0].getWeightCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount()); // Assert if number of outputs is correct
 
 	// execute network on all tests
 	for(unsigned iTestIndex = 0;iTestIndex < p_TestSet.getTestCount();++iTestIndex)
@@ -38,8 +38,8 @@ void MLP::executeNetwork(InputTest &p_Test)
 void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator)
 {
 	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
-	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
-	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+	logAssert(m_vecLayers[0].getWeightCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount()); // Assert if number of outputs is correct
 	logAssert(p_dEta > 0.0 && p_dEta < 1.0);
 
 	for(int iTrainedElement=0;iTrainedElement<p_iTrainedElements;++iTrainedElement)
@@ -125,8 +125,8 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 void MLP::executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMilliseconds,unsigned int *p_uiKernelMilliseconds)
 {
 	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
-	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
-	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+	logAssert(m_vecLayers[0].getWeightCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount()); // Assert if number of outputs is correct
 
 	Logging::Timer timerFull, timerKernel;
 	timerFull.start();
@@ -176,8 +176,8 @@ void MLP::executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMillis
 void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double p_dEta,int p_iNumTestsInBatch,MTRand *p_pRandomGenerator)
 {
 	logAssert(m_vecLayers.size() != 0 && p_TestSet.getTestCount() != 0); // Assert if there are any layers and tests
-	logAssert(m_vecLayers[0].getNeuronCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
-	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount() + 1); // Assert if number of outputs is correct
+	logAssert(m_vecLayers[0].getWeightCount() == (int) p_TestSet.getInputCount() + 1); // Assert if number of inputs is correct
+	logAssert(m_vecLayers[m_vecLayers.size()-1].getNeuronCount() == (int) p_TestSet.getOutputCount()); // Assert if number of outputs is correct
 	logAssert(p_dEta > 0.0 && p_dEta < 1.0);
 
 	for(unsigned iLayerIndex = 0;iLayerIndex < m_vecLayers.size();++iLayerIndex)

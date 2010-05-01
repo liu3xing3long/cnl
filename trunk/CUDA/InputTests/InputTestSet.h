@@ -61,6 +61,8 @@ public:
 
 	const vector<AttributeMapping>& getAttributeMappings() const;
 
+	Str getSourceDataFileName() const;
+
 	bool getDifferencesStatistics(DifferenceStatisticsType p_eDifferenceType, vector<AttributeLoggingData> &p_vecDifferencesData) const;
 	void printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsType p_eDifferenceType) const;
 

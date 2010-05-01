@@ -88,30 +88,7 @@ void checkIfGPUTrainingIsOK()
 	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_CPU);
 	dummyTestSet.printVectorDifferenceInfo(InputTestSet::DST_CORRECT_AND_GPU);
 }
-/*
-// Helping function
-inline void updateErrorsInVectors(const vector<double> &p_vecMaxErrors,vector<double> &p_vecMaxErrorsSum
-								  ,const vector<double> &p_vecMeanErrors,vector<double> &p_vecMeanErrorsSum
-								  ,vector< vector<double> > &p_vecResultsMaxErrors,vector< vector<double> > &p_vecResultsMeanErrors,int p_iTestsSetSize)
-{
-	// If it is the first added data to p_vecMaxErrorsSum and p_vecMeanErrorsSum, then first fill it with zeros
-	bool bFill = !p_vecMaxErrorsSum.size();
-	for(unsigned iOutputIndex=0;iOutputIndex<p_vecMaxErrors.size();++iOutputIndex)
-	{
-		if(bFill)
-		{
-			p_vecMaxErrorsSum.push_back(0.0);
-			p_vecMeanErrorsSum.push_back(0.0);
-		}
 
-		p_vecMaxErrorsSum[iOutputIndex] += p_vecMaxErrors[iOutputIndex]/p_iTestsSetSize;
-		p_vecMeanErrorsSum[iOutputIndex] += p_vecMeanErrors[iOutputIndex]/p_iTestsSetSize;
-	}
-
-	p_vecResultsMaxErrors.push_back(p_vecMaxErrors);
-	p_vecResultsMeanErrors.push_back(p_vecMeanErrors);
-}
-*/
 void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets, bool p_bTrainingCPU, bool p_bTrainingGPU)
 {
 	if((!p_bTrainingCPU && !p_bTrainingCPU) || p_vecTestSets.size() == 0)
@@ -121,21 +98,15 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 	}
 
 	const int numElementsInArrayTrainedElements = 3;
-	const int numElementsInArrayEta = 4;
-	const int numElementsInArrayTestsInTraining = 4;
-	const int numElementsInArrayHiddenNeurons = 3;
-	const int numElementsInArrayMaxAbsWeights = 2;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 100,80000,160000 };
-	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.02, 0.04, 0.08 };
-	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1, 2, 4, 8 };
-	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 16,32,64 };
-	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.01, 0.05 };
-/*	const int numElementsInArrays1 = 1;
-	const int numElementsInArrays2 = 1;
-	const int numElementsInArrays3 = 1;
-	const int iTrainedElementsArray[numElementsInArrays1] = { 1600 };
-	const double dEtaArray[numElementsInArrays2] = { 0.03 };
-	const int iTestsInTrainingArray[numElementsInArrays3] = { 1 }; */
+	const int numElementsInArrayEta = 3;
+	const int numElementsInArrayTestsInTraining = 1;
+	const int numElementsInArrayHiddenNeurons = 2;
+	const int numElementsInArrayMaxAbsWeights = 1;
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 40000,80000,160000 };
+	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.02, 0.04/*, 0.08*/ };
+	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 4/*1, 2, 4, 8*/ };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32,64 };
+	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
 	size_t iTestsSetSize = p_vecTestSets.size();
 	//const int iNumTests = 1000;
@@ -230,10 +201,10 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 						}
 
 						if(p_bTrainingCPU)
-							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPU,InputTestSet::DST_CORRECT_AND_CPU);
+							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPU,InputTestSet::DST_CORRECT_AND_CPU,uiMilisecondsCPU / iTestsSetSize);
 
 						if(p_bTrainingGPU)
-							printVectorDifferenceInfoFromVectors(vecDifferencesDataGPU,InputTestSet::DST_CORRECT_AND_GPU);
+							printVectorDifferenceInfoFromVectors(vecDifferencesDataGPU,InputTestSet::DST_CORRECT_AND_GPU,uiMilisecondsGPU / iTestsSetSize);
 
 						if(p_bTrainingCPU && p_bTrainingGPU)
 							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPUGPU,InputTestSet::DST_GPU_AND_CPU);
@@ -244,16 +215,17 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 	}
 }
 
-void makeTrainingToGenerateStatistics()
+void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 {
 	const int iTestsSetSize = 3;
 	vector<InputTestSet> vecTestSets;
 	vector<int> vecOutputColumns;
 	vector<int> vecUnusedColumns;
 
-	int iTestSetType = 3;
+	if(p_iTestSetType == -1)
+		p_iTestSetType = 3;
 
-	if(iTestSetType == 1)
+	if(p_iTestSetType == 1)
 	{
 		const int iNumTests = 1000;
 		for(int iTestIndex=0;iTestIndex<iTestsSetSize;++iTestIndex)
@@ -264,7 +236,7 @@ void makeTrainingToGenerateStatistics()
 	else
 	{
 		InputTestSet testSetCSV;
-		switch(iTestSetType)
+		switch(p_iTestSetType)
 		{
 			case 2:
 				vecOutputColumns.push_back(12);
@@ -286,9 +258,19 @@ void makeTrainingToGenerateStatistics()
 		{
 			vecTestSets.push_back(testSetCSV);
 		}
+
+		logTextParams(Logging::LT_INFORMATION,"!!!!!!!!!!!!!!!!!!!!!!!!!! Testing file %s !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",testSetCSV.getSourceDataFileName().c_str());
 	}
 
-	makeTrainingWithManyPossibilities(vecTestSets,true,false);
+	makeTrainingWithManyPossibilities(vecTestSets,true,true);
+}
+
+void makeAllTrainingsToToGenerateStatistics()
+{
+	for(int iTestSetIndex = 2;iTestSetIndex<=4;++iTestSetIndex)
+	{
+		makeTrainingToGenerateStatistics(iTestSetIndex);
+	}
 }
 
 void doExecuteNetworksCPUAndGPUAndSaveLoad()
@@ -412,11 +394,11 @@ int main()
 
 	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	//makeTrainingToGenerateStatistics();
+	makeTrainingToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 
-	checkIfCSVReadingIsOK();
+	//checkIfCSVReadingIsOK();
 
 	return 0;
 }

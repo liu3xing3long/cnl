@@ -93,11 +93,15 @@ Str makeDoubleVectorString(const vector<double>& p_vecDifferences)
 	return sResult;
 }
 
-void printVectorDifferenceInfoFromVectors(const vector<InputTestSet::AttributeLoggingData> &p_vecDifferencesData, InputTestSet::DifferenceStatisticsType p_eDifferenceType)
+void printVectorDifferenceInfoFromVectors(const vector<InputTestSet::AttributeLoggingData> &p_vecDifferencesData, InputTestSet::DifferenceStatisticsType p_eDifferenceType, unsigned int p_uiMiliseconds )
 {
-	logTextParams(Logging::LT_INFORMATION,"Differences between %s and %s , %d tests"
+	Str sToLogFirst("Differences between %s and %s , %d tests"
 		, (p_eDifferenceType == InputTestSet::DST_GPU_AND_CPU ? "GPU" : "Correct")
 		, (p_eDifferenceType == InputTestSet::DST_CORRECT_AND_GPU ? "GPU" : "CPU"), p_vecDifferencesData[0].m_uiNumTests);
+	if(p_uiMiliseconds != -1)
+		sToLogFirst += Str(", %d milliseconds",p_uiMiliseconds);
+	logText(Logging::LT_INFORMATION,sToLogFirst.c_str());
+
 	for(unsigned uOutputIndex=0;uOutputIndex<p_vecDifferencesData.size();++uOutputIndex)
 	{
 		const InputTestSet::AttributeLoggingData &loggingData = p_vecDifferencesData[uOutputIndex];

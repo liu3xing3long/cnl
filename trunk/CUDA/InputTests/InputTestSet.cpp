@@ -713,6 +713,11 @@ bool InputTestSet::loadFromCSVFile(Str p_sFileName,bool p_bContainsColumnNames,c
 	return true;
 }
 
+Str InputTestSet::getSourceDataFileName() const
+{
+	return m_sSourceDataFileName;
+}
+
 InputTestSet::InputTestSet(const InputTestSet &p_TestSet)
 {
 	m_vecTests.assign(p_TestSet.m_vecTests.begin(),p_TestSet.m_vecTests.end());
