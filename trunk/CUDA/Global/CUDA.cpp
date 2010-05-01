@@ -186,11 +186,11 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 								// We train the network using GPU
 								timer.start();
-								trainNet.trainNetworkGPU(trainTestSet,iTrainedElementsArray[iTrainedElementsIndex],dEtaArray[iEtaIndex],iTestsInTrainingArray[iTestsInTrainingIndex],&generatorInThreadGPU);
+							//	trainNet.trainNetworkGPU(trainTestSet,iTrainedElementsArray[iTrainedElementsIndex],dEtaArray[iEtaIndex],iTestsInTrainingArray[iTestsInTrainingIndex],&generatorInThreadGPU);
 								uiMilisecondsGPU += timer.stop();
 
 								// execute trained network and check difference between correct output
-								trainNet.executeNetworkGPU(trainTestSet);
+							//	trainNet.executeNetworkGPU(trainTestSet);
 
 								trainTestSet.getDifferencesStatistics(InputTestSet::DST_CORRECT_AND_GPU,vecDifferencesDataGPU);
 							}
@@ -264,7 +264,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 		logTextParams(Logging::LT_INFORMATION,"!!!!!!!!!!!!!!!!!!!!!!!!!! Testing file %s !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",testSetCSV.getSourceDataFileName().c_str());
 	}
 
-	makeTrainingWithManyPossibilities(vecTestSets,true,true);
+	makeTrainingWithManyPossibilities(vecTestSets,true,false);
 }
 
 void makeAllTrainingsToToGenerateStatistics()

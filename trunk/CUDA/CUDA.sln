@@ -2,7 +2,12 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CUDA", "CUDA.vcproj", "{FCADF7F0-BD79-40CD-BCBD-BA6B3ACB0C4D}"
 EndProject
+Project("{4CAA2610-1955-4629-BDC1-8133FE0B2087}") = "AQtimeProject1", "..\AQtimeProject1\AQtimeProject1.aqt", "{397B2832-9E7F-43AC-89E0-EC9D635683BD}"
+EndProject
 Global
+	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
+		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}
+	EndGlobalSection
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
 		Manager = AnkhSVN - Subversion Support for Visual Studio
