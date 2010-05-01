@@ -48,7 +48,7 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 
 #ifdef _MSC_VER		// Identifies Microsoft compilers
 	SYSTEMTIME now;
-	GetSystemTime(&now);
+	GetLocalTime(&now);
 
 	sLogging.format("%d.%02d.%02d %02d:%02d:%02d:%03d    %s%25s%50s%5d    %s\n",
 		now.wYear+1900,now.wMonth+1,now.wDay,

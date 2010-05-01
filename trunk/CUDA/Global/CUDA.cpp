@@ -97,13 +97,13 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 		return;
 	}
 
-	const int numElementsInArrayTrainedElements = 3;
-	const int numElementsInArrayEta = 3;
+	const int numElementsInArrayTrainedElements = 1;
+	const int numElementsInArrayEta = 1;
 	const int numElementsInArrayTestsInTraining = 1;
 	const int numElementsInArrayHiddenNeurons = 2;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 40000,80000,160000 };
-	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.02, 0.04/*, 0.08*/ };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 1000/*,80000,160000*/ };
+	const double dEtaArray[numElementsInArrayEta] = { 0.01, /*0.02, 0.04, 0.08*/ };
 	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 4/*1, 2, 4, 8*/ };
 	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32,64 };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
@@ -166,7 +166,9 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 								// We train the network using CPU
 								timer.start();
 								trainNet.trainNetwork(trainTestSet,iTrainedElementsArray[iTrainedElementsIndex],dEtaArray[iEtaIndex],iTestsInTrainingArray[iTestsInTrainingIndex],&generatorInThreadCPU);
-								uiMilisecondsCPU += timer.stop();
+								int res = timer.stop();
+								uiMilisecondsCPU += res;
+								logTextParams(Logging::LT_INFORMATION,"Training time CPU %d = %d",iTestSetIndex+1,res);
 
 								// execute trained network and check difference between correct output
 								trainNet.executeNetwork(trainTestSet);
