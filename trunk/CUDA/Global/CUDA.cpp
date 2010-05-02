@@ -97,15 +97,15 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 		return;
 	}
 
-	const int numElementsInArrayTrainedElements = 5;
+	const int numElementsInArrayTrainedElements = 1;
 	const int numElementsInArrayEta = 1;
 	const int numElementsInArrayTestsInTraining = 1;
-	const int numElementsInArrayHiddenNeurons = 2;
+	const int numElementsInArrayHiddenNeurons = 1;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 100,1000,5000,20000,60000 };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 1/*,1000,5000,20000,60000*/ };
 	const double dEtaArray[numElementsInArrayEta] = { 0.02 };
 	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1/*1, 2, 4, 8*/ };
-	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32, 64 };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32/*, 64*/ };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
 	size_t iTestsSetSize = p_vecTestSets.size();
@@ -273,7 +273,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 
 void makeAllTrainingsToToGenerateStatistics()
 {
-	for(int iTestSetIndex = 2;iTestSetIndex<=4;++iTestSetIndex)
+	for(int iTestSetIndex = 2;iTestSetIndex<=5;++iTestSetIndex)
 	{
 		makeTrainingToGenerateStatistics(iTestSetIndex);
 	}
@@ -400,7 +400,7 @@ int main()
 
 	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	makeTrainingToGenerateStatistics();
+	makeAllTrainingsToToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 

@@ -962,6 +962,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\Resources\Test_data\Concrete_Readme.txt"
+					>
+				</File>
+				<File
 					RelativePath=".\Resources\Test_data\forestfires.csv"
 					>
 				</File>
