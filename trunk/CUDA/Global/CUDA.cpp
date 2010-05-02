@@ -97,14 +97,14 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 		return;
 	}
 
-	const int numElementsInArrayTrainedElements = 3;
-	const int numElementsInArrayEta = 2;
-	const int numElementsInArrayTestsInTraining = 2;
+	const int numElementsInArrayTrainedElements = 5;
+	const int numElementsInArrayEta = 1;
+	const int numElementsInArrayTestsInTraining = 1;
 	const int numElementsInArrayHiddenNeurons = 2;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 40000,80000,160000 };
-	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.03 };
-	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1, 4/*1, 2, 4, 8*/ };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 100,1000,5000,20000,60000 };
+	const double dEtaArray[numElementsInArrayEta] = { 0.02 };
+	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1/*1, 2, 4, 8*/ };
 	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32, 64 };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
@@ -225,7 +225,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 	vector<int> vecUnusedColumns;
 
 	if(p_iTestSetType == -1)
-		p_iTestSetType = 4;
+		p_iTestSetType = 5;
 
 	if(p_iTestSetType == 1)
 	{
@@ -253,6 +253,10 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 				vecOutputColumns.push_back(1);
 				testSetCSV.loadFromCSVFile("Resources\\Test_data\\wdbc.data",false,',',vecOutputColumns,vecUnusedColumns);		
 				break;
+			case 5:
+				vecOutputColumns.push_back(8);
+				testSetCSV.loadFromCSVFile("Resources\\Test_data\\Concrete_Data.csv",true,';',vecOutputColumns,vecUnusedColumns);		
+				break;
 		}
 
 		// We add iTestsSetSize same test sets
@@ -264,7 +268,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 		logTextParams(Logging::LT_INFORMATION,"!!!!!!!!!!!!!!!!!!!!!!!!!! Testing file %s !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",testSetCSV.getSourceDataFileName().c_str());
 	}
 
-	makeTrainingWithManyPossibilities(vecTestSets,true,true);
+	makeTrainingWithManyPossibilities(vecTestSets,true,false);
 }
 
 void makeAllTrainingsToToGenerateStatistics()

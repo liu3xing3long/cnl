@@ -958,6 +958,10 @@
 				Name="Test_data"
 				>
 				<File
+					RelativePath=".\Resources\Test_data\Concrete_Data.csv"
+					>
+				</File>
+				<File
 					RelativePath=".\Resources\Test_data\forestfires.csv"
 					>
 				</File>
