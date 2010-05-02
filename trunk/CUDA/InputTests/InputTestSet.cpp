@@ -78,12 +78,9 @@ bool InputTestSet::getDifferencesStatistics(DifferenceStatisticsType p_eDifferen
 			{
 				if(uAttributeValuesCount == 2)
 				{
-					for(unsigned uTestIndex=0;uTestIndex<uNumTests;++uTestIndex)
-					{
-						int iIndexFirst = ( (dValueFirst >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
-						int iIndexSecond = ( (dValueSecond >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
-						iLiteralErrors += (iIndexFirst != iIndexSecond);
-					}
+					int iIndexFirst = ( (dValueFirst >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
+					int iIndexSecond = ( (dValueSecond >= (dMinNeuralNetworkValue + dMaxNeuralNetworkValue)/2.0) ? 1 : 0);
+					iLiteralErrors += (iIndexFirst != iIndexSecond);
 				}
 				else
 				{

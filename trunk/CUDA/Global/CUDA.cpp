@@ -102,7 +102,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 	const int numElementsInArrayTestsInTraining = 1;
 	const int numElementsInArrayHiddenNeurons = 2;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 2000,80000,160000 };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 200,80000,160000 };
 	const double dEtaArray[numElementsInArrayEta] = { 0.01, 0.02, 0.04, 0.08 };
 	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 4/*1, 2, 4, 8*/ };
 	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32, 64 };
@@ -225,7 +225,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 	vector<int> vecUnusedColumns;
 
 	if(p_iTestSetType == -1)
-		p_iTestSetType = 3;
+		p_iTestSetType = 4;
 
 	if(p_iTestSetType == 1)
 	{
@@ -251,7 +251,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 			case 4:
 				vecUnusedColumns.push_back(0);
 				vecOutputColumns.push_back(1);
-				testSetCSV.loadFromCSVFile("Resources\\Test_data\\wdbc.csv",false,',',vecOutputColumns,vecUnusedColumns);		
+				testSetCSV.loadFromCSVFile("Resources\\Test_data\\wdbc.data",false,',',vecOutputColumns,vecUnusedColumns);		
 				break;
 		}
 
@@ -264,7 +264,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 		logTextParams(Logging::LT_INFORMATION,"!!!!!!!!!!!!!!!!!!!!!!!!!! Testing file %s !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",testSetCSV.getSourceDataFileName().c_str());
 	}
 
-	makeTrainingWithManyPossibilities(vecTestSets,true,true);
+	makeTrainingWithManyPossibilities(vecTestSets,true,false);
 }
 
 void makeAllTrainingsToToGenerateStatistics()
