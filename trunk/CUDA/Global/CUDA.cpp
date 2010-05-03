@@ -100,12 +100,12 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 	const int numElementsInArrayTrainedElements = 1;
 	const int numElementsInArrayEta = 1;
 	const int numElementsInArrayTestsInTraining = 1;
-	const int numElementsInArrayHiddenNeurons = 1;
+	const int numElementsInArrayHiddenNeurons = 2;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 1/*,1000,5000,20000,60000*/ };
-	const double dEtaArray[numElementsInArrayEta] = { 0.02 };
-	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1/*1, 2, 4, 8*/ };
-	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32/*, 64*/ };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 7/*,1000,5000,20000,60000*/ };
+	const double dEtaArray[numElementsInArrayEta] = { 0.025 };
+	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 16/*1, 2, 4, 8*/ };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 510 };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
 	size_t iTestsSetSize = p_vecTestSets.size();
@@ -148,7 +148,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 						Logging::Timer timer;
 						unsigned int uiMilisecondsGPU = 0,uiMilisecondsCPU = 0;
-						logTextParams(Logging::LT_INFORMATION,"Trained elements:\t%d\tEta:\t%f\tTests in array:\t%d\tHidden neurons:\t%d\tMax Abs Weights:\t%f"
+						logTextParams(Logging::LT_INFORMATION,"Iterations:\t%d\tEta:\t%f\tTests in iteration:\t%d\tHidden neurons:\t%d\tMax Abs Weights:\t%f"
 							,iTrainedElementsArray[iTrainedElementsIndex],dEtaArray[iEtaIndex],iTestsInTrainingArray[iTestsInTrainingIndex],iHiddenNeuronsArray[iHiddenNeuronsIndex],dMaxAbsWeightsArray[iMaxAbsWeightsIndex]);
 
 						for(size_t iTestSetIndex=0;iTestSetIndex<iTestsSetSize;++iTestSetIndex)
@@ -159,6 +159,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 							{
 								MLP trainNet;
 								trainNet.setInputNeuronCount(trainTestSet.getInputCount());
+								trainNet.addNewLayer(iHiddenNeuronsArray[iHiddenNeuronsIndex],Neuron::NT_SIGMOID);
 								trainNet.addNewLayer(iHiddenNeuronsArray[iHiddenNeuronsIndex],Neuron::NT_SIGMOID);
 								trainNet.addNewLayer(trainTestSet.getOutputCount(),Neuron::NT_LINEAR);
 								trainNet.randomizeWeights(dMaxAbsWeightsArray[iMaxAbsWeightsIndex],&generatorInThreadCPU);
@@ -180,6 +181,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 							{
 								MLP trainNet;
 								trainNet.setInputNeuronCount(trainTestSet.getInputCount());
+								trainNet.addNewLayer(iHiddenNeuronsArray[iHiddenNeuronsIndex],Neuron::NT_SIGMOID);
 								trainNet.addNewLayer(iHiddenNeuronsArray[iHiddenNeuronsIndex],Neuron::NT_SIGMOID);
 								trainNet.addNewLayer(trainTestSet.getOutputCount(),Neuron::NT_LINEAR);
 								trainNet.randomizeWeights(dMaxAbsWeightsArray[iMaxAbsWeightsIndex],&generatorInThreadGPU);	
@@ -219,7 +221,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 {
-	const int iTestsSetSize = 3;
+	const int iTestsSetSize = 1;
 	vector<InputTestSet> vecTestSets;
 	vector<int> vecOutputColumns;
 	vector<int> vecUnusedColumns;
@@ -400,7 +402,7 @@ int main()
 
 	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	makeAllTrainingsToToGenerateStatistics();
+	makeTrainingToGenerateStatistics(); //makeAllTrainingsToToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 
