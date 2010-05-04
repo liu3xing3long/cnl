@@ -99,13 +99,13 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 	const int numElementsInArrayTrainedElements = 1;
 	const int numElementsInArrayEta = 1;
-	const int numElementsInArrayTestsInTraining = 1;
-	const int numElementsInArrayHiddenNeurons = 2;
+	const int numElementsInArrayTestsInTraining = 2;
+	const int numElementsInArrayHiddenNeurons = 5;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 7/*,1000,5000,20000,60000*/ };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 100/*,1000,5000,20000,60000*/ };
 	const double dEtaArray[numElementsInArrayEta] = { 0.025 };
-	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 16/*1, 2, 4, 8*/ };
-	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 510 };
+	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1, 16/*1, 2, 4, 8*/ };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32,64,128,256,510 };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
 	size_t iTestsSetSize = p_vecTestSets.size();
@@ -205,10 +205,10 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 						}
 
 						if(p_bTrainingCPU)
-							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPU,InputTestSet::DST_CORRECT_AND_CPU,uiMilisecondsCPU / iTestsSetSize);
+							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPU,InputTestSet::DST_CORRECT_AND_CPU,uiMilisecondsCPU / (int)iTestsSetSize);
 
 						if(p_bTrainingGPU)
-							printVectorDifferenceInfoFromVectors(vecDifferencesDataGPU,InputTestSet::DST_CORRECT_AND_GPU,uiMilisecondsGPU / iTestsSetSize);
+							printVectorDifferenceInfoFromVectors(vecDifferencesDataGPU,InputTestSet::DST_CORRECT_AND_GPU,uiMilisecondsGPU / (int) iTestsSetSize);
 
 						if(p_bTrainingCPU && p_bTrainingGPU)
 							printVectorDifferenceInfoFromVectors(vecDifferencesDataCPUGPU,InputTestSet::DST_GPU_AND_CPU);
@@ -221,7 +221,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 {
-	const int iTestsSetSize = 1;
+	const int iTestsSetSize = 3;
 	vector<InputTestSet> vecTestSets;
 	vector<int> vecOutputColumns;
 	vector<int> vecUnusedColumns;
