@@ -44,6 +44,7 @@ void MLP::trainNetwork(InputTestSet &p_TestSet,int p_iTrainedElements, double p_
 
 	for(int iTrainedElement=0;iTrainedElement<p_iTrainedElements;++iTrainedElement)
 	{
+		printf("Iter %d\n",iTrainedElement);
 		// We get test index to be used in training
 
 		vector<InputTest *> vecTests;
