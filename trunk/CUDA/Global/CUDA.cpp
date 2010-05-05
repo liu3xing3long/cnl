@@ -99,13 +99,13 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 	const int numElementsInArrayTrainedElements = 1;
 	const int numElementsInArrayEta = 1;
-	const int numElementsInArrayTestsInTraining = 2;
-	const int numElementsInArrayHiddenNeurons = 5;
+	const int numElementsInArrayTestsInTraining = 1;
+	const int numElementsInArrayHiddenNeurons = 1;
 	const int numElementsInArrayMaxAbsWeights = 1;
 	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 100/*,1000,5000,20000,60000*/ };
-	const double dEtaArray[numElementsInArrayEta] = { 0.025 };
-	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 1, 16/*1, 2, 4, 8*/ };
-	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32,64,128,256,510 };
+	const double dEtaArray[numElementsInArrayEta] = { 0.0025 };
+	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { /*1, */16/*1, 2, 4, 8*/ };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { /*32,64,128,256,*/510 };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
 	size_t iTestsSetSize = p_vecTestSets.size();
@@ -270,7 +270,7 @@ void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 		logTextParams(Logging::LT_INFORMATION,"!!!!!!!!!!!!!!!!!!!!!!!!!! Testing file %s !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",testSetCSV.getSourceDataFileName().c_str());
 	}
 
-	makeTrainingWithManyPossibilities(vecTestSets,true,false);
+	makeTrainingWithManyPossibilities(vecTestSets,true,true);
 }
 
 void makeAllTrainingsToToGenerateStatistics()
