@@ -286,8 +286,8 @@ void doExecuteNetworksCPUAndGPUAndSaveLoad()
 	// New MLP network
 	MLP dummyNet;
 
-	const int iNumTests = 2000;
-	const int iHiddenNeurons = 32;
+	const int iNumTests = 655;
+	const int iHiddenNeurons = 510;
 
 	// New hidden layer - 20 neurons, 2 neurons in input layer, linear neurons
 	dummyNet.setInputNeuronCount(iInputs);
@@ -400,9 +400,9 @@ int main()
 
 	logText(Logging::LT_INFORMATION,"Application Started");
 
-	//doExecuteNetworksCPUAndGPUAndSaveLoad();
+	doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	makeTrainingToGenerateStatistics(); //makeAllTrainingsToToGenerateStatistics();
+	//makeTrainingToGenerateStatistics(); //makeAllTrainingsToToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 
