@@ -24,10 +24,7 @@ Str Neuron::getNeuronTypeString() const
 		case NT_OFF: return Str("NT_OFF");
 		case NT_LINEAR: return Str("NT_LINEAR");
 		case NT_SIGMOID: return Str("NT_SIGMOID");
-/*		case NT_TANH: return Str("NT_TANH");
-		case NT_GAUSS: return Str("NT_GAUSS");
-		case NT_SOFTMAX: return Str("NT_SOFTMAX");
-		case NT_EXTERNAL: return Str("NT_EXTERNAL");*/
+		case NT_TANH: return Str("NT_TANH");
 		default:
 			logTextParams(Logging::LT_ERROR,"Incorrect neuron type: %d",m_eNeuronType);
 			return Str("");
@@ -39,6 +36,7 @@ void Neuron::setNeuronTypeString(Str p_sXMLNeuronTypeString)
 	if(p_sXMLNeuronTypeString == "NT_OFF")		{ m_eNeuronType = NT_OFF;		return; }
 	if(p_sXMLNeuronTypeString == "NT_LINEAR")	{ m_eNeuronType = NT_LINEAR;	return; }
 	if(p_sXMLNeuronTypeString == "NT_SIGMOID")	{ m_eNeuronType = NT_SIGMOID;	return; }
+	if(p_sXMLNeuronTypeString == "NT_TANH")		{ m_eNeuronType = NT_TANH;		return; }
 	/*if(p_sXMLNeuronTypeString == "NT_TANH")		{ m_eNeuronType = NT_TANH;		return; }
 	if(p_sXMLNeuronTypeString == "NT_GAUSS")	{ m_eNeuronType = NT_GAUSS;		return; }
 	if(p_sXMLNeuronTypeString == "NT_SOFTMAX")	{ m_eNeuronType = NT_SOFTMAX;	return; }
@@ -59,24 +57,30 @@ void Neuron::executeNeuron(const vector<double> &p_vecLayerInput, double &p_dRes
 
 	switch(m_eNeuronType)
 	{
-		case NT_LINEAR: 
+		case NT_LINEAR:
+		{
 			m_vecDerivativeOfLastOutput.push_back(1.0);
 			break;	// Do nothing
-		case NT_SIGMOID: 
-			double dExp = exp(-p_dResult); 
+		}
+		case NT_SIGMOID:
+		{
+			double dExp = exp(-p_dResult); // for unipolar sigmoid
 			p_dResult = 1.0 / (1.0 + dExp);
 			double dDerivative = dExp / pow(1.0 + dExp,2);
 			m_vecDerivativeOfLastOutput.push_back(dDerivative);
 			break;
+		}
+		case NT_TANH:
+		{
+			p_dResult = tanh(p_dResult); // for bipolar sigmoid
+			double dDerivative = 1 - tanh(p_dResult);
+			m_vecDerivativeOfLastOutput.push_back(dDerivative);
+			break;
+		}
 	}
 
 	m_vecLastOutputWithOutputFunction.push_back(p_dResult);
 }
-
-/*void Neuron::updateLayerWeights(double p_dDifferenceOutput,double p_dEta,vector<double> &p_vecDifferencesLayerBefore)
-{
-	
-}*/
 
 void Neuron::updateWeights(const vector< vector<double> > &p_vecOutputsLayerBefore, double p_dEta)
 {

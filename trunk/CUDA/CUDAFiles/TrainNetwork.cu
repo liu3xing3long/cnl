@@ -28,13 +28,23 @@ __global__ void executeLayerKernel_OLD(const real_gpu *dp_pLayerInput,const real
 	switch(p_eNeuronType)
 	{		
 		case Neuron::NT_LINEAR: 
+		{
 			dDerivativeOfLastOutput = 1.0f;
 			break;	// Do nothing
+		}
 		case Neuron::NT_SIGMOID: 
+		{
 			real_gpu dExp = exp(-dResult);
 			dResult = 1.0f / (1.0f + dExp);
 			dDerivativeOfLastOutput = dExp / pow(1.0f + dExp,2);
-			break;	
+			break;
+		}
+		case Neuron::NT_TANH:
+		{
+			dResult = tanhf(dResult); 
+			dDerivativeOfLastOutput = 1 - tanhf(dResult);
+			break;
+		}
 	}
 	
 	if(threadIdx.x == blockDim.x - 1)
@@ -155,11 +165,14 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 		switch(p_eNeuronType)
 		{		
-			case Neuron::NT_LINEAR: 
+			case Neuron::NT_LINEAR:
+			{
 				dDerivativeOfLastOutput = 1.0f;
 				dDerivativeOfLastOutput2 = 1.0f;
 				break;	// Do nothing
+			}
 			case Neuron::NT_SIGMOID:
+			{
 				real_gpu dExp = __expf(-dResult);
 				dResult = 1.0f / (1.0f + dExp);
 				dDerivativeOfLastOutput = dExp / __powf(1.0f + dExp,2);
@@ -167,6 +180,15 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 				dResult2 = 1.0f / (1.0f + dExp2);
 				dDerivativeOfLastOutput2 = dExp2 / __powf(1.0f + dExp2,2);
 				break;
+			}
+			case Neuron::NT_TANH:
+			{
+				dResult = tanhf(dResult);
+				dDerivativeOfLastOutput = 1 - tanhf(dResult);
+				dResult2 = tanhf(dResult2);
+				dDerivativeOfLastOutput2 = 1 - tanhf(dResult2);
+				break;
+			}
 		}
 		
 		if(threadIdx.x == p_iOutputNeuronCount)

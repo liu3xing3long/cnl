@@ -97,15 +97,15 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 		return;
 	}
 
-	const int numElementsInArrayTrainedElements = 1;
+	const int numElementsInArrayTrainedElements = 2;
 	const int numElementsInArrayEta = 1;
 	const int numElementsInArrayTestsInTraining = 1;
 	const int numElementsInArrayHiddenNeurons = 1;
 	const int numElementsInArrayMaxAbsWeights = 1;
-	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 100/*,1000,5000,20000,60000*/ };
-	const double dEtaArray[numElementsInArrayEta] = { 0.0025 };
-	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { /*1, */16/*1, 2, 4, 8*/ };
-	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { /*32,64,128,256,*/510 };
+	const int iTrainedElementsArray[numElementsInArrayTrainedElements] = { 10000,50000 };
+	const double dEtaArray[numElementsInArrayEta] = { 0.03 };
+	const int iTestsInTrainingArray[numElementsInArrayTestsInTraining] = { 4/*1, 2, 4, 8*/ };
+	const int iHiddenNeuronsArray[numElementsInArrayHiddenNeurons] = { 32/*,128,256,*/ };
 	const double dMaxAbsWeightsArray[numElementsInArrayMaxAbsWeights] = { 0.02/*, 0.05*/ };
 
 	size_t iTestsSetSize = p_vecTestSets.size();
@@ -120,7 +120,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 	//	testSetsInTraining[d] = new InputTestSet(iNumTests,iInputs,iOutputs,vecMinMax,testingFunction,NULL);
 	//}
 
-	int iSeed = int(getRandom01(NULL) * 100000000);
+	int iSeed = int(getRandom01(NULL) * 100000001);
 
 	for(int iTrainedElementsIndex=0;iTrainedElementsIndex<numElementsInArrayTrainedElements;++iTrainedElementsIndex)
 	{
@@ -221,7 +221,7 @@ void makeTrainingWithManyPossibilities(const vector<InputTestSet> &p_vecTestSets
 
 void makeTrainingToGenerateStatistics(int p_iTestSetType = -1)
 {
-	const int iTestsSetSize = 3;
+	const int iTestsSetSize = 2;
 	vector<InputTestSet> vecTestSets;
 	vector<int> vecOutputColumns;
 	vector<int> vecUnusedColumns;
@@ -400,9 +400,9 @@ int main()
 
 	logText(Logging::LT_INFORMATION,"Application Started");
 
-	doExecuteNetworksCPUAndGPUAndSaveLoad();
+	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	//makeTrainingToGenerateStatistics(); //makeAllTrainingsToToGenerateStatistics();
+	makeTrainingToGenerateStatistics(); //makeAllTrainingsToToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 
