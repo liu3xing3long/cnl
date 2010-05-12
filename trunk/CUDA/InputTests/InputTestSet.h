@@ -56,6 +56,7 @@ public:
 	unsigned getInputCount() const;
 	unsigned getOutputCount() const;
 
+	const InputTest& getTest(int p_iIndex) const;
 	InputTest& getTest(int p_iIndex);
 
 	const vector<AttributeMapping>& getAttributeMappings() const;

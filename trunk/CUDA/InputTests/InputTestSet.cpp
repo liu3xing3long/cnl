@@ -12,6 +12,11 @@ unsigned InputTestSet::getTestCount() const
 	return (unsigned) m_vecTests.size();
 }
 
+const InputTest& InputTestSet::getTest(int p_iIndex) const
+{
+	return m_vecTests[p_iIndex];
+}
+
 InputTest& InputTestSet::getTest(int p_iIndex)
 {
 	return m_vecTests[p_iIndex];
