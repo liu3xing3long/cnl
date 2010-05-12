@@ -14,10 +14,7 @@ public:
 		NT_OFF,
 		NT_LINEAR,
 		NT_SIGMOID,
-		NT_TANH,
-		/*NT_GAUSS,
-		NT_SOFTMAX,
-		NT_EXTERNAL	*/
+		NT_TANH
 	};
 
 private:
