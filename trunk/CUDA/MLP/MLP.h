@@ -7,7 +7,10 @@ private:
 	vector<Layer> m_vecLayers;
 
 	virtual void executeNetwork(InputTest &p_Test);
-	//virtual void executeNetworkGPU(InputTest &p_Test);
+
+protected:
+	virtual void saveToXML(TiXmlElement &p_XML) const;
+	virtual void loadFromXML(const TiXmlElement &p_XML);
 
 public: 
 	virtual void executeNetwork(InputTestSet &p_TestSet);
@@ -23,9 +26,6 @@ public:
 
 	virtual Layer *getLayerBefore(Layer * p_pLayer);
 	virtual Layer *getLayerAfter(Layer * p_pLayer);
-
-	virtual void saveToXML(TiXmlElement &p_XML) const;
-	virtual void loadFromXML(const TiXmlElement &p_XML);
 
 	MLP();
 	MLP(const MLP &p_Other);

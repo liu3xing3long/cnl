@@ -21,15 +21,15 @@ public:
 	virtual Layer *getLayerBefore(Layer *p_pLayer) = 0;
 	virtual Layer *getLayerAfter(Layer *p_pLayer) = 0;
 
-	virtual void saveToXML(TiXmlElement &p_XML) const = 0;
-	virtual void loadFromXML(const TiXmlElement &p_XML) = 0;
-
 	bool saveToFile(const Str &p_sFileName) const;
 	static bool loadFromFile(const Str &p_sFileName, NeuralNetwork *&p_pReturnedNetwork);
 
 protected:
 	
 	NeuralNetwork(NeuralNetworkType p_eNetworkType);
+
+	virtual void saveToXML(TiXmlElement &p_XML) const = 0;
+	virtual void loadFromXML(const TiXmlElement &p_XML) = 0;
 
 private:
 	NeuralNetwork(); // invisible
