@@ -351,7 +351,7 @@ void checkIfCSVReadingIsOK()
 {
 	InputTestSet testSetCSV;		// Nowy zestaw testów
 	vector<int> vecOutputColumns;	// Tworzenie listy numerów kolumn wyjœciowych (wynikowych)
-	vecOutputColumns.push_back(12);	// Jedyna wyjœciowa kolumna - indeks 12
+	vecOutputColumns.push_back(5);	// Jedyna wyjœciowa kolumna - indeks 5
 	vector<int> vecUnusedColumns;	// Lista numerów kolumn nieu¿ywanych - pusta
 	testSetCSV.loadFromCSVFile		// £adowanie listy testów
 		("Resources\\Test_data\\forestfires2.csv"	// Plik wejœciowy z testami w formacjie CSV
@@ -383,8 +383,8 @@ void checkIfCSVReadingIsOK()
 
 	testSetCSV.saveToFile("TestSetFromCSV.xml");// Zapisywanie zestawu testów jako XML
 	dummyNet.saveToFile("NetworkStruct.xml");	// Zapisywanie sieci MLP jako XML
-	//testSetCSV.loadFromFile("TestSetFromCSV.xml");
-	//testSetCSV.saveToFile("TestSetFromCSV2.xml");
+	testSetCSV.loadFromFile("TestSetFromCSV.xml");
+	testSetCSV.saveToFile("TestSetFromCSV2.xml");
 }
  
 int main()
@@ -402,11 +402,11 @@ int main()
 
 	//doExecuteNetworksCPUAndGPUAndSaveLoad();
 
-	makeTrainingToGenerateStatistics(); //makeAllTrainingsToToGenerateStatistics();
+	//makeTrainingToGenerateStatistics(); //makeAllTrainingsToToGenerateStatistics();
 
 	//checkIfGPUTrainingIsOK();
 
-	//checkIfCSVReadingIsOK();
+	checkIfCSVReadingIsOK();
 
 	return 0;
 }
