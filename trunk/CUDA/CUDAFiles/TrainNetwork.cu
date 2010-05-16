@@ -218,8 +218,6 @@ __global__ void executeLayerKernel(const real_gpu *dp_pLayerInput,const real_gpu
 
 			PRINT_MEMORY_INFO(dp_pDerivativeOfLastOutput,d_pDerivativeOfLastOutputThisTest);
 		}
-
-		//PRINT_DEBUG_INFO("GPU: Test %d , Neuron %d : first d_LayerInputThisTest %f , first d_WeightsThisTest %f , dResult %f , dDerivativeOfLastOutput %f\n",blockIdx.x,threadIdx.x,d_LayerInputThisTest[0],d_WeightsThisTest[0],dResult,dDerivativeOfLastOutput);
 	}
 }
 
@@ -235,14 +233,7 @@ extern "C" void executeLayerCUDA(const real_gpu *dp_pLayerInput,const real_gpu *
 	int iMaxNumberOfSimulatenousBlocks = 512 / iBlockDimUpdated + ((512 % iBlockDimUpdated) != 0);
 
 	int iMaxMemPerBlock = 0;
-	/*if(iMaxNumberOfSimulatenousBlocks > 7)
-	{ // We give some more shared memory...
-		iMaxMemPerBlock = max(0,((iMaxNumberOfSharedMemoryElementsForWeights) / iMaxNumberOfSimulatenousBlocks - p_iNumInputNeurons));
-	}
-	else
-	{*/
-		iMaxMemPerBlock = max(0,(iMaxNumberOfSharedMemoryElementsForWeights / iMaxNumberOfSimulatenousBlocks - 2 * p_iNumInputNeurons));
-	//}
+	iMaxMemPerBlock = max(0,(iMaxNumberOfSharedMemoryElementsForWeights / iMaxNumberOfSimulatenousBlocks - 2 * p_iNumInputNeurons));
 
 	int iHowMuchMemoryForWeights = (min(iNumOfWeightsAligned,max(512,iMaxMemPerBlock)) / iBlockDimUpdated) * iBlockDimUpdated;
 
@@ -398,23 +389,6 @@ __global__ void updateWeightsInTrainingKernel(const real_gpu *dp_pThisLayerError
 		dp_pThisLayerWeights[iWeightIndex2] = dp_pThisLayerWeights[iWeightIndex2] - dChange2;
 
 	PRINT_MEMORY_INFO(dp_pThisLayerWeights,&dp_pThisLayerWeights[iWeightIndex]);
-
-	/*real_gpu *d_pThisNeuronWeights = dp_pThisLayerWeights + threadIdx.x * (p_iNumOutputsLayerBefore+1);
-	real_gpu dErrorMultDerivativeMultEta = dp_pThisLayerError[threadIdx.x] * dp_pDerivativeOfLastOutput[threadIdx.x] * p_dEta;
-
-	PRINT_DEBUG_INFO("GPU: Test 0 , Neuron %d : First weight: %f , dErrorMultDerivativeMultEta: %f , p_iNumOutputsLayerBefore: %d\n",threadIdx.x,d_pThisNeuronWeights[0],dErrorMultDerivativeMultEta,p_iNumOutputsLayerBefore);
-	
-	for(unsigned uWeightIndex = 0;uWeightIndex < p_iNumOutputsLayerBefore;++uWeightIndex)
-	{
-		real_gpu dChange = dErrorMultDerivativeMultEta * dp_pLayerBeforeOutputs[uWeightIndex];
-		real_gpu dCurrentValue = d_pThisNeuronWeights[uWeightIndex];
-		real_gpu dChangedValue = dCurrentValue - dChange;
-		PRINT_DEBUG_INFO("GPU: Test 0 , Neuron %d , uWeightIndex %d: dCurrentValue = %f , dChange %f , dChangedValue %f\n",threadIdx.x,uWeightIndex,dCurrentValue,dChange,dChangedValue);
-		d_pThisNeuronWeights[uWeightIndex] = dChangedValue;
-	}
-	
-	PRINT_DEBUG_INFO("GPU: Test 0 , Neuron %d , Bias : dChange %f\n",threadIdx.x,dErrorMultDerivativeMultEta);
-	d_pThisNeuronWeights[p_iNumOutputsLayerBefore] = d_pThisNeuronWeights[p_iNumOutputsLayerBefore] - dErrorMultDerivativeMultEta;*/
 }
 
 extern "C" void updateWeightsInTrainingCUDA(const real_gpu *dp_pThisLayerError,const real_gpu *dp_pDerivativeOfLastOutput,const real_gpu *dp_pLayerBeforeOutputs,real_gpu p_dEta,int p_iThisLayerNeuronCount
