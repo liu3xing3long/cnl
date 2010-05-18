@@ -37,7 +37,6 @@ Resources\FileIndex.txt - ten plik
 Resources\Wykres_JakoscUczenia.xlsx - pomocniczy plik Excela z wygenerowanymi wykresami jakości uczenia
 
 TinyXML: Wszystkie pliki związane z biblioteką TinyXML (W niewielkim stopniu zmodyfikowałem pliki tinystr.xpp i tinystr.h).
-Resources: pliki nie używane przy kompilacji
 
 TinyXML\tinystr.* - zmodyfikowałem tę klasę, żeby zawierała przydatne dodatki - metodę format (podobna do sprintf) oraz konstruktor akceptujący podobne parametry jak metoda format.
 TinyXML\*.* - Pozostałe pliki z biblioteki TinyXML
