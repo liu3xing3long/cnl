@@ -463,9 +463,9 @@ bool InputTestSet::getColumnRangesFromCSVFile(const vector< vector<Str> > &p_vec
 	}
 	return true;
 }
-bool InputTestSet::generateInputColumnsVectorForCSVFile(const vector<int> &p_vecOutputColumns, const vector<int> &p_vecUnusedColumns, size_t uColumnsNumber, vector<int> &p_vecInputColumns)
+bool InputTestSet::generateInputColumnsVectorForCSVFile(const vector<int> &p_vecOutputColumns, const vector<int> &p_vecUnusedColumns, size_t p_uColumnsNumber, vector<int> &p_vecInputColumns)
 {
-	for(unsigned uColumnIndex = 0;uColumnIndex < uColumnsNumber;++uColumnIndex)
+	for(unsigned uColumnIndex = 0;uColumnIndex < p_uColumnsNumber;++uColumnIndex)
 	{
 		if(find( p_vecOutputColumns.begin(),p_vecOutputColumns.end(),uColumnIndex) == p_vecOutputColumns.end()
 			&& find( p_vecUnusedColumns.begin(),p_vecUnusedColumns.end(),uColumnIndex) == p_vecUnusedColumns.end())

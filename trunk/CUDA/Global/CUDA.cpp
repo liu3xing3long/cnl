@@ -1,24 +1,6 @@
-// CUDA.cpp : Defines the entry point for the console application.
-//
-
 #include "stdafx.h"
 
 //#include <omp.h>
-
-// JRTODO - sprawdz, czy wszystkie parametry metod/funkcji sa p_ , a skladniki klas/obiektow sa m_
-// JRTODO - popularne metody powinny byc inline
-// JRTODO - opisz w pracy te wszystkie kroki opisane w JRTODO ktore zrobilem, zeby program byl bardziej spojny
-// JRTODO - ustal, czy stale maja byc robione przez #define czy const xxx
-// JRTODO - jak metoda nie zmienia wnetrza obiektu, to oznacz ja jako const
-// JRTODO - zrob asserty
-// JRTODO - ustal, czsy w deklaracjach klas sa najpierw zmienne, czy metody (i czy najpierw konstruktor/destruktor, czy inne. czy public, czy private)
-// JRTODO - metody pomocnicze maja byc static
-// JRTODO - krotkie, czeste funkcje zrob inline
-
-// JRTODO - zestawy testow sa na http://mlr.cs.umass.edu/ml/ 
-
-
-//w czasie kompilacji .cu jest generowanych bardzo duzo plikow
 
 
 void testingFunction(const vector<double> &p_vecInputParameters,vector<double> &p_vecOutputParameters)
