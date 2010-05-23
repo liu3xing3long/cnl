@@ -51,7 +51,7 @@ void Logging::logTextFileLine(LoggingType p_eLoggingType, const char *p_sLogging
 	GetLocalTime(&now);
 
 	sLogging.format("%d.%02d.%02d %02d:%02d:%02d:%03d    %s%25s%50s%5d    %s\n",
-		now.wYear+1900,now.wMonth+1,now.wDay,
+		now.wYear,now.wMonth,now.wDay,
 		now.wHour,now.wMinute,now.wSecond,now.wMilliseconds,
 		sLoggingType.c_str(),sFileName.c_str(),p_sFunctionName,
 		p_lLineNumber,p_sLoggingText);
