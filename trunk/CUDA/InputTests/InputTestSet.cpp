@@ -146,16 +146,6 @@ void InputTestSet::printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsT
 	printVectorDifferenceInfoFromVectors(vecDifferencesData,p_eDifferenceType);
 }
 
-/*
-void InputTestSet::randomizeTests(MTRand *p_pRandomGenerator)
-{
-	// JRTODO - is this method needed?
-	for(unsigned uTestIndex=0;uTestIndex<m_vecTests.size();++uTestIndex)
-	{
-		m_vecTests[uTestIndex].randomizeTest(p_pRandomGenerator);
-	}
-}*/
-
 bool InputTestSet::saveToFile(Str p_sFileName) const
 {
 	FILE *pSaveFile = TiXmlFOpen(p_sFileName.c_str(),"wb");

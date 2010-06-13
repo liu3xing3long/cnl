@@ -66,7 +66,6 @@ public:
 	bool getDifferencesStatistics(DifferenceStatisticsType p_eDifferenceType, vector<AttributeLoggingData> &p_vecDifferencesData) const;
 	void printVectorDifferenceInfo(InputTestSet::DifferenceStatisticsType p_eDifferenceType) const;
 
-	//void randomizeTests(MTRand *p_pRandomGenerator);
 	InputTestSet();
 	InputTestSet(const InputTestSet &p_TestSet);
 	InputTestSet(unsigned p_uNumberTests,unsigned p_uNumberInputs,unsigned p_uNumberOutputs

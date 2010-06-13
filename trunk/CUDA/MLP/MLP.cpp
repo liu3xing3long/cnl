@@ -141,8 +141,6 @@ void MLP::executeNetworkGPU(InputTestSet &p_TestSet,unsigned int *p_uiFullMillis
 	{
 		const Layer &thisLayer = m_vecLayers[iLayerIndex];
 		// unallocate and allocate memory
-		//int iMemorySizeForOutput = getMemorySizeForOutput();
-		//int iMemorySizeForWeights = getMemorySizeForWeights();
 		if(iLayerIndex == 0)
 		{
 			int iDummy;
@@ -266,7 +264,6 @@ void MLP::trainNetworkGPU(InputTestSet &p_TestSet,int p_iTrainedElements,double 
 		CUDATools::retrieveGPUWeightsForLayerTraining(m_vecLayers[iLayerIndex]);
 	}
 
-	// JRTODO - check if all memory was freed
 	// We free all memory needed for training
 	CUDATools::freeGPUMemoryForTestTraining(d_pTestsInput,d_pTestsOutput);
 	
