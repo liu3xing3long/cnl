@@ -16,7 +16,12 @@
 	}
 		
 
-#define logAssert(a) if((int)(a) == 0) logText(Logging::LT_ERROR,Str("Assert failed: "+Str(#a)).c_str());
+#define logAssert(a)																					\
+	if((int)(a) == 0)																					\
+	{																									\
+		logText(Logging::LT_ERROR,Str("Assert failed (exiting): "+Str(#a)).c_str());					\
+		exit(1);																						\
+	}
 
 class Logging
 {

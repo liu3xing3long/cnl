@@ -69,7 +69,7 @@ FILE* TiXmlFOpen( const char* filename, const char* mode )
 			return fp;
 		else
 		{
-			logTextParams(Logging::LT_ERROR, "Error opening file %s: %s",sToFindFile.c_str(),strerror(err));
+			printf("Error opening file %s: %s\n",sToFindFile.c_str(),strerror(err));
 			return 0;
 		}
 	#else

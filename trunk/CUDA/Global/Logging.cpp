@@ -8,10 +8,13 @@ void Logging::makeSureLoggingFileExists()
 {
 	if(m_pLoggingFile == NULL)
 	{
-		Str sLogFileName("LogXXX.txt");
+		Str sLogFileName("LoggingCNL.txt");
 		m_pLoggingFile = TiXmlFOpen(sLogFileName.c_str(),"a");
 		if(m_pLoggingFile == NULL)
-			throw exception(Str("Cannot open log file: %s",sLogFileName.c_str()).c_str());
+		{
+			printf("Could not open log file %s, exiting\n", sLogFileName.c_str());
+			exit(1);
+		}
 
 		// We put some text at the beginning of session
 		fputs("\n",m_pLoggingFile);
